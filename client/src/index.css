@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand: #0097a7;
+  --color-brand-dark: #00838f;
+  --color-navy: #1a237e;
+  --font-sans: "Inter", system-ui, sans-serif;
+}
+
+@layer base {
+  * { box-sizing: border-box; }
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased;
+  }
+}
