@@ -23,7 +23,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <span>tarife<span className="text-[#1a237e]">sec</span>.net.tr</span>
           </Link>
 
-          {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-6">
             {NAV.map((item) => (
               <Link
@@ -40,19 +39,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             ))}
           </nav>
 
-          <a
-            href="tel:+90"
+          <Link
+            href="/paket-karsilastir"
             className="hidden md:flex items-center gap-2 bg-[#0097a7] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-[#00838f] transition-colors"
           >
-            Superonline Başvur
-          </a>
+            Paketi Karşılaştır
+          </Link>
 
           <button className="md:hidden p-2" onClick={() => setOpen(!open)}>
             {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
 
-        {/* Mobile menu */}
         {open && (
           <div className="md:hidden border-t border-gray-100 bg-white px-4 py-3 flex flex-col gap-3">
             {NAV.map((item) => (
@@ -94,14 +92,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </ul>
           </div>
           <div>
-            <h3 className="font-semibold mb-3 text-sm uppercase tracking-wide text-blue-300">Superonline Bayi</h3>
-            <p className="text-sm text-blue-100 mb-2">Göksoylar İletişim</p>
-            <p className="text-sm text-blue-100">Bayi Kodu: B9613</p>
-            <p className="text-sm text-blue-100">Manavgat, Antalya</p>
+            <h3 className="font-semibold mb-3 text-sm uppercase tracking-wide text-blue-300">Hakkımızda</h3>
+            <p className="text-sm text-blue-100 mb-2">
+              tarifesec.net.tr, Türkiye'deki tüm internet ve mobil operatörlerin paketlerini
+              tarafsız biçimde karşılaştıran bağımsız bir platformdur.
+            </p>
+            <p className="text-sm text-blue-100">
+              Herhangi bir operatörle ticari ilişkimiz bulunmamaktadır.
+            </p>
           </div>
         </div>
         <div className="border-t border-blue-800 text-center py-4 text-xs text-blue-300">
-          © {new Date().getFullYear()} tarifesec.net.tr — Göksoylar İletişim. Fiyatlar bilgi amaçlıdır, güncel fiyatlar için operatör sitesini ziyaret edin.
+          © {new Date().getFullYear()} tarifesec.net.tr — Fiyatlar bilgi amaçlıdır, güncel fiyatlar için operatör sitesini ziyaret edin.
         </div>
       </footer>
     </div>

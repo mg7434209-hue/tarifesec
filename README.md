@@ -58,5 +58,5 @@ tarifesec/
 
 ## Superonline Bayi
 
-Göksoylar İletişim — Bayi Kodu: **B9613** — Manavgat, Antalya  
+Bağımsız karşılaştırma platformu  
 Superonline başvuruları `affiliateUrl` alanındaki `?ref=B9613` parametresiyle izlenir.

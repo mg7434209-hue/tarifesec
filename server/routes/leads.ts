@@ -5,7 +5,7 @@ import { desc } from "drizzle-orm";
 
 const router = Router();
 
-// POST /api/leads  — Superonline bayi B9613 lead formu
+// POST /api/leads  — Teklif talep formu
 router.post("/", async (req, res) => {
   try {
     const ALLOWED = ["name", "phone", "city", "packageInterest", "source"];

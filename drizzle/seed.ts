@@ -23,7 +23,7 @@ async function seed() {
       dataLimit: "Limitsiz", modemIncluded: true, installationFee: 0,
       features: JSON.stringify(["WiFi 6 Modem", "Limitsiz", "7/24 Destek"]),
       isFeatured: true,
-      affiliateUrl: "https://superonline.net?ref=B9613",
+      affiliateUrl: "https://superonline.net",
       officialUrl: "https://superonline.net/fiber",
     },
     {
@@ -33,7 +33,7 @@ async function seed() {
       dataLimit: "Limitsiz", modemIncluded: true, installationFee: 0,
       features: JSON.stringify(["WiFi 6 Modem", "Limitsiz", "Ebeveyn Kontrolü"]),
       isFeatured: true,
-      affiliateUrl: "https://superonline.net?ref=B9613",
+      affiliateUrl: "https://superonline.net",
       officialUrl: "https://superonline.net/fiber",
     },
     {
@@ -43,7 +43,7 @@ async function seed() {
       dataLimit: "Limitsiz", modemIncluded: true, installationFee: 0,
       features: JSON.stringify(["WiFi 6 Modem", "Limitsiz", "Gaming Öncelik"]),
       isFeatured: true,
-      affiliateUrl: "https://superonline.net?ref=B9613",
+      affiliateUrl: "https://superonline.net",
       officialUrl: "https://superonline.net/fiber",
     },
     // ── Superbox Kablosuz (isFeatured = true) ──
@@ -54,7 +54,7 @@ async function seed() {
       dataLimit: "Limitsiz", modemIncluded: true, installationFee: 0,
       features: JSON.stringify(["Kurulum yok", "Kablosuz 4.5G", "Anında aktif"]),
       isFeatured: true,
-      affiliateUrl: "https://superonline.net?ref=B9613",
+      affiliateUrl: "https://superonline.net",
       officialUrl: "https://superonline.net/superbox",
     },
     {
@@ -64,7 +64,7 @@ async function seed() {
       dataLimit: "Limitsiz", modemIncluded: true, installationFee: 0,
       features: JSON.stringify(["Kurulum yok", "Kablosuz 4.5G", "Anında aktif"]),
       isFeatured: true,
-      affiliateUrl: "https://superonline.net?ref=B9613",
+      affiliateUrl: "https://superonline.net",
       officialUrl: "https://superonline.net/superbox",
     },
     // ── Türk Telekom ──
