@@ -7,6 +7,9 @@ import { db } from "../../drizzle/db";
 import { packages, mobileTariffs, scrapeLog, leads } from "../../drizzle/schema";
 import { eq, desc } from "drizzle-orm";
 import { requireAdmin } from "../middleware/auth";
+import { schedulerStatus, triggerScrape } from "../scheduler";
+import { config } from "../config";
+import { SOURCES } from "../../scraper/sources";
 
 const router = Router();
 
@@ -122,19 +125,47 @@ router.get("/scrape-log", async (_req, res) => {
 });
 
 // ─── Scraper'ı manuel tetikle ─────────────────────────────────────────────────
-// NOT: Eski sürüm `exec("tsx scraper/index.ts")` ile kabuk süreci başlatıyordu.
-// Üretim imajında tsx yok (devDependency) ve web sürecinde kabuk açmak gereksiz
-// bir saldırı yüzeyi. Scraper artık Railway Cron servisiyle çalışır
-// (railway-cron.json) ve burada süreç içinde çağrılır.
-router.post("/run-scraper", async (_req, res) => {
+router.post("/run-scraper", (_req, res) => {
+  triggerScrape();
+  res.json({ message: "Tarama başlatıldı — birkaç dakika sürebilir." });
+});
+
+// ─── Tarama durumu + veri tazeliği ────────────────────────────────────────────
+router.get("/status", async (_req, res) => {
   try {
-    const { runScraper } = await import("../../scraper/index");
-    res.json({ message: "Scraper başlatıldı — logları kontrol edin" });
-    runScraper().catch((e: unknown) =>
-      console.error("[admin] scraper hatası:", (e as Error).message)
+    const all = await db.select().from(packages).where(eq(packages.isActive, true));
+    const staleMs = config.scrape.staleAfterHours * 60 * 60 * 1000;
+    const now = Date.now();
+
+    const stale = all.filter(
+      (p) => !p.lastScrapedAt || now - new Date(p.lastScrapedAt).getTime() > staleMs
     );
+
+    const pending = all.filter((p) => p.priceChanged);
+
+    res.json({
+      scheduler: schedulerStatus(),
+      staleAfterHours: config.scrape.staleAfterHours,
+      counts: {
+        total: all.length,
+        stale: stale.length,
+        pendingApproval: pending.length,
+      },
+      sources: SOURCES.map((s) => ({
+        operatorSlug: s.operatorSlug,
+        label: s.label,
+        mode: s.manual ? "manuel" : "otomatik",
+      })),
+      staleItems: stale.map((p) => ({
+        id: p.id,
+        operator: p.operator,
+        name: p.name,
+        priceMonthly: p.priceMonthly,
+        lastScrapedAt: p.lastScrapedAt,
+      })),
+    });
   } catch (err) {
-    console.error("[admin] scraper yüklenemedi:", (err as Error).message);
+    res.status(500).json({ error: "Durum okunamadı" });
   }
 });
 

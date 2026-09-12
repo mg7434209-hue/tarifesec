@@ -1,8 +1,9 @@
 {
   "$schema": "https://railway.app/railway.schema.json",
+  "_not": "İSTEĞE BAĞLI. Uygulama içi zamanlayıcı (server/scheduler.ts) taramayı web süreciyle birlikte yürütür; bu dosya yalnızca taramayı AYRI bir Railway Cron servisine taşımak isteyenler içindir. İkisini birlikte kullanmayın — çift tarama olur. Ayrı servis kuruyorsanız web servisinde AUTO_SCRAPE=false yapın.",
   "deploy": {
     "cronSchedule": "0 3 * * *",
-    "startCommand": "tsx scraper/index.ts",
+    "startCommand": "npm run scrape",
     "restartPolicyType": "NEVER"
   }
 }

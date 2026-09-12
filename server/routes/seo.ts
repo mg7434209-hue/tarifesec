@@ -42,6 +42,7 @@ router.get("/robots.txt", (_req, res) => {
 User-agent: *
 Allow: /
 Disallow: /api/
+Disallow: /admin
 
 ${aiBots.map((b) => `User-agent: ${b}\nAllow: /`).join("\n\n")}
 

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Phone, CheckCircle2, Loader2 } from "lucide-react";
 import { submitLead } from "@/lib/api";
+import PartnerCard from "./PartnerCard";
 
 const SEHIRLER = [
   "Adana", "Ankara", "Antalya", "Bursa", "Denizli", "Diyarbakır", "Eskişehir",
@@ -34,9 +35,13 @@ export default function TeklifFormu({
       <div className="bg-green-50 border border-green-200 rounded-2xl p-6 text-center">
         <CheckCircle2 className="w-8 h-8 text-green-600 mx-auto mb-2" />
         <h3 className="font-semibold text-green-900 mb-1">Talebiniz alındı</h3>
-        <p className="text-sm text-green-700">
+        <p className="text-sm text-green-700 mb-5">
           En kısa sürede sizi arayıp size en uygun tarifeyi anlatacağız.
         </p>
+        <div className="text-left">
+          <p className="text-xs text-gray-500 mb-2">Beklemek istemiyorsanız:</p>
+          <PartnerCard context="donusum" compact />
+        </div>
       </div>
     );
   }

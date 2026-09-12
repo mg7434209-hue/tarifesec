@@ -16,16 +16,20 @@ function head(opts: {
   canonical: string;
   jsonLd: unknown[];
   noindex?: boolean;
+  /** noindex ile birlikte bağlantı takibini de kapat (yönetim sayfaları) */
+  nofollow?: boolean;
   ogType?: string;
 }) {
-  const { title, description, canonical, jsonLd, noindex, ogType = "website" } = opts;
+  const { title, description, canonical, jsonLd, noindex, nofollow, ogType = "website" } = opts;
 
   return [
     `<title>${esc(title)}</title>`,
     `<meta name="description" content="${esc(description)}" />`,
     `<link rel="canonical" href="${esc(canonical)}" />`,
     `<meta name="robots" content="${
-      noindex ? "noindex, follow" : "index, follow, max-image-preview:large, max-snippet:-1"
+      noindex
+        ? `noindex, ${nofollow ? "nofollow" : "follow"}`
+        : "index, follow, max-image-preview:large, max-snippet:-1"
     }" />`,
     `<meta property="og:type" content="${esc(ogType)}" />`,
     `<meta property="og:site_name" content="${SITE_NAME}" />`,
@@ -110,6 +114,25 @@ export async function renderRoute(pathname: string, template: string): Promise<R
         template,
         head({ title: route.title, description: route.description, canonical, jsonLd }),
         body
+      ),
+    };
+  }
+
+  // ── Yönetim paneli — indekslenmez, içerik basılmaz ────────────────────────
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) {
+    return {
+      status: 200,
+      html: inject(
+        template,
+        head({
+          title: `Yönetim Paneli | ${SITE_NAME}`,
+          description: "Yetkili erişim.",
+          canonical: `${SITE}/admin`,
+          noindex: true,
+          nofollow: true,
+          jsonLd: [],
+        }),
+        ""
       ),
     };
   }

@@ -12,6 +12,7 @@ import { esc, tl, fullName } from "./util";
 import { FAQ, type Faq } from "./faq";
 import type { Pkg, Mobile, Post } from "./data";
 import { summarize, summarizeMobile } from "./data";
+import { byContext, PARTNER_REL, type PartnerContext } from "../../shared/partners";
 
 const faqBlock = (items: Faq[]) =>
   !items.length
@@ -19,6 +20,22 @@ const faqBlock = (items: Faq[]) =>
     : `<section><h2>Sık Sorulan Sorular</h2><dl>${items
         .map((f) => `<dt><h3>${esc(f.q)}</h3></dt><dd><p>${esc(f.a)}</p></dd>`)
         .join("")}</dl></section>`;
+
+/**
+ * İş ortağı bağlantıları.
+ * Kullanıcının gördüğüyle aynı olmalı (cloaking yasak); rel="sponsored"
+ * taşır, böylece ticari bağlantı olduğu arama motorlarına bildirilir.
+ */
+const partnerBlock = (ctx: PartnerContext) => {
+  const list = byContext(ctx);
+  if (!list.length) return "";
+  return `<section><h2>İlginizi çekebilir <small>(reklam)</small></h2><ul>${list
+    .map(
+      (p) =>
+        `<li><a href="${esc(p.url)}" rel="${PARTNER_REL}" target="_blank">${esc(p.name)}</a> — ${esc(p.description)}</li>`
+    )
+    .join("")}</ul></section>`;
+};
 
 const pkgRow = (p: Pkg) => {
   const feats = (() => {
@@ -88,6 +105,7 @@ ${tl(m.minPrice)} ile ${tl(m.maxPrice)} arasında. En uygun tarife:
 </ul>
 
 ${s ? `<h2>Öne çıkan paketler</h2><ul>${pkgs.slice(0, 6).map(pkgRow).join("")}</ul>` : ""}
+${partnerBlock("genel")}
 ${faqBlock(FAQ["/"] ?? [])}`;
 }
 
@@ -131,6 +149,7 @@ ${[...byOperator.entries()]
   </ul>
 </section>
 
+${partnerBlock("internet")}
 ${faqBlock(FAQ["/paket-karsilastir"] ?? [])}`;
 }
 
@@ -160,6 +179,7 @@ ${[...byOperator.entries()]
   )
   .join("")}
 
+${partnerBlock("internet")}
 ${faqBlock(FAQ["/mobil-tarifeler"] ?? [])}`;
 }
 

@@ -17,8 +17,15 @@ import { speedTests } from "../../drizzle/schema";
 import { desc, sql } from "drizzle-orm";
 import { config } from "../config";
 import { rateLimit } from "../middleware/rateLimit";
+import { bandwidthLimit } from "../middleware/bandwidth";
 
 const router = Router();
+
+// Bant genişliği uçları bayt bütçesiyle sınırlanır (istek sayısıyla değil)
+const bw = bandwidthLimit({
+  windowMs: config.speedTest.budgetWindowMs,
+  maxBytes: config.speedTest.budgetBytes,
+});
 
 const noStore = (res: any) => {
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
@@ -30,10 +37,7 @@ router.get("/ping", (_req, res) => {
   res.status(204).end();
 });
 
-router.get(
-  "/download",
-  rateLimit(config.rateLimit.speedTest),
-  (req, res) => {
+router.get("/download", bw.guard, (req, res) => {
     const requested = Number(req.query.bytes) || config.speedTest.defaultBytes;
     const total = Math.min(Math.max(requested, 1024), config.speedTest.maxDownloadBytes);
 
@@ -60,14 +64,11 @@ router.get(
     };
 
     req.on("close", () => res.destroy());
+    res.on("finish", () => bw.charge(req, sent));
     write();
-  }
-);
+});
 
-router.post(
-  "/upload",
-  rateLimit(config.rateLimit.speedTest),
-  (req, res) => {
+router.post("/upload", bw.guard, (req, res) => {
     let received = 0;
     let aborted = false;
 
@@ -82,14 +83,14 @@ router.post(
 
     req.on("end", () => {
       if (aborted) return;
+      bw.charge(req, received);
       noStore(res);
       res.json({ bytes: received });
     });
-  }
-);
+});
 
 /** Sonucu kaydet — anonim istatistik (IP/kişisel veri tutulmaz) */
-router.post("/result", rateLimit(config.rateLimit.speedTest), async (req, res) => {
+router.post("/result", rateLimit(config.rateLimit.speedTestMeta), async (req, res) => {
   try {
     const download = Math.round(Number(req.body?.downloadSpeed));
     const upload = Math.round(Number(req.body?.uploadSpeed));

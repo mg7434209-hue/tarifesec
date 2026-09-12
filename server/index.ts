@@ -14,6 +14,7 @@ import speedTestRouter from "./routes/speedtest";
 import seoRouter from "./routes/seo";
 import { renderRoute } from "./seo/render";
 import { config } from "./config";
+import { startScheduler } from "./scheduler";
 
 dotenv.config();
 
@@ -26,8 +27,9 @@ const isProd = process.env.NODE_ENV === "production";
 app.set("trust proxy", 1);
 app.disable("x-powered-by");
 
-// Hız testi yüklemesi ham gövde olarak okunur; JSON parser'ı ona uygulama.
-app.use("/api/speedtest/upload", (_req, _res, next) => next());
+// Hız testi yüklemesi application/octet-stream gönderir; express.json ve
+// urlencoded yalnızca kendi içerik türlerini ayrıştırdığı için ham gövde
+// speedtest rotasına dokunulmadan ulaşır.
 app.use(express.json({ limit: "100kb" }));
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true, limit: "100kb" }));
@@ -131,4 +133,5 @@ app.listen(PORT, () => {
   if (!process.env.DATABASE_URL) {
     console.warn("⚠️  DATABASE_URL tanımlı değil — veritabanı çağrıları başarısız olacak.");
   }
+  startScheduler();
 });

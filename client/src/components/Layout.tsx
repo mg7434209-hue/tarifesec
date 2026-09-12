@@ -2,6 +2,7 @@ import { Link, useLocation } from "wouter";
 import { Menu, X, Wifi } from "lucide-react";
 import { useEffect, useState } from "react";
 import VisitCounter from "./VisitCounter";
+import { PARTNERS, PARTNER_REL } from "@shared/partners";
 
 const NAV = [
   { label: "Ana Sayfa", href: "/" },
@@ -109,13 +110,30 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </ul>
           </div>
           <div>
+            <h3 className="font-semibold mb-3 text-sm uppercase tracking-wide text-blue-300">İş Ortakları</h3>
+            <ul className="space-y-2 text-sm text-blue-100 mb-5">
+              {PARTNERS.map((p) => (
+                <li key={p.id}>
+                  <a
+                    href={p.url}
+                    target="_blank"
+                    rel={PARTNER_REL}
+                    className="hover:text-white transition-colors inline-flex items-center gap-1.5"
+                  >
+                    {p.name} <span className="text-[10px] text-blue-400">↗</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
             <h3 className="font-semibold mb-3 text-sm uppercase tracking-wide text-blue-300">Hakkımızda</h3>
             <p className="text-sm text-blue-100 mb-2">
               tarifesec.net.tr, Türkiye'deki tüm internet ve mobil operatörlerin paketlerini
               tarafsız biçimde karşılaştıran bağımsız bir platformdur.
             </p>
             <p className="text-sm text-blue-100">
-              Herhangi bir operatörle ticari ilişkimiz bulunmamaktadır.
+              Sıralamalar ücret karşılığı değiştirilmez. Sitede iş ortaklarımıza
+              ait sponsorlu bağlantılar bulunur; bunlar "reklam" olarak işaretlenir
+              ve karşılaştırma sonuçlarını etkilemez.
             </p>
           </div>
         </div>
