@@ -1,38 +1,38 @@
 /**
  * Admin auth — x-admin-secret başlığı ile.
  *
- * FAIL-CLOSED: ADMIN_SECRET tanımlı değilse hiçbir istek geçmez.
- * (Eski sürümde `token !== process.env.ADMIN_SECRET` karşılaştırması,
- *  ADMIN_SECRET tanımsızken başlıksız isteği `undefined === undefined`
- *  ile geçiriyordu — tüm admin API'si açıktı.)
+ * Şifre kaynağı: ADMIN_SECRET ortam değişkeni > veritabanı (bkz. adminAuth.ts).
+ * Hiç şifre yoksa uçlar 503 döner ve panel kurulum ekranını gösterir.
  *
- * Secret YALNIZCA başlıkta kabul edilir; `?secret=` sorgu parametresi
- * sunucu loglarına ve Referer başlığına sızdığı için desteklenmez.
+ * FAIL-CLOSED: eski sürümde `token !== process.env.ADMIN_SECRET` karşılaştırması,
+ * ADMIN_SECRET tanımsızken başlıksız isteği `undefined === undefined` ile
+ * geçiriyordu — tüm admin API'si açıktı.
+ *
+ * Secret YALNIZCA başlıkta kabul edilir; `?secret=` sorgu parametresi sunucu
+ * loglarına ve Referer başlığına sızdığı için desteklenmez.
  */
 import type { Request, Response, NextFunction } from "express";
-import crypto from "crypto";
+import { verify, needsSetup } from "../adminAuth";
 
-function safeEqual(a: string, b: string): boolean {
-  const ab = Buffer.from(a, "utf8");
-  const bb = Buffer.from(b, "utf8");
-  if (ab.length !== bb.length) return false;
-  return crypto.timingSafeEqual(ab, bb);
-}
+export async function requireAdmin(req: Request, res: Response, next: NextFunction) {
+  try {
+    if (await needsSetup()) {
+      return res.status(503).json({
+        error: "Yönetim şifresi henüz belirlenmedi",
+        needsSetup: true,
+      });
+    }
 
-export function requireAdmin(req: Request, res: Response, next: NextFunction) {
-  const secret = process.env.ADMIN_SECRET;
+    const header = req.headers["x-admin-secret"];
+    const token = Array.isArray(header) ? header[0] : header;
 
-  if (!secret || secret.length < 8) {
-    console.error("[auth] ADMIN_SECRET tanımlı değil — admin uçları kapalı.");
-    return res.status(503).json({ error: "Admin API yapılandırılmamış" });
+    if (!(await verify(token))) {
+      return res.status(401).json({ error: "Yetkisiz" });
+    }
+
+    next();
+  } catch (err) {
+    console.error("[auth] doğrulama hatası:", (err as Error).message);
+    res.status(503).json({ error: "Kimlik doğrulama kullanılamıyor" });
   }
-
-  const header = req.headers["x-admin-secret"];
-  const token = Array.isArray(header) ? header[0] : header;
-
-  if (typeof token !== "string" || !safeEqual(token, secret)) {
-    return res.status(401).json({ error: "Yetkisiz" });
-  }
-
-  next();
 }
