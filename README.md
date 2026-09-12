@@ -40,6 +40,8 @@ npm run dev
 | `VISITOR_BASE` | — | Ziyaretçi sayacı tabanı (varsayılan `1000`) |
 | `DATABASE_SSL` | — | `true`/`false` ile SSL'i elle zorla; boşsa host'a göre otomatik |
 | `SITE_URL` | — | sitemap/canonical kökü (varsayılan `https://www.tarifesec.net.tr`) |
+| `AUTO_SCRAPE` | — | `false` ile otomatik fiyat taramasını kapatır |
+| `SCRAPE_INTERVAL_HOURS` | — | Tarama sıklığı (varsayılan 12) |
 
 ## Ziyaretçi Sayacı
 
@@ -77,6 +79,84 @@ koda sayı gömmeyin.
 
 Admin yetkisi **yalnızca `x-admin-secret` başlığıyla** verilir. `?secret=`
 sorgu parametresi loglara ve Referer başlığına sızdığı için desteklenmez.
+
+## Otomatik Fiyat Güncelleme
+
+Fiyatlar `server/scheduler.ts` ile **web süreci içinde** düzenli olarak taranır —
+ayrı Railway Cron servisi kurmak gerekmez (`railway-cron.json` yalnızca isteğe
+bağlı alternatiftir; ikisini birlikte kullanmayın).
+
+| Değişken | Varsayılan | Açıklama |
+|----------|-----------|----------|
+| `AUTO_SCRAPE` | `true` | `false` ile kapatılır |
+| `SCRAPE_INTERVAL_HOURS` | `12` | Tarama sıklığı |
+| `SCRAPE_STARTUP_DELAY_MIN` | `5` | Açılıştan sonraki ilk tur gecikmesi |
+| `STALE_AFTER_HOURS` | `72` | Bu süreden eski veri "bayat" sayılır |
+
+### Güvenlik ilkesi — emin değilsen dokunma
+
+Yanlış fiyat yayınlamak, fiyatı güncellememekten **daha kötüdür**. Bu yüzden:
+
+- **Kimlik bazlı eşleştirme.** Taranan her kayıt kendi hız bilgisini taşır ve
+  veritabanı satırıyla `downloadSpeed` üzerinden eşleşir. *Eski sürüm
+  `prices[i]` ile `dbPackages[i]`'yi konuma göre eşleştiriyordu; operatör
+  sayfasına bir kampanya kutusu eklendiğinde tüm fiyatlar kayıyordu.*
+- Aynı hızda birden fazla paket varsa (fiber + kablosuz) → **belirsiz, atlanır**.
+- %`MAX_DRIFT` (40) üzeri fiyat sapması → **yayınlanmaz**, admin onayına düşer.
+- Hiç kayıt çıkmazsa veya hiçbiri mevcut paketlerle eşleşmezse → **tur iptal**
+  (sayfa yapısı değişmiş demektir).
+- Turkcell ve Vodafone bot koruması nedeniyle `manual: true` işaretlidir;
+  admin panelinden elle güncellenir.
+
+Yeni operatör eklemek için `scraper/sources.ts` listesine satır ekleyin — koda
+dokunmaya gerek yoktur.
+
+Ayrıştırma ve eşleştirme mantığı **test edilmiştir** (`npm run test:scraper`,
+16 test). Bulut ortamından operatör sitelerine erişilemediği için testler örnek
+HTML kullanır; **canlıya alındıktan sonra seçicilerin gerçek sayfalarla bir kez
+doğrulanması gerekir** (admin panelindeki "Şimdi tara" ile).
+
+## Yönetim Paneli (`/admin`)
+
+Menüde yoktur, `robots.txt`'te engellidir, sitemap dışındadır ve `noindex,
+nofollow` basar. Şifre `ADMIN_SECRET`; yalnızca `sessionStorage`'da tutulur.
+
+- Paket fiyatlarını elle düzenleme (otomatik taranamayan operatörler için)
+- "Fiyat değişti" rozetlerini onaylama
+- Bayat veri uyarısı, tarama durumu ve son tur özeti
+- "Şimdi tara" ile elle tetikleme
+
+## Reklam Alanları ve İş Ortakları
+
+`shared/partners.ts` tek doğru kaynaktır; yeni ortak eklemek için listeye satır
+eklenir. Kartlar `PartnerCard` ile basılır.
+
+- Bağlantılar `rel="sponsored noopener noreferrer"` taşır (Google'ın ticari
+  bağlantılar için istediği işaretleme) ve görsel olarak **"reklam"** etiketlenir.
+- Alan yükseklikleri `AD_PLACEMENTS`'te **sabit** rezerve edilir — içerik geç
+  gelse bile sayfa zıplamaz (CLS = 0).
+- Yerleşimler: ana sayfa, paket/mobil listelerinin altı, hız testi sonucu ve
+  teklif formu sonrası teşekkür ekranı; ayrıca footer şeridi.
+- Aynı bağlantılar sunucu tarafı içeriğe de basılır — kullanıcının gördüğüyle
+  botun gördüğü **aynıdır** (cloaking yok).
+
+**Şeffaflık:** footer'daki "hiçbir operatörle ticari ilişkimiz yok" ifadesi,
+sponsorlu bağlantıların varlığını açıkça belirtecek biçimde güncellenmiştir.
+
+## Hız Testi
+
+`client/src/lib/speedtest.ts` — ölçüm motoru, `SpeedGauge` — kadran.
+
+- **4 paralel akış.** Tek TCP bağlantısı yüksek hızlı hatlarda pencere boyutu
+  ve gecikme nedeniyle hattı dolduramaz; tek akışlı ölçüm 200 Mbps üzerinde
+  gerçeğin belirgin altında çıkar.
+- İlk **800 ms atılır** (bağlantı kurulumu + TCP yavaş başlangıcı).
+- Sonuç, 250 ms'lik kararlı pencerelerin **medyanıdır** — anlık zirve değil.
+- Jitter ve kararlılık yüzdesi ayrıca raporlanır.
+- Sunucu tarafı sınır **bayt bütçesidir** (`bandwidthLimit`), istek sayısı
+  değil: istek sayısına dayalı sınır, hattı hızlı olan kullanıcıyı testin
+  ortasında 429 ile cezalandırır. Tek testin tüketimi istemcide de sınırlıdır
+  (indirme 700 MB, yükleme 150 MB).
 
 ## SEO / AEO — sunucu tarafı üretim (AI botları JS çalıştırmaz!)
 
@@ -126,7 +206,9 @@ kopya tutulmaz (veri bayatlamasın).
 
 ```
 tarifesec/
-├── shared/routes.ts     # TEK DOĞRU KAYNAK — rota meta (sunucu + istemci)
+├── shared/
+│   ├── routes.ts        # TEK DOĞRU KAYNAK — rota meta (sunucu + istemci)
+│   └── partners.ts      # TEK DOĞRU KAYNAK — iş ortakları + reklam alanları
 ├── client/
 │   ├── public/          # favicon, OG görseli
 │   └── src/
@@ -136,12 +218,18 @@ tarifesec/
 ├── server/
 │   ├── index.ts         # Express entry + güvenlik başlıkları + SSR servis
 │   ├── config.ts        # TEK DOĞRU KAYNAK — sayılar/katsayılar
-│   ├── middleware/      # auth.ts (fail-closed), rateLimit.ts
+│   ├── middleware/      # auth.ts (fail-closed), rateLimit.ts, bandwidth.ts
+│   ├── scheduler.ts     # uygulama içi otomatik tarama
 │   ├── seo/             # render, meta, jsonld, content, faq, llms, data
 │   └── routes/          # packages, mobile, leads, blog, admin, visitors,
 │                        # speedtest, seo (robots/sitemap/llms)
 ├── drizzle/             # schema.ts, db.ts, seed.ts, seed-blog.ts
-└── scraper/index.ts     # Günlük fiyat tarayıcı (Railway Cron)
+└── scraper/
+    ├── index.ts         # tarama akışı
+    ├── sources.ts       # BİLDİRİMSEL operatör listesi
+    ├── parse.ts         # HTML → yapılandırılmış kayıt
+    ├── match.ts         # kimlik bazlı eşleştirme (emin değilsen dokunma)
+    └── __tests__/       # 16 test
 ```
 
 ## Konvansiyonlar
@@ -157,7 +245,9 @@ tarifesec/
 ## Test (commit öncesi)
 
 ```bash
-npm test          # tsc --noEmit
+npm test          # tsc --noEmit + scraper testleri (16 test)
+npm run test:scraper  # yalnız scraper ayrıştırma/eşleştirme testleri
+npm run scrape        # taramayı elle çalıştır
 npm run build     # vite build + sitemap + esbuild → dist/
 npm start         # http://localhost:3000
 ```

@@ -12,6 +12,7 @@ const MobilTarifeler = lazy(() => import("./pages/MobilTarifeler"));
 const HizTesti = lazy(() => import("./pages/HizTesti"));
 const BlogListesi = lazy(() => import("./pages/Blog").then((m) => ({ default: m.BlogListesi })));
 const BlogYazisi = lazy(() => import("./pages/Blog").then((m) => ({ default: m.BlogYazisi })));
+const Admin = lazy(() => import("./pages/Admin"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 function Yukleniyor() {
@@ -33,6 +34,8 @@ export default function App() {
           <Route path="/hiz-testi" component={HizTesti} />
           <Route path="/blog" component={BlogListesi} />
           <Route path="/blog/:slug" component={BlogYazisi} />
+          {/* Menüde yok, robots engelli, sitemap dışı */}
+          <Route path="/admin" component={Admin} />
           <Route component={NotFound} />
         </Switch>
       </Suspense>

@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchMobile } from "@/lib/api";
 import { Phone, Star, ExternalLink } from "lucide-react";
+import PartnerCard from "@/components/PartnerCard";
+import TeklifFormu from "@/components/TeklifFormu";
 import { useRouteSeo, parseFeatures } from "@/lib/hooks";
 
 const OPERATORS = [
@@ -134,6 +136,14 @@ export default function MobilTarifeler() {
             </div>
           );
         })}
+      </div>
+
+      <div className="mt-10">
+        <PartnerCard context="internet" placement="sonucAlti" />
+      </div>
+
+      <div className="mt-10">
+        <TeklifFormu packageInterest="Mobil tarife" />
       </div>
     </div>
   );

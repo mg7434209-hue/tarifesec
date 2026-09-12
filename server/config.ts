@@ -22,13 +22,31 @@ export const config = {
   rateLimit: {
     leads: { windowMs: 60 * 60 * 1000, max: 5 },
     visitors: { windowMs: 60 * 1000, max: 30 },
-    speedTest: { windowMs: 60 * 1000, max: 20 },
+    /** Yalnızca sonuç kaydı / istatistik uçları için */
+    speedTestMeta: { windowMs: 60 * 1000, max: 30 },
+  },
+
+  /** Otomatik fiyat taraması */
+  scrape: {
+    auto: process.env.AUTO_SCRAPE !== "false",
+    intervalHours: Number(process.env.SCRAPE_INTERVAL_HOURS ?? 12),
+    /** Dağıtım sonrası ilk turu geciktir (yeniden başlatma fırtınasını önler) */
+    startupDelayMinutes: Number(process.env.SCRAPE_STARTUP_DELAY_MIN ?? 5),
+    /** Bu süreden eski veri "bayat" sayılır ve admin panelinde işaretlenir */
+    staleAfterHours: Number(process.env.STALE_AFTER_HOURS ?? 72),
   },
 
   /** Hız testi parametreleri */
   speedTest: {
+    /**
+     * IP başına bant genişliği bütçesi. Tek bir tam test ~1-2 GB'a kadar
+     * çıkabilir (hızlı hatlarda); bütçe birkaç teste izin verecek, sürekli
+     * kötüye kullanıma izin vermeyecek şekilde seçilmiştir.
+     */
+    budgetWindowMs: 10 * 60 * 1000,
+    budgetBytes: 6 * 1024 * 1024 * 1024,
     maxDownloadBytes: 50 * 1024 * 1024,
-    maxUploadBytes: 20 * 1024 * 1024,
+    maxUploadBytes: 8 * 1024 * 1024,
     defaultBytes: 8 * 1024 * 1024,
   },
 } as const;

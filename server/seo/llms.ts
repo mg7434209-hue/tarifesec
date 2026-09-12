@@ -9,6 +9,7 @@ import { SITE, SITE_NAME } from "./meta";
 import { getPackages, getMobile, getPosts, summarize, summarizeMobile } from "./data";
 import { FAQ } from "./faq";
 import { fullName } from "./util";
+import { PARTNERS } from "../../shared/partners";
 
 const stamp = () => new Date().toISOString().slice(0, 10);
 
@@ -126,6 +127,10 @@ ${
         .join("\n")}`
     : ""
 }
+
+## İş ortakları (sponsorlu)
+
+${PARTNERS.map((p) => `- [${p.name}](${p.url}) — ${p.description}`).join("\n")}
 
 ## Platform hakkında
 
