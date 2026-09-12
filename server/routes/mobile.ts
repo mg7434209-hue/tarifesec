@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db } from "../../drizzle/db";
 import { mobileTariffs } from "../../drizzle/schema";
 import { eq, and, asc, desc } from "drizzle-orm";
+import { requireAdmin } from "../middleware/auth";
 
 const router = Router();
 
@@ -34,14 +35,14 @@ router.get("/", async (req, res) => {
 });
 
 // PUT /api/mobile/:id (admin)
-router.put("/:id", async (req, res) => {
+router.put("/:id", requireAdmin, async (req, res) => {
   try {
     const ALLOWED = [
       "name","priceMonthly","pricePrePaid","gbLimit","minuteLimit",
       "features","isFeatured","affiliateUrl","isActive","sortOrder"
     ];
-    const clean = Object.fromEntries(
-      Object.entries(req.body).filter(([k]) => ALLOWED.includes(k))
+    const clean: any = Object.fromEntries(
+      Object.entries(req.body ?? {}).filter(([k]) => ALLOWED.includes(k))
     );
     clean.updatedAt = new Date();
     const result = await db

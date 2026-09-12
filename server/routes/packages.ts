@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db } from "../../drizzle/db";
 import { packages } from "../../drizzle/schema";
 import { eq, and, gte, asc, desc } from "drizzle-orm";
+import { requireAdmin } from "../middleware/auth";
 
 const router = Router();
 
@@ -9,11 +10,6 @@ const router = Router();
 router.get("/", async (req, res) => {
   try {
     const { operator, type, minSpeed, sort } = req.query;
-
-    let query = db
-      .select()
-      .from(packages)
-      .where(eq(packages.isActive, true));
 
     const conditions = [eq(packages.isActive, true)];
     if (operator) conditions.push(eq(packages.operatorSlug, operator as string));
@@ -55,9 +51,21 @@ router.get("/:id", async (req, res) => {
 });
 
 // POST /api/packages (admin)
-router.post("/", async (req, res) => {
+router.post("/", requireAdmin, async (req, res) => {
   try {
-    const result = await db.insert(packages).values(req.body).returning();
+    const ALLOWED = [
+      "operator","operatorSlug","type","name","downloadSpeed","uploadSpeed",
+      "priceMonthly","priceNoCommitment","commitmentMonths","dataLimit",
+      "modemIncluded","installationFee","features","isFeatured",
+      "affiliateUrl","officialUrl","isActive","sortOrder"
+    ];
+    const clean: any = Object.fromEntries(
+      Object.entries(req.body ?? {}).filter(([k]) => ALLOWED.includes(k))
+    );
+    if (!clean.operator || !clean.name || clean.priceMonthly == null) {
+      return res.status(400).json({ error: "operator, name ve priceMonthly zorunlu" });
+    }
+    const result = await db.insert(packages).values(clean).returning();
     res.status(201).json(result[0]);
   } catch (err) {
     console.error(err);
@@ -66,14 +74,14 @@ router.post("/", async (req, res) => {
 });
 
 // PUT /api/packages/:id (admin)
-router.put("/:id", async (req, res) => {
+router.put("/:id", requireAdmin, async (req, res) => {
   try {
     const ALLOWED = [
       "name","priceMonthly","priceNoCommitment","downloadSpeed","uploadSpeed",
       "commitmentMonths","features","isFeatured","affiliateUrl","isActive","sortOrder"
     ];
-    const clean = Object.fromEntries(
-      Object.entries(req.body).filter(([k]) => ALLOWED.includes(k))
+    const clean: any = Object.fromEntries(
+      Object.entries(req.body ?? {}).filter(([k]) => ALLOWED.includes(k))
     );
     clean.updatedAt = new Date();
     const result = await db

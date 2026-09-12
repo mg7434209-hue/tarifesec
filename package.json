@@ -4,11 +4,13 @@
   "type": "module",
   "scripts": {
     "dev": "NODE_ENV=development tsx watch server/index.ts",
-    "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
+    "build": "vite build && node build-sitemap.js && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
     "start": "NODE_ENV=production node dist/index.js",
     "check": "tsc --noEmit",
     "db:push": "drizzle-kit generate && drizzle-kit migrate",
-    "db:seed": "tsx drizzle/seed.ts"
+    "db:seed": "tsx drizzle/seed.ts",
+    "build:sitemap": "node build-sitemap.js",
+    "test": "tsc --noEmit"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -60,5 +62,8 @@
     "tsx": "^4.19.1",
     "typescript": "5.9.3",
     "vite": "^7.1.7"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

@@ -13,6 +13,13 @@ dotenv.config();
 
 // ─── Yardımcı: fiyat güncelle ────────────────────────────────────────────────
 
+/**
+ * Otomatik kabul edilen azami fiyat sapması.
+ * Scraper'lar HTML'den sırayla fiyat eşleştirdiği için yanlış hizalama
+ * riski var; %MAX_DRIFT üzeri değişiklik YAYINLANMAZ, elle onaya düşer.
+ */
+const MAX_DRIFT = 0.4;
+
 async function updatePackagePrice(
   id: number,
   newPrice: number,
@@ -23,6 +30,17 @@ async function updatePackagePrice(
   if (!current.length) return;
 
   const old = current[0].priceMonthly;
+
+  if (Math.abs(newPrice - old) / old > MAX_DRIFT) {
+    console.warn(
+      `  ⚠️  [${id}] ${old}₺ → ${newPrice}₺ sapma %${Math.round(
+        (Math.abs(newPrice - old) / old) * 100
+      )} — yayınlanmadı, elle kontrol gerekiyor.`
+    );
+    await db.update(tbl).set({ lastScrapedAt: new Date() }).where(eq(tbl.id, id));
+    return { changed: false, skipped: true };
+  }
+
   if (old === newPrice) {
     await db.update(tbl).set({ lastScrapedAt: new Date() }).where(eq(tbl.id, id));
     return { changed: false };
@@ -231,7 +249,7 @@ async function markManualCheckNeeded(operatorSlug: string) {
 
 // ─── Ana fonksiyon ────────────────────────────────────────────────────────────
 
-async function runScraper() {
+export async function runScraper() {
   console.log("=".repeat(50));
   console.log(`🚀 TarifeSec Scraper başladı: ${new Date().toLocaleString("tr-TR")}`);
   console.log("=".repeat(50));
@@ -251,10 +269,19 @@ async function runScraper() {
   }
   console.log("=".repeat(50));
 
-  process.exit(0);
+  return totalChanges;
 }
 
-runScraper().catch(e => {
-  console.error("❌ Scraper kritik hata:", e);
-  process.exit(1);
-});
+// Doğrudan çalıştırıldığında (Railway Cron) süreci sonlandır;
+// admin panelinden import edildiğinde sonlandırma.
+const isDirectRun =
+  process.argv[1] && /scraper[\\/](index)\.(ts|js)$/.test(process.argv[1]);
+
+if (isDirectRun) {
+  runScraper()
+    .then(() => process.exit(0))
+    .catch((e) => {
+      console.error("❌ Scraper kritik hata:", e);
+      process.exit(1);
+    });
+}
