@@ -17,6 +17,32 @@ bağlı olduğundan emin olmak. Geri kalan her şey site kendiliğinden yapar.
 
 ---
 
+## 0. HANGİ ADRESE BAKIYORSUNUZ? (önce bunu kontrol edin)
+
+Alan adınızın iki hâli **farklı sunuculara** bakıyor:
+
+| Adres | Nereye gidiyor |
+|-------|----------------|
+| `www.tarifesec.net.tr` | ✅ Railway (sitemizin çalıştığı yer) |
+| `tarifesec.net.tr` (www'siz) | ❌ Başka bir sunucu — Railway değil |
+
+**www'siz adrese bakarsanız değişiklikleri ASLA göremezsiniz**, kaç kez
+dağıtım yaparsak yapalım. Test ederken mutlaka `www.` ile açın.
+
+### Kalıcı çözümü (önerilir)
+
+Alan adınızı aldığınız yerin DNS ayarlarında, www'siz kaydın da Railway'e
+gitmesini sağlayın:
+
+1. Railway → projeniz → **Settings** → **Domains**
+2. `tarifesec.net.tr` (www'siz) adresini de **Custom Domain** olarak ekleyin
+3. Railway size bir hedef gösterir; alan adı sağlayıcınızın DNS panelinde
+   apex kaydını (`@` veya boş isimli kayıt) o hedefe yönlendirin
+4. Alternatif: apex'i `www`'ye yönlendiren bir kural tanımlayın
+
+Bu yapılmazsa ziyaretçilerinizin bir kısmı eski/boş sayfayı görmeye devam eder
+ve Google iki ayrı site görür (SEO açısından da zararlıdır).
+
 ## 1. Railway'de PostgreSQL bağlı mı? (zorunlu)
 
 Site verileri veritabanında tutar. Railway panelinde projenize bakın:
@@ -95,6 +121,13 @@ Site zaten arama motorları ve yapay zekâ botları için hazırdır
 - **Şifre değiştirme**.
 
 ## Sorun giderme
+
+**Sayfalar "Cannot GET /" diyor veya 404 dönüyor**
+Bu, sunucunun derlenmiş siteyi bulamadığı anlamına gelirdi. Artık site,
+derleme çıktısı varsa kendiliğinden sunuluyor — `NODE_ENV` ayarlamanıza gerek
+yok. Yine de görüyorsanız Railway günlüğünde
+`İstemci derlemesi bulunamadı` satırını arayın: derleme adımı başarısız
+olmuştur.
 
 **Site açılmıyor / hata veriyor**
 Railway → **Deployments** → son dağıtımın günlüğüne bakın. `[bootstrap]` ile

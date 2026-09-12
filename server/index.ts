@@ -23,7 +23,21 @@ dotenv.config();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 3000;
-const isProd = process.env.NODE_ENV === "production";
+const isDev = process.env.NODE_ENV === "development";
+
+/**
+ * Derlenmiş site NEREDE: dist/client
+ *
+ * Sunum artık NODE_ENV'e BAĞLI DEĞİL. railway.json başlatma komutu
+ * `node dist/index.js` olduğu için NODE_ENV ayarlanmıyordu; değişken elle
+ * tanımlanmadığında sunucu statik dosyaları ve SSR'ı tamamen atlıyor, her
+ * sayfa 404 dönüyordu. Artık ölçüt basit ve güvenilir: derleme çıktısı
+ * varsa ve geliştirme modunda değilsek siteyi sun.
+ */
+const distPath = path.join(__dirname, "../dist/client");
+const indexFile = path.join(distPath, "index.html");
+const hasBuild = fs.existsSync(indexFile);
+const serveSite = hasBuild && !isDev;
 
 // Railway proxy arkasında gerçek istemci IP'si (hız sınırı ve secure çerez için)
 app.set("trust proxy", 1);
@@ -37,18 +51,18 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true, limit: "100kb" }));
 
 // ─── Güvenlik başlıkları ─────────────────────────────────────────────────────
-app.use((_req, res, next) => {
+app.use((req, res, next) => {
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-Frame-Options", "SAMEORIGIN");
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
   res.setHeader("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
-  if (isProd) {
+  if (req.secure || req.headers["x-forwarded-proto"] === "https") {
     res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
   }
   next();
 });
 
-if (!isProd) {
+if (isDev) {
   app.use((_req, res, next) => {
     res.header("Access-Control-Allow-Origin", "http://localhost:5173");
     res.header("Access-Control-Allow-Credentials", "true");
@@ -81,16 +95,9 @@ app.use("/api", (_req, res) => {
 });
 
 // ─── Statik SPA + sunucu tarafı SEO render ────────────────────────────────────
-if (isProd) {
-  const distPath = path.join(__dirname, "../dist/client");
-  const indexFile = path.join(distPath, "index.html");
-
-  if (!fs.existsSync(indexFile)) {
-    console.error(`⚠️  İstemci derlemesi bulunamadı: ${indexFile} — 'npm run build' çalıştırın.`);
-  }
-
+if (serveSite) {
   // Şablon bir kez okunur
-  const template = fs.existsSync(indexFile) ? fs.readFileSync(indexFile, "utf8") : "";
+  const template = fs.readFileSync(indexFile, "utf8");
 
   // Hash'li varlıklar uzun süre, index.html hiç önbelleğe alınmaz
   app.use(
@@ -112,8 +119,6 @@ if (isProd) {
    * JSON-LD'si ve gerçek içeriğiyle basılır.
    */
   app.get("*", async (req, res) => {
-    if (!template) return res.status(503).send("Derleme bulunamadı");
-
     try {
       const { html, status } = await renderRoute(req.path, template);
       res.status(status);
@@ -126,6 +131,11 @@ if (isProd) {
       res.send(template); // en kötü ihtimalle ham SPA kabuğu
     }
   });
+} else if (!isDev) {
+  console.error(
+    `⚠️  İstemci derlemesi bulunamadı: ${indexFile}\n` +
+      "   'npm run build' çalıştırılmadan başlatılmış olabilir — site sayfa sunamaz."
+  );
 }
 
 app.listen(PORT, async () => {
