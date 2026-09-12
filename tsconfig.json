@@ -3,7 +3,11 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "jsx": "react-jsx",
     "strict": true,
     "skipLibCheck": true,
@@ -12,9 +16,22 @@
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./client/src/*"]
+      "@/*": [
+        "./client/src/*"
+      ],
+      "@shared/*": [
+        "./shared/*"
+      ]
     }
   },
-  "include": ["client/src", "server", "drizzle"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "client/src",
+    "server",
+    "drizzle",
+    "shared"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

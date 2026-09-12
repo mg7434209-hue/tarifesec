@@ -1,17 +1,25 @@
 import { Link, useLocation } from "wouter";
 import { Menu, X, Wifi } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import VisitCounter from "./VisitCounter";
 
 const NAV = [
   { label: "Ana Sayfa", href: "/" },
   { label: "Ev İnterneti", href: "/paket-karsilastir" },
   { label: "Mobil Tarifeler", href: "/mobil-tarifeler" },
   { label: "Hız Testi", href: "/hiz-testi" },
+  { label: "Rehber", href: "/blog" },
 ];
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [location] = useLocation();
+
+  // Rota değişince mobil menüyü kapat ve sayfanın başına dön
+  useEffect(() => {
+    setOpen(false);
+    window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+  }, [location]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -28,8 +36,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <Link
                 key={item.href}
                 href={item.href}
+                aria-current={
+                  item.href === "/" ? (location === "/" ? "page" : undefined)
+                  : location.startsWith(item.href) ? "page" : undefined
+                }
                 className={`text-sm font-medium transition-colors ${
-                  location === item.href
+                  (item.href === "/" ? location === "/" : location.startsWith(item.href))
                     ? "text-[#0097a7]"
                     : "text-gray-600 hover:text-gray-900"
                 }`}
@@ -46,7 +58,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             Paketi Karşılaştır
           </Link>
 
-          <button className="md:hidden p-2" onClick={() => setOpen(!open)}>
+          <button
+            className="md:hidden p-2"
+            onClick={() => setOpen(!open)}
+            aria-label={open ? "Menüyü kapat" : "Menüyü aç"}
+            aria-expanded={open}
+          >
             {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
@@ -102,8 +119,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </p>
           </div>
         </div>
-        <div className="border-t border-blue-800 text-center py-4 text-xs text-blue-300">
-          © {new Date().getFullYear()} tarifesec.net.tr — Fiyatlar bilgi amaçlıdır, güncel fiyatlar için operatör sitesini ziyaret edin.
+        <div className="border-t border-blue-800 px-4 py-5 flex flex-col items-center gap-3">
+          <VisitCounter />
+          <p className="text-center text-xs text-blue-300 max-w-2xl">
+            © {new Date().getFullYear()} tarifesec.net.tr — Fiyatlar bilgi amaçlıdır, güncel
+            fiyatlar için operatör sitesini ziyaret edin.
+          </p>
         </div>
       </footer>
     </div>

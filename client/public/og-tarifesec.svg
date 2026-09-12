@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1a237e"/>
+      <stop offset="1" stop-color="#0097a7"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <g fill="none" stroke="#4dd0e1" stroke-width="14" stroke-linecap="round" opacity="0.9">
+    <path d="M120 250c55-50 145-50 200 0"/>
+    <path d="M158 300c36-33 88-33 124 0"/>
+  </g>
+  <circle cx="220" cy="350" r="20" fill="#4dd0e1"/>
+  <text x="120" y="450" font-family="Inter, system-ui, sans-serif" font-size="64" font-weight="700" fill="#ffffff">tarifesec.net.tr</text>
+  <text x="120" y="516" font-family="Inter, system-ui, sans-serif" font-size="34" fill="#bbdefb">İnternet ve mobil tarifeleri tarafsız karşılaştırın</text>
+</svg>

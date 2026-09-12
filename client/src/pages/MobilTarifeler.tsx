@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchMobile } from "@/lib/api";
 import { Phone, Star, ExternalLink } from "lucide-react";
+import { useRouteSeo, parseFeatures } from "@/lib/hooks";
 
 const OPERATORS = [
   { value: "", label: "Tüm Operatörler" },
@@ -45,6 +46,8 @@ export default function MobilTarifeler() {
 
   const tariffs = data?.data ?? [];
 
+  useRouteSeo("/mobil-tarifeler");
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">
       <h1 className="text-2xl font-bold text-gray-900 mb-1">Mobil Hat Tarifeleri</h1>
@@ -81,7 +84,7 @@ export default function MobilTarifeler() {
         {tariffs.map((t: any) => {
           const bgColor = OPERATOR_COLORS[t.operatorSlug] ?? "#666";
           const txtColor = OPERATOR_TEXT[t.operatorSlug] ?? "#fff";
-          const features = t.features ? JSON.parse(t.features) : [];
+          const features = parseFeatures(t.features);
           return (
             <div
               key={t.id}
@@ -121,7 +124,7 @@ export default function MobilTarifeler() {
                 </ul>
               )}
               <a
-                href={t.officialUrl ?? "#"}
+                href={t.affiliateUrl ?? t.officialUrl ?? "#"}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-auto flex items-center justify-center gap-1.5 border border-gray-300 text-gray-700 text-sm font-medium py-2.5 rounded-lg hover:bg-gray-50 transition-colors"

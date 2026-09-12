@@ -1,6 +1,23 @@
 import { Link } from "wouter";
+import { useEffect } from "react";
 
 export default function NotFound() {
+  // SPA fallback 200 döndürdüğü için arama motorlarına yumuşak 404
+  // sinyali vermek üzere sayfayı indeks dışı bırakıyoruz.
+  useEffect(() => {
+    document.title = "Sayfa bulunamadı — tarifesec.net.tr";
+
+    // Var olan robots etiketini geçici olarak değiştir; ikinci (çelişen)
+    // etiket eklemek yerine eskisini geri koyuyoruz.
+    const meta = document.head.querySelector<HTMLMetaElement>('meta[name="robots"]');
+    const previous = meta?.content ?? null;
+    if (meta) meta.content = "noindex, follow";
+
+    return () => {
+      if (meta && previous !== null) meta.content = previous;
+    };
+  }, []);
+
   return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4">
       <h1 className="text-6xl font-bold text-gray-200 mb-4">404</h1>

@@ -1,5 +1,7 @@
 import { Link } from "wouter";
 import { Zap, Smartphone, BarChart3, ArrowRight, CheckCircle, Shield } from "lucide-react";
+import TeklifFormu from "@/components/TeklifFormu";
+import { useRouteSeo } from "@/lib/hooks";
 
 const OPERATORS = [
   { name: "Superonline", color: "#0097a7" },
@@ -34,6 +36,8 @@ const FEATURES = [
 ];
 
 export default function Home() {
+  useRouteSeo("/");
+
   return (
     <div>
       {/* Hero */}
@@ -110,6 +114,11 @@ export default function Home() {
             </Link>
           </div>
         ))}
+      </section>
+
+      {/* Teklif formu — gerçek dönüşüm noktası */}
+      <section className="max-w-5xl mx-auto px-4 pb-16">
+        <TeklifFormu />
       </section>
 
       {/* Bağımsızlık bandı */}

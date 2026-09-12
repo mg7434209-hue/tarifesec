@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchPackages } from "@/lib/api";
 import { Wifi, Star, ExternalLink, SlidersHorizontal, TrendingUp, TrendingDown } from "lucide-react";
+import TeklifFormu from "@/components/TeklifFormu";
+import { useRouteSeo, parseFeatures } from "@/lib/hooks";
 
 const OPERATORS = [
   { value: "", label: "Tüm Operatörler" },
@@ -69,6 +71,8 @@ export default function PaketKarsilastirma() {
 
   const pkgs = data?.data ?? [];
 
+  useRouteSeo("/paket-karsilastir");
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">
       <h1 className="text-2xl font-bold text-gray-900 mb-1">İnternet Paketi Karşılaştırma</h1>
@@ -101,7 +105,7 @@ export default function PaketKarsilastirma() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {pkgs.map((pkg: any) => {
           const color = OP_COLORS[pkg.operatorSlug] ?? "#666";
-          const features = pkg.features ? JSON.parse(pkg.features) : [];
+          const features = parseFeatures(pkg.features);
           const borderClass = pkg.priceChanged
             ? pkg.priceChangeDirection === "up"
               ? "border-red-300 ring-1 ring-red-200"
@@ -175,6 +179,10 @@ export default function PaketKarsilastirma() {
             </div>
           );
         })}
+      </div>
+
+      <div className="mt-12">
+        <TeklifFormu packageInterest="Ev interneti" />
       </div>
 
       {!isLoading && pkgs.length === 0 && (

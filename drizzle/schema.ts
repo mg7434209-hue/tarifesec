@@ -95,6 +95,17 @@ export const leads = pgTable("leads", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const siteCounters = pgTable("site_counters", {
+  key: varchar("key", { length: 50 }).primaryKey(),
+  value: integer("value").default(0).notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const visitDays = pgTable("visit_days", {
+  day: varchar("day", { length: 10 }).primaryKey(), // YYYY-MM-DD
+  count: integer("count").default(0).notNull(),
+});
+
 export const scrapeLog = pgTable("scrape_log", {
   id: serial("id").primaryKey(),
   operator: varchar("operator", { length: 50 }).notNull(),
@@ -113,3 +124,6 @@ export type InsertMobileTariff = typeof mobileTariffs.$inferInsert;
 export type Lead = typeof leads.$inferSelect;
 export type InsertLead = typeof leads.$inferInsert;
 export type ScrapeLog = typeof scrapeLog.$inferSelect;
+export type BlogPost = typeof blogPosts.$inferSelect;
+export type SpeedTest = typeof speedTests.$inferSelect;
+export type VisitDay = typeof visitDays.$inferSelect;

@@ -1,24 +1,16 @@
 /**
- * Admin API — Şifre: ADMIN_SECRET env variable
- * Basit bearer token auth, JWT gerektirmez
+ * Admin API — x-admin-secret başlığı ile korunur (server/middleware/auth.ts).
+ * ADMIN_SECRET tanımlı değilse uçlar fail-closed çalışır (503).
  */
 import { Router } from "express";
 import { db } from "../../drizzle/db";
 import { packages, mobileTariffs, scrapeLog, leads } from "../../drizzle/schema";
-import { eq, desc, or } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
+import { requireAdmin } from "../middleware/auth";
 
 const router = Router();
 
-// ─── Auth middleware ──────────────────────────────────────────────────────────
-function auth(req: any, res: any, next: any) {
-  const token = req.headers["x-admin-secret"] || req.query.secret;
-  if (token !== process.env.ADMIN_SECRET) {
-    return res.status(401).json({ error: "Yetkisiz" });
-  }
-  next();
-}
-
-router.use(auth);
+router.use(requireAdmin);
 
 // ─── Fiyat değişiklikleri — onay bekleyenler ─────────────────────────────────
 router.get("/price-changes", async (_req, res) => {
@@ -64,8 +56,8 @@ router.put("/package/:id", async (req, res) => {
   try {
     const ALLOWED = ["priceMonthly", "priceNoCommitment", "name", "features",
                      "isFeatured", "isActive", "affiliateUrl", "sortOrder"];
-    const clean = Object.fromEntries(
-      Object.entries(req.body).filter(([k]) => ALLOWED.includes(k))
+    const clean: any = Object.fromEntries(
+      Object.entries(req.body ?? {}).filter(([k]) => ALLOWED.includes(k))
     );
 
     // Fiyat değişiyorsa previousPrice kaydet
@@ -93,8 +85,8 @@ router.put("/mobile/:id", async (req, res) => {
   try {
     const ALLOWED = ["priceMonthly", "pricePrePaid", "name", "gbLimit",
                      "features", "isFeatured", "isActive", "sortOrder"];
-    const clean = Object.fromEntries(
-      Object.entries(req.body).filter(([k]) => ALLOWED.includes(k))
+    const clean: any = Object.fromEntries(
+      Object.entries(req.body ?? {}).filter(([k]) => ALLOWED.includes(k))
     );
 
     if (clean.priceMonthly) {
@@ -130,17 +122,19 @@ router.get("/scrape-log", async (_req, res) => {
 });
 
 // ─── Scraper'ı manuel tetikle ─────────────────────────────────────────────────
+// NOT: Eski sürüm `exec("tsx scraper/index.ts")` ile kabuk süreci başlatıyordu.
+// Üretim imajında tsx yok (devDependency) ve web sürecinde kabuk açmak gereksiz
+// bir saldırı yüzeyi. Scraper artık Railway Cron servisiyle çalışır
+// (railway-cron.json) ve burada süreç içinde çağrılır.
 router.post("/run-scraper", async (_req, res) => {
   try {
+    const { runScraper } = await import("../../scraper/index");
     res.json({ message: "Scraper başlatıldı — logları kontrol edin" });
-    // Railway'de: tsx scraper/index.ts komutunu çalıştır
-    const { exec } = await import("child_process");
-    exec("tsx scraper/index.ts", (err, stdout, stderr) => {
-      if (err) console.error("Scraper hata:", err);
-      console.log(stdout);
-    });
+    runScraper().catch((e: unknown) =>
+      console.error("[admin] scraper hatası:", (e as Error).message)
+    );
   } catch (err) {
-    res.status(500).json({ error: "Başlatılamadı" });
+    console.error("[admin] scraper yüklenemedi:", (err as Error).message);
   }
 });
 
