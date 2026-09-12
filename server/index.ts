@@ -11,6 +11,8 @@ import blogRouter from "./routes/blog";
 import adminRouter from "./routes/admin";
 import visitorsRouter from "./routes/visitors";
 import speedTestRouter from "./routes/speedtest";
+import seoRouter from "./routes/seo";
+import { renderRoute } from "./seo/render";
 import { config } from "./config";
 
 dotenv.config();
@@ -52,6 +54,9 @@ if (!isProd) {
   });
 }
 
+// ─── SEO / AEO uçları (statikten ÖNCE: canlı veriden üretilir) ───────────────
+app.use(seoRouter);
+
 // ─── API ──────────────────────────────────────────────────────────────────────
 app.use("/api/packages", packagesRouter);
 app.use("/api/mobile", mobileRouter);
@@ -70,7 +75,7 @@ app.use("/api", (_req, res) => {
   res.status(404).json({ error: "Bulunamadı" });
 });
 
-// ─── Statik SPA ───────────────────────────────────────────────────────────────
+// ─── Statik SPA + sunucu tarafı SEO render ────────────────────────────────────
 if (isProd) {
   const distPath = path.join(__dirname, "../dist/client");
   const indexFile = path.join(distPath, "index.html");
@@ -78,6 +83,9 @@ if (isProd) {
   if (!fs.existsSync(indexFile)) {
     console.error(`⚠️  İstemci derlemesi bulunamadı: ${indexFile} — 'npm run build' çalıştırın.`);
   }
+
+  // Şablon bir kez okunur
+  const template = fs.existsSync(indexFile) ? fs.readFileSync(indexFile, "utf8") : "";
 
   // Hash'li varlıklar uzun süre, index.html hiç önbelleğe alınmaz
   app.use(
@@ -91,9 +99,27 @@ if (isProd) {
     })
   );
 
-  app.get("*", (_req, res) => {
-    res.setHeader("Cache-Control", "no-cache");
-    res.sendFile(indexFile);
+  /**
+   * SPA istemcide render edildiği için JS çalıştırmayan istemciler
+   * (GPTBot, ClaudeBot, PerplexityBot ve Googlebot'un ilk turu) boş bir
+   * <div id="root"> görüyordu; her URL aynı başlıkla indeksleniyordu.
+   * Artık her rota sunucuda kendi başlığı, açıklaması, canonical'ı,
+   * JSON-LD'si ve gerçek içeriğiyle basılır.
+   */
+  app.get("*", async (req, res) => {
+    if (!template) return res.status(503).send("Derleme bulunamadı");
+
+    try {
+      const { html, status } = await renderRoute(req.path, template);
+      res.status(status);
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      res.setHeader("Cache-Control", "public, max-age=0, s-maxage=300, must-revalidate");
+      res.send(html);
+    } catch (err) {
+      console.error("[seo] render hatası:", (err as Error).message);
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      res.send(template); // en kötü ihtimalle ham SPA kabuğu
+    }
   });
 }
 

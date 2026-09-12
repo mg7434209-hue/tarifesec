@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchMobile } from "@/lib/api";
 import { Phone, Star, ExternalLink } from "lucide-react";
-import { useSeo, parseFeatures } from "@/lib/hooks";
+import { useRouteSeo, parseFeatures } from "@/lib/hooks";
 
 const OPERATORS = [
   { value: "", label: "Tüm Operatörler" },
@@ -46,12 +46,7 @@ export default function MobilTarifeler() {
 
   const tariffs = data?.data ?? [];
 
-  useSeo({
-    title: "Mobil Tarife Karşılaştırma — Turkcell, Vodafone, Türk Telekom | tarifesec.net.tr",
-    description:
-      "Faturalı ve faturasız mobil hat tarifelerini GB, dakika ve aylık ücrete göre karşılaştırın. Güncel Turkcell, Vodafone ve Türk Telekom fiyatları.",
-    canonicalPath: "/mobil-tarifeler",
-  });
+  useRouteSeo("/mobil-tarifeler");
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">

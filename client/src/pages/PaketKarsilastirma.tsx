@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchPackages } from "@/lib/api";
 import { Wifi, Star, ExternalLink, SlidersHorizontal, TrendingUp, TrendingDown } from "lucide-react";
 import TeklifFormu from "@/components/TeklifFormu";
-import { useSeo, parseFeatures } from "@/lib/hooks";
+import { useRouteSeo, parseFeatures } from "@/lib/hooks";
 
 const OPERATORS = [
   { value: "", label: "Tüm Operatörler" },
@@ -71,12 +71,7 @@ export default function PaketKarsilastirma() {
 
   const pkgs = data?.data ?? [];
 
-  useSeo({
-    title: "Ev İnterneti Paket Karşılaştırma — Fiber, Kablosuz, ADSL | tarifesec.net.tr",
-    description:
-      "Superonline, Türk Telekom, Vodafone ve TurkNet ev interneti paketlerini hız ve fiyata göre filtreleyin, yan yana karşılaştırın.",
-    canonicalPath: "/paket-karsilastir",
-  });
+  useRouteSeo("/paket-karsilastir");
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">

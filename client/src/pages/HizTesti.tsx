@@ -2,7 +2,7 @@ import { useCallback, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Zap, Download, Upload, Activity, RotateCcw, Loader2 } from "lucide-react";
 import { fetchSpeedStats, saveSpeedResult } from "@/lib/api";
-import { useSeo } from "@/lib/hooks";
+import { useRouteSeo } from "@/lib/hooks";
 
 type Phase = "idle" | "ping" | "download" | "upload" | "done";
 
@@ -25,12 +25,7 @@ export default function HizTesti() {
 
   const { data: stats } = useQuery({ queryKey: ["speedstats"], queryFn: fetchSpeedStats });
 
-  useSeo({
-    title: "İnternet Hız Testi — Ölç, Karşılaştır | tarifesec.net.tr",
-    description:
-      "Ücretsiz internet hız testi: indirme, yükleme hızınızı ve ping değerinizi ölçün. Sonucunuzu Türkiye ortalamasıyla karşılaştırın.",
-    canonicalPath: "/hiz-testi",
-  });
+  useRouteSeo("/hiz-testi");
 
   const measurePing = useCallback(async (signal: AbortSignal) => {
     const samples: number[] = [];

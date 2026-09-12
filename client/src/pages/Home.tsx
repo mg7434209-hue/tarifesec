@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { Zap, Smartphone, BarChart3, ArrowRight, CheckCircle, Shield } from "lucide-react";
 import TeklifFormu from "@/components/TeklifFormu";
-import { useSeo } from "@/lib/hooks";
+import { useRouteSeo } from "@/lib/hooks";
 
 const OPERATORS = [
   { name: "Superonline", color: "#0097a7" },
@@ -36,25 +36,7 @@ const FEATURES = [
 ];
 
 export default function Home() {
-  useSeo({
-    title: "İnternet ve Mobil Tarife Karşılaştırma | tarifesec.net.tr",
-    description:
-      "Superonline, Türk Telekom, Vodafone, Turkcell ve TurkNet internet paketlerini ve mobil tarifeleri tek yerde tarafsız karşılaştırın. Ücretsiz hız testi.",
-    canonicalPath: "/",
-    jsonLd: {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      name: "tarifesec.net.tr",
-      url: "https://www.tarifesec.net.tr/",
-      description:
-        "Türkiye'nin internet ve mobil tarife karşılaştırma platformu.",
-      potentialAction: {
-        "@type": "SearchAction",
-        target: "https://www.tarifesec.net.tr/paket-karsilastir?q={search_term_string}",
-        "query-input": "required name=search_term_string",
-      },
-    },
-  });
+  useRouteSeo("/");
 
   return (
     <div>

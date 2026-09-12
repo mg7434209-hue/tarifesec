@@ -13,3 +13,32 @@
     @apply bg-gray-50 text-gray-900 antialiased;
   }
 }
+
+/*
+ * Sunucuda basılan taranabilir içeriğin (#ssr-content) biçimi.
+ * React mount olduğunda bu düğüm tamamen değiştirilir; bu stiller yalnızca
+ * JS yüklenene kadar geçen kısa sürede ve JS çalıştırmayan istemcilerde görünür.
+ */
+.prose-seo h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--color-navy);
+  margin-bottom: 0.75rem;
+  line-height: 1.2;
+}
+.prose-seo h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+.prose-seo h3 { font-size: 1rem; font-weight: 600; color: #1f2937; }
+.prose-seo p { color: #4b5563; margin-bottom: 0.75rem; line-height: 1.65; }
+.prose-seo ul { margin: 0.5rem 0 1rem 1.25rem; list-style: disc; }
+.prose-seo li { color: #4b5563; margin-bottom: 0.5rem; line-height: 1.6; }
+.prose-seo a { color: var(--color-brand); text-decoration: underline; }
+.prose-seo dt { margin-top: 1rem; }
+.prose-seo dd { margin: 0 0 0.75rem 0; }
+.prose-seo section { margin-top: 1.5rem; }
+.prose-seo strong { color: #111827; font-weight: 600; }

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { byPath } from "@shared/routes";
 
 /**
  * Belirtilen başlangıçtan hedefe yumuşak sayan animasyon (easeOutExpo).
@@ -41,8 +42,6 @@ type SeoOptions = {
   title: string;
   description?: string;
   canonicalPath?: string;
-  /** JSON-LD nesnesi (structured data) */
-  jsonLd?: Record<string, unknown>;
 };
 
 function upsertMeta(selector: string, attr: "name" | "property", key: string, content: string) {
@@ -56,10 +55,34 @@ function upsertMeta(selector: string, attr: "name" | "property", key: string, co
 }
 
 /**
- * SPA olduğu için sayfa başına başlık/açıklama/canonical JS ile yazılır.
- * (Önceden tüm rotalar aynı <title>Tarifeseç</title> ile indeksleniyordu.)
+ * Canonical kökü, sunucunun ilk yüklemede bastığı <link rel="canonical">
+ * değerinden okunur. window.location.origin KULLANILMAZ: ziyaretçi siteye
+ * farklı bir alan adından (www'siz, *.up.railway.app) gelirse canonical
+ * yanlış kök alır ve sayfa kendi kopyasını işaret ederdi.
  */
-export function useSeo({ title, description, canonicalPath, jsonLd }: SeoOptions) {
+function canonicalBase(): string {
+  const link = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+  if (link?.href) {
+    try {
+      return new URL(link.href).origin;
+    } catch {
+      /* düş */
+    }
+  }
+  return window.location.origin;
+}
+
+/**
+ * Sayfa başına başlık/açıklama/canonical.
+ *
+ * İlk yüklemede bu değerleri sunucu zaten basar (server/seo/render.ts);
+ * bu kanca yalnızca SPA içi gezinmede günceller ve AYNI paylaşılan metni
+ * kullanır (shared/routes.ts), böylece sunucu ile istemci başlığı ayrışmaz.
+ *
+ * JSON-LD'ye DOKUNMAZ — yapılandırılmış veriyi yalnızca sunucu üretir,
+ * aksi hâlde aynı şema iki kez gömülürdü.
+ */
+export function useSeo({ title, description, canonicalPath }: SeoOptions) {
   useEffect(() => {
     document.title = title;
 
@@ -69,7 +92,7 @@ export function useSeo({ title, description, canonicalPath, jsonLd }: SeoOptions
     }
     upsertMeta('meta[property="og:title"]', "property", "og:title", title);
 
-    const url = `${window.location.origin}${canonicalPath ?? window.location.pathname}`;
+    const url = `${canonicalBase()}${canonicalPath ?? window.location.pathname}`;
     upsertMeta('meta[property="og:url"]', "property", "og:url", url);
 
     let link = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
@@ -79,20 +102,17 @@ export function useSeo({ title, description, canonicalPath, jsonLd }: SeoOptions
       document.head.appendChild(link);
     }
     link.href = url;
+  }, [title, description, canonicalPath]);
+}
 
-    let script: HTMLScriptElement | null = null;
-    if (jsonLd) {
-      script = document.createElement("script");
-      script.type = "application/ld+json";
-      script.dataset.page = "1";
-      script.textContent = JSON.stringify(jsonLd);
-      document.head.appendChild(script);
-    }
-
-    return () => {
-      script?.remove();
-    };
-  }, [title, description, canonicalPath, JSON.stringify(jsonLd ?? null)]);
+/** Paylaşılan rota meta verisinden useSeo çağrısı. */
+export function useRouteSeo(path: string) {
+  const meta = byPath(path);
+  useSeo({
+    title: meta?.title ?? "tarifesec.net.tr",
+    description: meta?.description,
+    canonicalPath: path,
+  });
 }
 
 /** features alanı bozuk JSON içerebilir — sayfayı çökertmeden boş dizi döner. */

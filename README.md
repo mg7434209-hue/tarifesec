@@ -24,6 +24,7 @@ cp .env.example .env
 # 3. DB şeması + başlangıç verileri
 npm run db:push
 npm run db:seed
+npm run db:seed:blog   # rehber yazıları
 
 # 4. Dev sunucusu (backend :3000, Vite :5173)
 npm run dev
@@ -68,6 +69,8 @@ koda sayı gömmeyin.
 | `POST /api/leads` | açık (hız sınırlı) | Teklif formu — TR telefon doğrulaması + honeypot |
 | `GET /api/leads` | 🔒 admin | **Kişisel veri** — yalnızca admin |
 | `GET /api/blog[/:slug]` | açık | Yayınlanmış yazılar |
+| `/robots.txt` `/sitemap.xml` | açık | Canlı veriden üretilir |
+| `/llms.txt` `/llms-full.txt` | açık | Yapay zekâ motorları için özet/tam veri |
 | `GET /api/visitors` | açık | Ziyaretçi sayacı |
 | `GET /api/speedtest/*` | açık (hız sınırlı) | Hız testi ping/download/upload/stats |
 | `/api/admin/*` | 🔒 admin | Fiyat onayı, scrape log, leadler |
@@ -75,32 +78,77 @@ koda sayı gömmeyin.
 Admin yetkisi **yalnızca `x-admin-secret` başlığıyla** verilir. `?secret=`
 sorgu parametresi loglara ve Referer başlığına sızdığı için desteklenmez.
 
+## SEO / AEO — sunucu tarafı üretim (AI botları JS çalıştırmaz!)
+
+Site bir SPA'dir; **içerik istemcide render edilir**. GPTBot, ClaudeBot,
+PerplexityBot ve Googlebot'un ilk turu JavaScript çalıştırmadığı için bu
+istemciler eskiden boş bir `<div id="root">` ve her URL'de aynı `<title>`
+görüyordu. Bu yüzden HTML artık **sunucuda** üretilir:
+
+- `server/seo/render.ts` her rota için `<title>`, `description`, `canonical`,
+  Open Graph / Twitter etiketlerini ve JSON-LD bloklarını `index.html` kabuğuna
+  enjekte eder; `#root` içine **gerçek içerik** basar (paket listesi, fiyatlar,
+  SSS). React mount olunca bu düğümün yerini alır.
+- **KURAL:** sunucuda basılan bilgi, kullanıcının gördüğü bilgiyle AYNI olmalı.
+  Gizli metin veya farklı içerik sunmak (cloaking) cezalandırılır.
+- Rota meta verisi `shared/routes.ts` içindedir; sunucu ve istemci **aynı**
+  kaynaktan okur (`useRouteSeo`). İkisinin ayrı başlık tutması, Googlebot'un
+  JS öncesi/sonrası farklı başlık görmesine yol açar — ayırmayın.
+- JSON-LD **yalnızca sunucuda** üretilir (`server/seo/jsonld.ts`): Organization,
+  WebSite+SearchAction, BreadcrumbList, FAQPage, ItemList+Offer (paketler ve
+  tarifeler), WebApplication (hız testi), Article (blog).
+- SSS içeriği `server/seo/faq.ts` — hem görünür metin hem FAQPage şeması üretir.
+  Yapay zekâ motorları soru-cevap içeriğini doğrudan alıntılar; cevapları kısa
+  ve kendi başına anlamlı yazın.
+- 404 artık gerçek **404** durum kodu döner (eski SPA fallback 200 dönüyordu =
+  soft-404).
+
+### Yapay zekâ görünürlüğü (AEO)
+
+- `/llms.txt` — sitenin makine-okunur özeti (yol haritası + özet rakamlar)
+- `/llms-full.txt` — tüm paket/tarife fiyatlarının tam listesi + SSS
+- `/robots.txt` — GPTBot, OAI-SearchBot, ClaudeBot, PerplexityBot,
+  Google-Extended, Applebot-Extended **isimle karşılanır**. Bu botları
+  engellemek AI görünürlüğünü sıfırlar.
+- `/sitemap.xml` — canlı veriden üretilir, blog yazılarını da içerir.
+
+Dördü de `server/routes/seo.ts` içinde, DB'den **canlı** üretilir; statik
+kopya tutulmaz (veri bayatlamasın).
+
+### Yeni rota eklerken
+
+1. `client/src/App.tsx` — rota tanımı
+2. `shared/routes.ts` — başlık/açıklama (sitemap ve SSR otomatik kapsar)
+3. `server/seo/content.ts` — taranabilir içerik (gerekiyorsa)
+4. `server/seo/faq.ts` — sayfaya ait SSS (varsa)
+
 ## Klasör Yapısı
 
 ```
 tarifesec/
+├── shared/routes.ts     # TEK DOĞRU KAYNAK — rota meta (sunucu + istemci)
 ├── client/
-│   ├── public/          # robots.txt, sitemap.xml, favicon, OG görseli
+│   ├── public/          # favicon, OG görseli
 │   └── src/
 │       ├── pages/       # Home, PaketKarsilastirma, MobilTarifeler, HizTesti, Blog, NotFound
 │       ├── components/  # Layout, VisitCounter, TeklifFormu
 │       └── lib/         # api.ts (fetch), hooks.ts (useSeo, useCountUp, parseFeatures)
 ├── server/
-│   ├── index.ts         # Express entry + güvenlik başlıkları + SPA servis
+│   ├── index.ts         # Express entry + güvenlik başlıkları + SSR servis
 │   ├── config.ts        # TEK DOĞRU KAYNAK — sayılar/katsayılar
 │   ├── middleware/      # auth.ts (fail-closed), rateLimit.ts
-│   └── routes/          # packages, mobile, leads, blog, admin, visitors, speedtest
-├── drizzle/             # schema.ts, db.ts, seed.ts
-├── scraper/index.ts     # Günlük fiyat tarayıcı (Railway Cron)
-└── build-sitemap.js     # sitemap.xml üretici (build'de çalışır)
+│   ├── seo/             # render, meta, jsonld, content, faq, llms, data
+│   └── routes/          # packages, mobile, leads, blog, admin, visitors,
+│                        # speedtest, seo (robots/sitemap/llms)
+├── drizzle/             # schema.ts, db.ts, seed.ts, seed-blog.ts
+└── scraper/index.ts     # Günlük fiyat tarayıcı (Railway Cron)
 ```
 
 ## Konvansiyonlar
 
 - **Sayı gömme**: katsayı/limit/taban değerleri `server/config.ts`'te tutulur.
-- **SEO**: SPA olduğu için sayfa başına `title`/`description`/`canonical`
-  `useSeo()` ile yazılır. Yeni rota eklerken hem `App.tsx`'e hem
-  `build-sitemap.js` içindeki `ROUTES` listesine satır ekleyin.
+- **SEO**: Yukarıdaki "SEO / AEO" bölümüne bakın. Başlık/açıklama tek kaynakta
+  (`shared/routes.ts`); istemciye sayı veya metin gömmeyin.
 - **Fiyat güvenliği**: scraper HTML'den sırayla eşleştirme yaptığı için
   %40'tan büyük fiyat sapmalarını **yayınlamaz**, elle onaya bırakır
   (`scraper/index.ts` → `MAX_DRIFT`).
