@@ -99,7 +99,9 @@ router.get("/", async (req, res) => {
       maxAge: secondsUntilMidnight() * 1000,
       httpOnly: true,
       sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
+      // NODE_ENV yerine gerçek bağlantı: Railway HTTPS sonlandırıp
+      // x-forwarded-proto ile iletir.
+      secure: req.secure || req.headers["x-forwarded-proto"] === "https",
       path: "/",
     });
   }
