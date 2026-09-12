@@ -12,9 +12,11 @@ import adminRouter from "./routes/admin";
 import visitorsRouter from "./routes/visitors";
 import speedTestRouter from "./routes/speedtest";
 import seoRouter from "./routes/seo";
+import setupRouter from "./routes/setup";
 import { renderRoute } from "./seo/render";
 import { config } from "./config";
 import { startScheduler } from "./scheduler";
+import { bootstrap } from "./bootstrap";
 
 dotenv.config();
 
@@ -64,6 +66,7 @@ app.use("/api/packages", packagesRouter);
 app.use("/api/mobile", mobileRouter);
 app.use("/api/leads", leadsRouter);
 app.use("/api/blog", blogRouter);
+app.use("/api/setup", setupRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/visitors", visitorsRouter);
 app.use("/api/speedtest", speedTestRouter);
@@ -125,13 +128,25 @@ if (isProd) {
   });
 }
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`🚀 ${config.site.name} ${PORT} portunda çalışıyor`);
-  if (!process.env.ADMIN_SECRET) {
-    console.warn("⚠️  ADMIN_SECRET tanımlı değil — /api/admin uçları kapalı (503).");
-  }
+
   if (!process.env.DATABASE_URL) {
     console.warn("⚠️  DATABASE_URL tanımlı değil — veritabanı çağrıları başarısız olacak.");
   }
+
+  // Şema güncellemesi + ilk veri yüklemesi (elle komut gerektirmez)
+  await bootstrap();
+
+  if (!process.env.ADMIN_SECRET) {
+    const { needsSetup } = await import("./adminAuth");
+    if (await needsSetup()) {
+      console.warn(
+        "⚠️  Yönetim şifresi henüz belirlenmedi. /admin adresini açıp HEMEN " +
+          "bir şifre belirleyin — o ana kadar adresi bulan herkes belirleyebilir."
+      );
+    }
+  }
+
   startScheduler();
 });

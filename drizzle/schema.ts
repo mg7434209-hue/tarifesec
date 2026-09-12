@@ -95,6 +95,12 @@ export const leads = pgTable("leads", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const settings = pgTable("settings", {
+  key: varchar("key", { length: 60 }).primaryKey(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const siteCounters = pgTable("site_counters", {
   key: varchar("key", { length: 50 }).primaryKey(),
   value: integer("value").default(0).notNull(),

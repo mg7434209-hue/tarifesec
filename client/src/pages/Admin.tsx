@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   ShieldCheck, RefreshCw, AlertTriangle, Check, Clock,
-  TrendingUp, TrendingDown, Loader2, LogOut,
+  TrendingUp, TrendingDown, Loader2, LogOut, KeyRound,
 } from "lucide-react";
 
 /**
@@ -45,11 +45,82 @@ function useAdminApi(secret: string) {
         },
       });
       if (res.status === 401) throw new Error("Şifre hatalı");
-      if (res.status === 503) throw new Error("ADMIN_SECRET sunucuda tanımlı değil");
+      if (res.status === 503) throw new Error("Yönetim şifresi belirlenmemiş — sayfayı yenileyin");
       if (!res.ok) throw new Error("İstek başarısız");
       return res.json();
     },
     [secret]
+  );
+}
+
+/** İlk kurulum — sunucuda hiç şifre yokken gösterilir */
+function Kurulum({ onOk }: { onOk: (s: string) => void }) {
+  const [pw, setPw] = useState("");
+  const [pw2, setPw2] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  return (
+    <form
+      onSubmit={async (e) => {
+        e.preventDefault();
+        setError(null);
+        if (pw !== pw2) return setError("Şifreler eşleşmiyor.");
+        if (pw.length < 8) return setError("Şifre en az 8 karakter olmalı.");
+        setBusy(true);
+        try {
+          const res = await fetch("/api/setup/password", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ password: pw }),
+          });
+          const body = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(body?.error ?? "Kurulum başarısız");
+          sessionStorage.setItem(KEY, pw);
+          onOk(pw);
+        } catch (err) {
+          setError((err as Error).message);
+        } finally {
+          setBusy(false);
+        }
+      }}
+      noValidate
+      className="max-w-sm mx-auto mt-24 bg-white border border-gray-200 rounded-2xl p-8"
+    >
+      <ShieldCheck className="w-8 h-8 text-[#0097a7] mb-3" />
+      <h1 className="text-lg font-bold text-gray-900 mb-1">İlk Kurulum</h1>
+      <p className="text-sm text-gray-500 mb-5">
+        Yönetim paneli için bir şifre belirleyin. Bu şifreyi kaydedin — yalnızca
+        siz bileceksiniz.
+      </p>
+
+      <label className="text-xs text-gray-500 font-medium block mb-1">Şifre (en az 8 karakter)</label>
+      <input
+        type="password" value={pw} onChange={(e) => setPw(e.target.value)} autoFocus
+        autoComplete="new-password"
+        className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2.5 mb-3 focus:outline-none focus:ring-2 focus:ring-[#0097a7]/30"
+      />
+      <label className="text-xs text-gray-500 font-medium block mb-1">Şifre (tekrar)</label>
+      <input
+        type="password" value={pw2} onChange={(e) => setPw2(e.target.value)}
+        autoComplete="new-password"
+        className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2.5 mb-3 focus:outline-none focus:ring-2 focus:ring-[#0097a7]/30"
+      />
+
+      {error && <p className="text-sm text-red-600 mb-3" role="alert">{error}</p>}
+
+      <button
+        disabled={busy || !pw || !pw2}
+        className="w-full bg-[#0097a7] hover:bg-[#00838f] disabled:opacity-60 text-white font-semibold py-2.5 rounded-lg"
+      >
+        {busy ? "Kaydediliyor…" : "Şifreyi belirle ve gir"}
+      </button>
+
+      <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2.5 mt-4">
+        Bu ekran yalnızca bir kez gösterilir. Şifre belirlendikten sonra panele
+        yalnızca bu şifreyle girilebilir.
+      </p>
+    </form>
   );
 }
 
@@ -67,7 +138,7 @@ function Giris({ onOk }: { onOk: (s: string) => void }) {
         try {
           const res = await fetch("/api/admin/status", { headers: { "x-admin-secret": value } });
           if (res.status === 401) throw new Error("Şifre hatalı");
-          if (res.status === 503) throw new Error("Sunucuda ADMIN_SECRET tanımlı değil");
+          if (res.status === 503) throw new Error("Yönetim şifresi belirlenmemiş — sayfayı yenileyin");
           if (!res.ok) throw new Error("Bağlanılamadı");
           sessionStorage.setItem(KEY, value);
           onOk(value);
@@ -108,8 +179,89 @@ function Rozet({ tone, children }: { tone: "ok" | "warn" | "bad"; children: Reac
   return <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${cls}`}>{children}</span>;
 }
 
+function SifreDegistir({
+  onMsg, onChanged,
+}: {
+  onMsg: (m: string) => void;
+  /** Yeni şifreyi üst bileşene bildirir — aksi hâlde sonraki istekler
+      eski şifreyle gider ve 401 alır. */
+  onChanged: (next: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [cur, setCur] = useState("");
+  const [nxt, setNxt] = useState("");
+  const [err, setErr] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  if (!open) {
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        className="mt-6 text-sm text-gray-500 hover:text-gray-900 inline-flex items-center gap-1.5"
+      >
+        <KeyRound className="w-4 h-4" /> Şifreyi değiştir
+      </button>
+    );
+  }
+
+  return (
+    <form
+      noValidate
+      onSubmit={async (e) => {
+        e.preventDefault();
+        setErr(null);
+        if (nxt.length < 8) return setErr("Yeni şifre en az 8 karakter olmalı.");
+        setBusy(true);
+        try {
+          const res = await fetch("/api/setup/change-password", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "x-admin-secret": cur },
+            body: JSON.stringify({ current: cur, next: nxt }),
+          });
+          const body = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(body?.error ?? "Değiştirilemedi");
+          sessionStorage.setItem(KEY, nxt);
+          onChanged(nxt);
+          onMsg("Şifre değiştirildi. Yeni şifrenizi kaydedin.");
+          setOpen(false);
+          setCur(""); setNxt("");
+        } catch (e2) {
+          setErr((e2 as Error).message);
+        } finally {
+          setBusy(false);
+        }
+      }}
+      className="mt-6 bg-white border border-gray-200 rounded-xl p-5 max-w-sm"
+    >
+      <h2 className="font-semibold text-gray-900 mb-3 text-sm flex items-center gap-1.5">
+        <KeyRound className="w-4 h-4 text-[#0097a7]" /> Şifre değiştir
+      </h2>
+      <input
+        type="password" placeholder="Mevcut şifre" value={cur}
+        onChange={(e) => setCur(e.target.value)} autoComplete="current-password"
+        className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 mb-2 focus:outline-none focus:ring-2 focus:ring-[#0097a7]/30"
+      />
+      <input
+        type="password" placeholder="Yeni şifre (en az 8 karakter)" value={nxt}
+        onChange={(e) => setNxt(e.target.value)} autoComplete="new-password"
+        className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 mb-2 focus:outline-none focus:ring-2 focus:ring-[#0097a7]/30"
+      />
+      {err && <p className="text-sm text-red-600 mb-2" role="alert">{err}</p>}
+      <div className="flex gap-2">
+        <button disabled={busy} className="bg-[#0097a7] hover:bg-[#00838f] disabled:opacity-60 text-white text-sm font-semibold px-4 py-2 rounded-lg">
+          {busy ? "Kaydediliyor…" : "Kaydet"}
+        </button>
+        <button type="button" onClick={() => { setOpen(false); setErr(null); }} className="text-sm text-gray-500 px-3">
+          Vazgeç
+        </button>
+      </div>
+    </form>
+  );
+}
+
 export default function Admin() {
   const [secret, setSecret] = useState<string | null>(() => sessionStorage.getItem(KEY));
+  const [setupNeeded, setSetupNeeded] = useState<boolean | null>(null);
   const [status, setStatus] = useState<Status | null>(null);
   const [pkgs, setPkgs] = useState<Pkg[]>([]);
   const [busy, setBusy] = useState(false);
@@ -117,6 +269,13 @@ export default function Admin() {
   const [edits, setEdits] = useState<Record<number, string>>({});
 
   const api = useAdminApi(secret ?? "");
+
+  useEffect(() => {
+    fetch("/api/setup/state")
+      .then((r) => r.json())
+      .then((d) => setSetupNeeded(Boolean(d.needsSetup)))
+      .catch(() => setSetupNeeded(false));
+  }, []);
 
   useEffect(() => {
     document.title = "Yönetim Paneli — tarifesec.net.tr";
@@ -139,6 +298,10 @@ export default function Admin() {
 
   useEffect(() => { void load(); }, [load]);
 
+  if (setupNeeded === null) {
+    return <p className="max-w-sm mx-auto mt-24 text-sm text-gray-400 text-center">Yükleniyor…</p>;
+  }
+  if (setupNeeded) return <Kurulum onOk={(s) => { setSetupNeeded(false); setSecret(s); }} />;
   if (!secret) return <Giris onOk={setSecret} />;
 
   const kaydet = async (id: number) => {
@@ -324,6 +487,8 @@ export default function Admin() {
           </table>
         </div>
       </div>
+
+      <SifreDegistir onMsg={setMsg} onChanged={setSecret} />
 
       <p className="text-xs text-gray-400 mt-4">
         Onayla, "fiyat değişti" rozetini karttan kaldırır. Fiyatı elle

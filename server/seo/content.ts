@@ -37,6 +37,16 @@ const partnerBlock = (ctx: PartnerContext) => {
     .join("")}</ul></section>`;
 };
 
+/** Verinin ne kadar taze olduğunu herkese göster — güven ve şeffaflık. */
+export const freshnessLine = (rows: { lastScrapedAt: Date | null }[]) => {
+  const stamps = rows.map((r) => r.lastScrapedAt).filter(Boolean) as Date[];
+  if (!stamps.length) return "";
+  const newest = new Date(Math.max(...stamps.map((d) => new Date(d).getTime())));
+  return `<p><small>Fiyatlar son olarak ${newest.toLocaleDateString("tr-TR", {
+    day: "numeric", month: "long", year: "numeric",
+  })} tarihinde kontrol edildi. Kesin fiyat için operatörün resmi sayfasını ziyaret edin.</small></p>`;
+};
+
 const pkgRow = (p: Pkg) => {
   const feats = (() => {
     try {
@@ -128,6 +138,8 @@ bulunuyor: ${s.operators.map((o) => esc(o)).join(", ")}. Fiyat aralığı
 ${tl(s.minPrice)} – ${tl(s.maxPrice)}, en yüksek hız ${s.maxSpeed} Mbps.</p>`
     : "<p>Paket listesi yükleniyor.</p>"
 }
+
+${freshnessLine(pkgs)}
 
 ${[...byOperator.entries()]
   .map(

@@ -11,6 +11,27 @@ Türkiye'nin internet ve mobil tarife karşılaştırma platformu.
 - **ORM**: Drizzle
 - **Hosting**: Railway (GitHub auto-deploy)
 
+> **Siteyi yayına alıyorsanız** teknik olmayan, adım adım rehber:
+> **[KURULUM.md](KURULUM.md)**
+
+## Kurulum otomasyonu
+
+Dağıtımda elle komut çalıştırmak **gerekmez**:
+
+- **Şema**: `server/bootstrap.ts` açılışta `drizzle/migrations` altındaki
+  migration'ları uygular (idempotent).
+- **Başlangıç verisi**: tablolar **boşsa** paketler, tarifeler ve rehber
+  yazıları yüklenir. Dolu tabloya dokunulmaz — elle düzenlenen fiyatlar her
+  dağıtımda geri alınmaz.
+- **Yönetim şifresi**: `ADMIN_SECRET` tanımlı değilse `/admin` ilk açılışta
+  kurulum ekranı gösterir ve şifre tarayıcıdan belirlenir (scrypt ile
+  karmalanıp `settings` tablosunda saklanır). Ortam değişkeni her zaman
+  önceliklidir — kurtarma yolu budur.
+- **Fiyat taraması**: açılıştan 5 dk sonra, sonra 12 saatte bir.
+
+Hata durumunda süreç çökmez; site veritabanısız da ayakta kalır ve sorun
+günlüğe yazılır.
+
 ## Geliştirme
 
 ```bash

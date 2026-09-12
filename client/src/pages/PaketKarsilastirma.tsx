@@ -72,6 +72,18 @@ export default function PaketKarsilastirma() {
 
   const pkgs = data?.data ?? [];
 
+  // Verinin tazeliği kullanıcıya da gösterilir (yalnız admin panelinde değil)
+  const sonKontrol = (() => {
+    const stamps = pkgs
+      .map((p: any) => p.lastScrapedAt)
+      .filter(Boolean)
+      .map((d: string) => new Date(d).getTime());
+    if (!stamps.length) return null;
+    return new Date(Math.max(...stamps)).toLocaleDateString("tr-TR", {
+      day: "numeric", month: "long", year: "numeric",
+    });
+  })();
+
   useRouteSeo("/paket-karsilastir");
 
   return (
@@ -99,9 +111,16 @@ export default function PaketKarsilastirma() {
         ))}
       </div>
 
-      <p className="text-sm text-gray-500 mb-4">
-        {isLoading ? "Yükleniyor..." : `${pkgs.length} paket bulundu`}
-      </p>
+      <div className="flex flex-wrap items-baseline justify-between gap-2 mb-4">
+        <p className="text-sm text-gray-500">
+          {isLoading ? "Yükleniyor..." : `${pkgs.length} paket bulundu`}
+        </p>
+        {sonKontrol && (
+          <p className="text-xs text-gray-400">
+            Fiyatlar son kontrol: {sonKontrol}
+          </p>
+        )}
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {pkgs.map((pkg: any) => {
