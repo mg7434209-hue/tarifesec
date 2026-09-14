@@ -122,6 +122,25 @@ Site zaten arama motorları ve yapay zekâ botları için hazırdır
 
 ## Sorun giderme
 
+**Site çalışıyor ama YAPTIĞIMIZ DEĞİŞİKLİKLER GÖRÜNMÜYOR**
+
+En sık sebep: Railway'de derleme başarısız oluyor ve Railway **son çalışan
+sürümü sunmaya devam ediyor**. Site açılır, hata vermez, ama kod eskidir.
+
+Railway → servis → **Deployments** sekmesine bakın. Son dağıtım kırmızı
+(Failed) ise üstüne tıklayıp günlüğe bakın. Şu satırı görüyorsanız:
+
+    sh: 1: vite: not found
+
+Sebep `NODE_ENV=production` değişkeninin derleme sırasında npm'in
+devDependencies'i atlamasına yol açmasıdır. Bu sorun `nixpacks.toml` içinde
+düzeltildi; yeni bir dağıtım tetiklemeniz yeterlidir (**Deployments** →
+üç nokta → **Redeploy**).
+
+Artık her commit'te GitHub'da otomatik derleme kontrolü çalışıyor: commit'in
+yanında yeşil tik varsa derleme sağlamdır, kırmızı çarpı varsa sorun
+GitHub'da görünür.
+
 **Sayfalar "Cannot GET /" diyor veya 404 dönüyor**
 Bu, sunucunun derlenmiş siteyi bulamadığı anlamına gelirdi. Artık site,
 derleme çıktısı varsa kendiliğinden sunuluyor — `NODE_ENV` ayarlamanıza gerek

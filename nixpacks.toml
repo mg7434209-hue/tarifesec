@@ -1,8 +1,25 @@
+# Railway derleme yapılandırması
+#
+# NPM_CONFIG_PRODUCTION=false ve --include=dev ZORUNLUDUR:
+# Railway'de NODE_ENV=production tanımlıysa (eski README bunu söylüyordu ve
+# çoğu kurulumda tanımlıdır) npm devDependencies'i ATLAR. vite, esbuild ve
+# typescript devDependency olduğu için "npm run build" şu hatayla düşer:
+#
+#     sh: 1: vite: not found
+#
+# Bu durumda Railway derlemeyi başarısız sayar ve SON BAŞARILI dağıtımı
+# sunmaya devam eder — site çalışır ama kod aylarca eski kalır. Sessiz ve
+# fark edilmesi zor bir hatadır.
+
+[variables]
+NPM_CONFIG_PRODUCTION = "false"
+NODE_ENV = "production"
+
 [phases.setup]
 nixPkgs = ["nodejs_20"]
 
 [phases.install]
-cmds = ["npm ci"]
+cmds = ["npm ci --include=dev"]
 
 [phases.build]
 cmds = ["npm run build"]
