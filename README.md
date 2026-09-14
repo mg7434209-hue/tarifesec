@@ -112,7 +112,21 @@ bağlı alternatiftir; ikisini birlikte kullanmayın).
 | `AUTO_SCRAPE` | `true` | `false` ile kapatılır |
 | `SCRAPE_INTERVAL_HOURS` | `12` | Tarama sıklığı |
 | `SCRAPE_STARTUP_DELAY_MIN` | `5` | Açılıştan sonraki ilk tur gecikmesi |
-| `STALE_AFTER_HOURS` | `72` | Bu süreden eski veri "bayat" sayılır |
+| `STALE_AFTER_HOURS` | `48` | Bu süreden eski veri "bayat" sayılır |
+
+### Tarama sağlığı — sessiz bozulmayı görünür kılmak
+
+Tarama sessizce bozulabilir: operatör sayfasını değiştirir, bot koruması
+devreye girer. `scrape_log` tutuluyordu ama **kimse bakmıyordu**. Artık:
+
+- `server/health.ts` — operatör bazlı sağlık raporu (son başarılı tarama, son
+  hata, paketlerin en yeni kontrol zamanı). Elle yönetilen operatörler
+  (Turkcell, Vodafone) bayatlık hesabından hariç tutulur.
+- `GET /api/health/data` — veri güncelse **200**, bayatsa **503**. Dışarıdan
+  ücretsiz bir uptime servisiyle izlenip e-posta uyarısı alınabilir.
+- Admin panelinde operatör tablosu ve kırmızı uyarı bandı.
+- Karşılaştırma sayfasında 2 günden eski veri için görünür uyarı — hem
+  istemcide hem SSR çıktısında.
 
 ### Güvenlik ilkesi — emin değilsen dokunma
 

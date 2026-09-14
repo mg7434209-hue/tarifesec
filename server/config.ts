@@ -32,8 +32,13 @@ export const config = {
     intervalHours: Number(process.env.SCRAPE_INTERVAL_HOURS ?? 12),
     /** Dağıtım sonrası ilk turu geciktir (yeniden başlatma fırtınasını önler) */
     startupDelayMinutes: Number(process.env.SCRAPE_STARTUP_DELAY_MIN ?? 5),
-    /** Bu süreden eski veri "bayat" sayılır ve admin panelinde işaretlenir */
-    staleAfterHours: Number(process.env.STALE_AFTER_HOURS ?? 72),
+    /**
+     * Bu süreden eski veri "bayat" sayılır; admin panelinde uyarı çıkar ve
+     * karşılaştırma sayfasındaki tazelik satırı uyarı tonuna geçer.
+     * Tarama 12 saatte bir çalıştığı için 48 saat, üst üste birkaç turun
+     * sessizce başarısız olduğu anlamına gelir.
+     */
+    staleAfterHours: Number(process.env.STALE_AFTER_HOURS ?? 48),
   },
 
   /** Hız testi parametreleri */

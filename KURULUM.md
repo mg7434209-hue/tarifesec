@@ -97,6 +97,44 @@ güncellenmesi gerekir (bu bir geliştirici işidir — bana söylemeniz yeterli
 > değer yayınlanmaz, eski fiyat olduğu gibi kalır ve panelde "bayat" olarak
 > işaretlenir. Bu durumda fiyatları panelden elle de güncelleyebilirsiniz.
 
+## 3.1 Tarifelerin güncel kaldığından emin olun
+
+Site fiyatları **12 saatte bir** kendiliğinden tarar. Sizin bir şey yapmanız
+gerekmez; ama taramanın sessizce bozulmadığını bilmek istersiniz.
+
+### Panelden bakmak (en kolay)
+
+`/admin` → üstte **"Operatör tarama durumu"** tablosu. Her operatör için:
+
+- ✅ **çalışıyor** — son 48 saat içinde güncellenmiş
+- ❌ **güncellenmiyor** — yanında hata sebebi yazar (ör. "sayfa yapısı değişmiş
+  olabilir"). Bu operatörün fiyatlarını tablodan elle düzeltebilirsiniz.
+- **elle güncellenir** — Turkcell ve Vodafone bot koruması nedeniyle otomatik
+  taranamaz, normaldir.
+
+Sorun varsa sayfanın üstünde kırmızı bir uyarı bandı çıkar.
+
+### Otomatik uyarı almak (önerilir — ücretsiz)
+
+Panele bakmayı unutursanız da haberiniz olsun diye bir sağlık adresi var:
+
+```
+https://www.tarifesec.net.tr/api/health/data
+```
+
+Veri güncelse **200**, 48 saattir güncellenmemişse **503** döner.
+
+[UptimeRobot](https://uptimerobot.com) gibi ücretsiz bir izleme servisine
+kaydolup bu adresi ekleyin (HTTP monitör, 1 saatte bir kontrol yeterli).
+Tarama bozulduğunda size **e-posta gelir**. Kurulumu 5 dakika sürer.
+
+### Ziyaretçi ne görür?
+
+Veri 2 günden eskiyse karşılaştırma sayfasında turuncu bir uyarı çıkar:
+"Fiyatlar son kontrol: 11 Eylül 2026 (3 gün önce) — başvuru öncesi operatör
+sitesinden doğrulayın". Eski fiyatı gizlemek yerine açıkça söylüyoruz;
+yanlış fiyatla operatöre başvuran kullanıcı siteye bir daha güvenmez.
+
 ## 4. Google'a siteyi tanıtın (isteğe bağlı ama önerilir)
 
 1. [Google Search Console](https://search.google.com/search-console) → siteyi ekleyin

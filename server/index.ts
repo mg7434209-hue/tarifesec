@@ -85,8 +85,26 @@ app.use("/api/admin", adminRouter);
 app.use("/api/visitors", visitorsRouter);
 app.use("/api/speedtest", speedTestRouter);
 
+// Sunucu ayakta mı (uptime izleme)
 app.get("/api/health", (_req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
+});
+
+/**
+ * Veri tazeliği — DIŞARIDAN izlenmek için tasarlandı.
+ *
+ * Veri bayatsa 503 döner. UptimeRobot gibi ücretsiz bir izleme servisine bu
+ * adresi verirseniz, tarama sessizce bozulduğunda size e-posta gelir; aksi
+ * hâlde sorun yalnızca admin paneline bakıldığında fark edilir.
+ */
+app.get("/api/health/data", async (_req, res) => {
+  try {
+    const { healthReport } = await import("./health");
+    const report = await healthReport();
+    res.status(report.ok ? 200 : 503).json(report);
+  } catch (err) {
+    res.status(503).json({ ok: false, error: (err as Error).message });
+  }
 });
 
 // Bilinmeyen API yolu HTML değil JSON 404 döndürsün

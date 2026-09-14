@@ -43,10 +43,19 @@ const partnerBlock = (ctx: PartnerContext) => {
 export const freshnessLine = (rows: { lastScrapedAt: Date | null }[]) => {
   const stamps = rows.map((r) => r.lastScrapedAt).filter(Boolean) as Date[];
   if (!stamps.length) return "";
+
   const newest = new Date(Math.max(...stamps.map((d) => new Date(d).getTime())));
-  return `<p><small>Fiyatlar son olarak ${newest.toLocaleDateString("tr-TR", {
+  const gun = Math.floor((Date.now() - newest.getTime()) / 864e5);
+  const tarih = newest.toLocaleDateString("tr-TR", {
     day: "numeric", month: "long", year: "numeric",
-  })} tarihinde kontrol edildi. Kesin fiyat için operatörün resmi sayfasını ziyaret edin.</small></p>`;
+  });
+
+  // Veri eskiyse bunu gizlemiyoruz — kullanıcı yanlış fiyatla başvurmasın
+  return gun >= 2
+    ? `<p><small>Fiyatlar son olarak ${tarih} tarihinde (${gun} gün önce) kontrol edildi. ` +
+      `Başvuru öncesi güncel fiyatı operatörün resmi sayfasından doğrulayın.</small></p>`
+    : `<p><small>Fiyatlar son olarak ${tarih} tarihinde kontrol edildi. ` +
+      `Kesin fiyat için operatörün resmi sayfasını ziyaret edin.</small></p>`;
 };
 
 const pkgRow = (p: Pkg) => {
