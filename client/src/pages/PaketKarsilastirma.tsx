@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchPackages } from "@/lib/api";
-import { Wifi, Star, ExternalLink, SlidersHorizontal, TrendingUp, TrendingDown } from "lucide-react";
+import { Wifi, Star, ExternalLink, SlidersHorizontal, TrendingUp, TrendingDown, AlertTriangle } from "lucide-react";
 import TeklifFormu from "@/components/TeklifFormu";
 import PartnerCard from "@/components/PartnerCard";
 import { useRouteSeo, parseFeatures } from "@/lib/hooks";
@@ -72,16 +72,25 @@ export default function PaketKarsilastirma() {
 
   const pkgs = data?.data ?? [];
 
-  // Verinin tazeliği kullanıcıya da gösterilir (yalnız admin panelinde değil)
-  const sonKontrol = (() => {
+  /**
+   * Verinin tazeliği kullanıcıya da gösterilir.
+   * Veri eskiyse bunu saklamak yerine açıkça söylüyoruz — yanlış fiyatla
+   * operatöre başvuran kullanıcı, sitenin güvenini bir daha kazanmaz.
+   */
+  const tazelik = (() => {
     const stamps = pkgs
       .map((p: any) => p.lastScrapedAt)
       .filter(Boolean)
       .map((d: string) => new Date(d).getTime());
     if (!stamps.length) return null;
-    return new Date(Math.max(...stamps)).toLocaleDateString("tr-TR", {
-      day: "numeric", month: "long", year: "numeric",
-    });
+
+    const son = new Date(Math.max(...stamps));
+    const gun = Math.floor((Date.now() - son.getTime()) / 864e5);
+    return {
+      metin: son.toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" }),
+      gun,
+      eski: gun >= 2,
+    };
   })();
 
   useRouteSeo("/paket-karsilastir");
@@ -115,9 +124,13 @@ export default function PaketKarsilastirma() {
         <p className="text-sm text-gray-500">
           {isLoading ? "Yükleniyor..." : `${pkgs.length} paket bulundu`}
         </p>
-        {sonKontrol && (
-          <p className="text-xs text-gray-400">
-            Fiyatlar son kontrol: {sonKontrol}
+        {tazelik && (
+          <p className={`text-xs ${tazelik.eski ? "text-amber-700" : "text-gray-400"}`}>
+            {tazelik.eski && <AlertTriangle className="w-3 h-3 inline mr-1 -mt-0.5" />}
+            Fiyatlar son kontrol: {tazelik.metin}
+            {tazelik.eski && (
+              <> ({tazelik.gun} gün önce) — başvuru öncesi operatör sitesinden doğrulayın</>
+            )}
           </p>
         )}
       </div>

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   ShieldCheck, RefreshCw, AlertTriangle, Check, Clock,
-  TrendingUp, TrendingDown, Loader2, LogOut, KeyRound,
+  TrendingUp, TrendingDown, Loader2, LogOut, KeyRound, Activity, CheckCircle2, XCircle,
 } from "lucide-react";
 
 /**
@@ -24,10 +24,17 @@ type Pkg = {
   lastScrapedAt: string | null; isActive: boolean;
 };
 
+type OperatorHealth = {
+  operatorSlug: string; label: string; mode: string;
+  lastSuccessAt: string | null; lastStatus: string | null; lastError: string | null;
+  packageCount: number; lastCheckedAt: string | null; stale: boolean;
+};
+
 type Status = {
   scheduler: { enabled: boolean; intervalHours: number; running: boolean;
     lastRun: { at: string; changed: number; error?: string } | null };
   staleAfterHours: number;
+  health?: { ok: boolean; summary: string; operators: OperatorHealth[] };
   counts: { total: number; stale: number; pendingApproval: number };
   sources: { operatorSlug: string; label: string; mode: string }[];
   staleItems: { id: number; operator: string; name: string; lastScrapedAt: string | null }[];
@@ -407,6 +414,81 @@ export default function Admin() {
           Kaynaklar:{" "}
           {status.sources.map((s) => `${s.label} (${s.mode})`).join(" · ")}
         </p>
+      )}
+
+      {/* Tarama sağlığı — hangi operatör çalışıyor, hangisi bozuk */}
+      {status?.health && (
+        <div className="mb-6">
+          {!status.health.ok && (
+            <div className="mb-3 bg-red-50 border border-red-200 rounded-xl p-4 flex gap-3">
+              <XCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <div className="font-semibold text-red-900 text-sm mb-0.5">
+                  Fiyat taraması sorunlu
+                </div>
+                <p className="text-sm text-red-700">{status.health.summary}</p>
+                <p className="text-xs text-red-600 mt-1">
+                  Aşağıdaki tablodan hangi operatörün güncellenmediğini görebilir,
+                  fiyatları elle düzeltebilirsiniz.
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+            <div className="px-4 py-2.5 bg-gray-50 border-b border-gray-200 flex items-center gap-2">
+              <Activity className="w-4 h-4 text-[#0097a7]" />
+              <h2 className="text-sm font-semibold text-gray-900">Operatör tarama durumu</h2>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="text-gray-500 text-xs">
+                  <tr>
+                    <th className="text-left px-4 py-2 font-medium">Operatör</th>
+                    <th className="text-left px-4 py-2 font-medium">Yöntem</th>
+                    <th className="text-left px-4 py-2 font-medium">Paket</th>
+                    <th className="text-left px-4 py-2 font-medium">Son kontrol</th>
+                    <th className="text-left px-4 py-2 font-medium">Durum</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {status.health.operators.map((o) => (
+                    <tr key={o.operatorSlug} className={o.stale ? "bg-red-50/40" : ""}>
+                      <td className="px-4 py-2.5 font-medium text-gray-900">{o.label}</td>
+                      <td className="px-4 py-2.5 text-gray-500">{o.mode}</td>
+                      <td className="px-4 py-2.5 text-gray-600">{o.packageCount}</td>
+                      <td className="px-4 py-2.5 text-gray-600">
+                        {o.lastCheckedAt
+                          ? new Date(o.lastCheckedAt).toLocaleString("tr-TR")
+                          : "hiç"}
+                      </td>
+                      <td className="px-4 py-2.5">
+                        {o.mode === "manuel" ? (
+                          <Rozet tone="warn">elle güncellenir</Rozet>
+                        ) : o.stale ? (
+                          <div className="flex flex-col gap-1 items-start">
+                            <Rozet tone="bad">
+                              <XCircle className="w-3 h-3 inline" /> güncellenmiyor
+                            </Rozet>
+                            {o.lastError && (
+                              <span className="text-[11px] text-red-600 max-w-xs block">
+                                {o.lastError}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <Rozet tone="ok">
+                            <CheckCircle2 className="w-3 h-3 inline" /> çalışıyor
+                          </Rozet>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Paket tablosu */}

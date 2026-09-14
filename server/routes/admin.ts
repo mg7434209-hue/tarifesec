@@ -10,6 +10,7 @@ import { requireAdmin } from "../middleware/auth";
 import { schedulerStatus, triggerScrape } from "../scheduler";
 import { config } from "../config";
 import { SOURCES } from "../../scraper/sources";
+import { healthReport } from "../health";
 
 const router = Router();
 
@@ -133,6 +134,7 @@ router.post("/run-scraper", (_req, res) => {
 // ─── Tarama durumu + veri tazeliği ────────────────────────────────────────────
 router.get("/status", async (_req, res) => {
   try {
+    const health = await healthReport();
     const all = await db.select().from(packages).where(eq(packages.isActive, true));
     const staleMs = config.scrape.staleAfterHours * 60 * 60 * 1000;
     const now = Date.now();
@@ -141,15 +143,14 @@ router.get("/status", async (_req, res) => {
       (p) => !p.lastScrapedAt || now - new Date(p.lastScrapedAt).getTime() > staleMs
     );
 
-    const pending = all.filter((p) => p.priceChanged);
-
     res.json({
       scheduler: schedulerStatus(),
       staleAfterHours: config.scrape.staleAfterHours,
+      health,
       counts: {
         total: all.length,
         stale: stale.length,
-        pendingApproval: pending.length,
+        pendingApproval: all.filter((p) => p.priceChanged).length,
       },
       sources: SOURCES.map((s) => ({
         operatorSlug: s.operatorSlug,
@@ -165,6 +166,7 @@ router.get("/status", async (_req, res) => {
       })),
     });
   } catch (err) {
+    console.error("[admin] durum hatası:", (err as Error).message);
     res.status(500).json({ error: "Durum okunamadı" });
   }
 });
