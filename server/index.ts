@@ -85,9 +85,40 @@ app.use("/api/admin", adminRouter);
 app.use("/api/visitors", visitorsRouter);
 app.use("/api/speedtest", speedTestRouter);
 
-// Sunucu ayakta mı (uptime izleme)
-app.get("/api/health", (_req, res) => {
-  res.json({ status: "ok", timestamp: new Date().toISOString() });
+/**
+ * Sunucu ve bağlantı durumu — tarayıcıdan açılıp okunabilecek teşhis.
+ *
+ * Veritabanı bağlı değilse site AÇILIR ama paketler görünmez, ziyaretçi
+ * sayacı her yeniden başlatmada sıfırlanır ve fiyat şeması (JSON-LD)
+ * üretilemez. Bu durum daha önce yalnızca sunucu günlüğünde görünüyordu;
+ * artık tek bir adresten anlaşılıyor.
+ */
+app.get("/api/health", async (_req, res) => {
+  const out: Record<string, unknown> = {
+    status: "ok",
+    timestamp: new Date().toISOString(),
+  };
+
+  if (!process.env.DATABASE_URL) {
+    out.database = "yapılandırılmamış";
+    out.sorun =
+      "DATABASE_URL tanımlı değil. Railway'de PostgreSQL servisi ekleyin — " +
+      "paketler görünmez, ziyaretçi sayacı sıfırlanır ve fiyat şeması üretilemez.";
+    return res.status(503).json(out);
+  }
+
+  try {
+    const { db } = await import("../drizzle/db");
+    const { sql } = await import("drizzle-orm");
+    await db.execute(sql`select 1`);
+    out.database = "bağlı";
+    res.json(out);
+  } catch (err) {
+    out.status = "degraded";
+    out.database = "bağlanamadı";
+    out.sorun = (err as Error).message;
+    res.status(503).json(out);
+  }
 });
 
 /**

@@ -45,6 +45,23 @@ ve Google iki ayrı site görür (SEO açısından da zararlıdır).
 
 ## 1. Railway'de PostgreSQL bağlı mı? (zorunlu)
 
+### Önce şunu açın — 5 saniyede anlarsınız
+
+Tarayıcınızdan:
+
+```
+https://www.tarifesec.net.tr/api/health
+```
+
+- `"database": "bağlı"` → her şey yolunda
+- `"database": "yapılandırılmamış"` → **PostgreSQL bağlı değil**, aşağıdaki
+  adımları uygulayın
+
+Veritabanı bağlı değilken site açılır ama şunlar olmaz:
+paketler görünmez (karşılaştırma sayfası boş kalır), ziyaretçi sayacı her
+dağıtımda 1.000'e döner, fiyat şeması (JSON-LD) üretilemez ve Google fiyatları
+göremez.
+
 Site verileri veritabanında tutar. Railway panelinde projenize bakın:
 
 1. [railway.app](https://railway.app) → projenizi açın
