@@ -1,0 +1,60 @@
+name: Derleme ve testler
+
+# Derleme hatası Railway'de SESSİZCE olur: Railway başarısız derlemede son
+# çalışan sürümü sunmaya devam eder, site açılır ama kod eski kalır. Bu iş
+# akışı aynı hatayı GitHub'da görünür kılar — commit'in yanında kırmızı çarpı
+# çıkar.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    # Railway'deki ortamla AYNI koşul: NODE_ENV=production iken npm
+    # devDependencies'i atlar ve "vite: not found" ile düşer. Hatanın burada
+    # da yakalanabilmesi için değişken bilerek tanımlanıyor.
+    env:
+      NODE_ENV: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Bağımlılıklar (devDependencies dahil)
+        run: npm ci --include=dev
+
+      - name: Derleme araçları kuruldu mu
+        run: |
+          test -x node_modules/.bin/vite || { echo "::error::vite kurulmadı — NODE_ENV=production devDependencies'i atlamış olabilir"; exit 1; }
+          test -x node_modules/.bin/esbuild || { echo "::error::esbuild kurulmadı"; exit 1; }
+
+      - name: Tip kontrolü ve testler
+        run: npm test
+
+      - name: Derleme
+        run: npm run build
+
+      - name: Derleme çıktısı doğru mu
+        run: |
+          test -f dist/index.js || { echo "::error::dist/index.js üretilmedi"; exit 1; }
+          test -f dist/client/index.html || { echo "::error::dist/client/index.html üretilmedi"; exit 1; }
+
+      - name: Sunucu ayağa kalkıyor ve sayfa sunuyor mu
+        run: |
+          node dist/index.js & SRV=$!
+          for i in $(seq 1 30); do
+            curl -sf -o /dev/null http://127.0.0.1:3000/api/health && break
+            sleep 1
+          done
+          code=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3000/)
+          kill $SRV 2>/dev/null || true
+          test "$code" = "200" || { echo "::error::Ana sayfa $code döndü (200 bekleniyordu)"; exit 1; }
+          echo "Ana sayfa 200 döndü."
