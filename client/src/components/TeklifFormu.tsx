@@ -3,6 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { Phone, CheckCircle2, Loader2 } from "lucide-react";
 import { submitLead } from "@/lib/api";
 import PartnerCard from "./PartnerCard";
+import { Link } from "wouter";
 
 const SEHIRLER = [
   "Adana", "Ankara", "Antalya", "Bursa", "Denizli", "Diyarbakır", "Eskişehir",
@@ -23,6 +24,7 @@ export default function TeklifFormu({
   compact?: boolean;
 }) {
   const [form, setForm] = useState({ name: "", phone: "", city: "", website: "" });
+  const [onay, setOnay] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const mutation = useMutation({
@@ -53,9 +55,19 @@ export default function TeklifFormu({
 
   return (
     <form
+      noValidate
       onSubmit={(e) => {
         e.preventDefault();
         setError(null);
+        // KVKK 5/1: açık rıza olmadan kişisel veri işlenemez.
+        if (!onay) {
+          setError("Devam etmek için aydınlatma metnini onaylamanız gerekiyor.");
+          return;
+        }
+        if (!form.phone.trim()) {
+          setError("Telefon numarası gerekli.");
+          return;
+        }
         mutation.mutate();
       }}
       className={`bg-white border border-gray-200 rounded-2xl ${compact ? "p-5" : "p-6 md:p-8"}`}
@@ -130,13 +142,30 @@ export default function TeklifFormu({
         className="absolute left-[-9999px] w-px h-px opacity-0"
       />
 
+      <label className="flex items-start gap-2.5 mt-4 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={onay}
+          onChange={(e) => { setOnay(e.target.checked); setError(null); }}
+          className="mt-0.5 w-4 h-4 accent-[#0097a7] flex-shrink-0"
+        />
+        <span className="text-xs text-gray-500 leading-relaxed">
+          Telefon numaramın, yalnızca bana uygun tarife seçeneklerini anlatmak
+          amacıyla işlenmesine ve tarafımla iletişime geçilmesine izin veriyorum.{" "}
+          <Link href="/kvkk" className="text-[#0097a7] underline">
+            Aydınlatma metnini
+          </Link>{" "}
+          okudum.
+        </span>
+      </label>
+
       {error && (
         <p className="text-sm text-red-600 mt-3" role="alert">{error}</p>
       )}
 
       <button
         type="submit"
-        disabled={mutation.isPending}
+        disabled={mutation.isPending || !onay}
         className="mt-4 w-full md:w-auto inline-flex items-center justify-center gap-2 bg-[#0097a7] hover:bg-[#00838f] disabled:opacity-60 text-white font-semibold px-6 py-3 rounded-xl transition-colors"
       >
         {mutation.isPending ? (
@@ -147,7 +176,8 @@ export default function TeklifFormu({
       </button>
 
       <p className="text-xs text-gray-400 mt-3">
-        Bilgileriniz yalnızca size dönüş yapmak için kullanılır, üçüncü kişilerle paylaşılmaz.
+        Bilgileriniz yalnızca size dönüş yapmak için kullanılır, üçüncü kişilerle
+        paylaşılmaz veya pazarlama listelerine eklenmez.
       </p>
     </form>
   );

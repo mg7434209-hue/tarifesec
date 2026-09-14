@@ -138,6 +138,28 @@ if (serveSite) {
   );
 }
 
+/**
+ * Son çare hata yakalayıcı.
+ *
+ * Express'te yakalanmayan hata varsayılan olarak yığın izini (stack trace)
+ * istemciye yazar — dosya yolları ve kod yapısı sızar. Bu katman hatayı
+ * günlüğe alır, dışarıya yalnızca genel bir mesaj verir.
+ */
+app.use((err: Error, req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  console.error(`[hata] ${req.method} ${req.path}:`, err.message);
+  if (res.headersSent) return;
+
+  if (req.path.startsWith("/api/")) {
+    res.status(500).json({ error: "Sunucu hatası" });
+  } else {
+    res.status(500).type("html").send(
+      "<!doctype html><meta charset=\"utf-8\"><title>Sunucu hatası</title>" +
+        "<p>Beklenmeyen bir hata oluştu. Lütfen birazdan tekrar deneyin.</p>" +
+        "<p><a href=\"/\">Ana sayfa</a></p>"
+    );
+  }
+});
+
 app.listen(PORT, async () => {
   console.log(`🚀 ${config.site.name} ${PORT} portunda çalışıyor`);
 

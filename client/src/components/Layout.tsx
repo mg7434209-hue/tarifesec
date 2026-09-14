@@ -3,6 +3,7 @@ import { Menu, X, Wifi } from "lucide-react";
 import { useEffect, useState } from "react";
 import VisitCounter from "./VisitCounter";
 import { PARTNERS, PARTNER_REL } from "@shared/partners";
+import { LEGAL_DOCS } from "@shared/legal";
 
 const NAV = [
   { label: "Ana Sayfa", href: "/" },
@@ -122,6 +123,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   >
                     {p.name} <span className="text-[10px] text-blue-400">↗</span>
                   </a>
+                </li>
+              ))}
+            </ul>
+            <h3 className="font-semibold mb-3 text-sm uppercase tracking-wide text-blue-300">Kurumsal</h3>
+            <ul className="space-y-2 text-sm text-blue-100 mb-5">
+              <li><Link href="/hakkimizda" className="hover:text-white transition-colors">Hakkımızda</Link></li>
+              <li><Link href="/iletisim" className="hover:text-white transition-colors">İletişim</Link></li>
+              {LEGAL_DOCS.map((d) => (
+                <li key={d.slug}>
+                  <Link href={`/${d.slug}`} className="hover:text-white transition-colors">{d.title}</Link>
                 </li>
               ))}
             </ul>
