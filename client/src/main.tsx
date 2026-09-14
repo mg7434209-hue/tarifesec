@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import App from "./App";
+import ErrorBoundary from "./components/ErrorBoundary";
 import "./index.css";
 
 const queryClient = new QueryClient({
@@ -12,8 +13,16 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <App />
-    </QueryClientProvider>
+    {/*
+      DIŞ hata sınırı: Layout (header, footer, ziyaretçi sayacı) App.tsx'teki
+      iç sınırın DIŞINDA kalıyor; orada çıkan bir hata tüm ağacı söküp sayfayı
+      bembeyaz bırakırdı. İç sınır sayfa hatalarını izole eder (header/footer
+      ayakta kalır), dış sınır ise son güvenlik ağıdır.
+    */}
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
+    </ErrorBoundary>
   </StrictMode>
 );

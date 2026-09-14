@@ -106,6 +106,12 @@ export async function renderRoute(pathname: string, template: string): Promise<R
       jsonLd.push(ld.speedTestApp());
     } else if (route.path === "/blog") {
       body = content.blogContent(await getPosts());
+    } else if (route.path === "/hakkimizda") {
+      body = content.aboutContent();
+    } else if (route.path === "/iletisim") {
+      body = content.contactContent();
+    } else if (["/kvkk", "/gizlilik", "/cerez-politikasi"].includes(route.path)) {
+      body = content.legalContent(route.path.slice(1));
     }
 
     return {

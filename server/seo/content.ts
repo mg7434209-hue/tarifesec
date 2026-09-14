@@ -13,6 +13,8 @@ import { FAQ, type Faq } from "./faq";
 import type { Pkg, Mobile, Post } from "./data";
 import { summarize, summarizeMobile } from "./data";
 import { byContext, PARTNER_REL, type PartnerContext } from "../../shared/partners";
+import { legalBySlug } from "../../shared/legal";
+import { SITE_INFO, hasContactPhone, hasContactAddress } from "../../shared/site";
 
 const faqBlock = (items: Faq[]) =>
   !items.length
@@ -250,4 +252,57 @@ export function postContent(post: Post): string {
     .map((para) => `<p>${esc(para.trim())}</p>`)
     .join("")}
 </article>`;
+}
+
+
+/** KVKK / gizlilik / çerez metinleri */
+export function legalContent(slug: string): string {
+  const doc = legalBySlug(slug);
+  if (!doc) return "";
+  return `<h1>${esc(doc.title)}</h1>
+<p>${esc(doc.intro)}</p>
+<p><small>Son güncelleme: ${esc(SITE_INFO.legalUpdatedAt)}</small></p>
+${doc.sections
+  .map(
+    (sec) =>
+      `<section><h2>${esc(sec.heading)}</h2>${sec.paragraphs
+        .map((para) => `<p>${esc(para)}</p>`)
+        .join("")}</section>`
+  )
+  .join("")}`;
+}
+
+export function contactContent(): string {
+  const c = SITE_INFO.company;
+  return `<h1>İletişim</h1>
+<p>Soru, öneri veya kişisel verilerinizle ilgili taleplerinizi bize iletebilirsiniz.</p>
+<ul>
+  <li>E-posta: <a href="mailto:${esc(c.email)}">${esc(c.email)}</a></li>
+  ${hasContactPhone() ? `<li>Telefon: ${esc(c.phone)}</li>` : ""}
+  ${hasContactAddress() ? `<li>Adres: ${esc(c.address)}</li>` : ""}
+</ul>
+<p>Kişisel verilerinizin silinmesini veya düzeltilmesini talep etmek için yukarıdaki
+e-posta adresine yazmanız yeterlidir. Talebiniz en geç 30 gün içinde sonuçlandırılır.
+Ayrıntılar <a href="/kvkk">KVKK Aydınlatma Metni</a>'ndedir.</p>`;
+}
+
+export function aboutContent(): string {
+  return `<h1>Hakkımızda</h1>
+<p>${esc(SITE_INFO.name)}, Türkiye'deki ev interneti ve mobil hat tarifelerini tek
+sayfada karşılaştırmanızı sağlayan bağımsız bir platformdur.</p>
+
+<section><h2>Bağımsızlık</h2>
+<p>Hiçbir operatörle ticari ortaklığımız yoktur ve sıralamalar ücret karşılığı
+değiştirilmez. Sitede iş ortaklarımıza ait sponsorlu bağlantılar bulunur; bunlar
+açıkça "reklam" olarak işaretlenir ve karşılaştırma sonuçlarını etkilemez.</p></section>
+
+<section><h2>Veriler nasıl güncelleniyor?</h2>
+<p>Fiyatlar operatörlerin resmi sayfalarından düzenli olarak taranır. Emin
+olunamayan hiçbir değer yayınlanmaz: belirsiz eşleşmeler ve olağandışı fiyat
+sıçramaları otomatik uygulanmaz, elle kontrol edilir.</p></section>
+
+<section><h2>Sorumluluk sınırı</h2>
+<p>Fiyatlar bilgilendirme amaçlıdır ve kampanyalara göre değişebilir. Başvuru
+öncesinde kesin fiyatı ve adresinizdeki altyapı uygunluğunu operatörün resmi
+sayfasından doğrulamanızı öneririz.</p></section>`;
 }

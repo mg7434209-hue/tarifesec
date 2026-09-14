@@ -55,6 +55,51 @@ export const ROUTES: RouteMeta[] = [
     priority: "0.8",
   },
   {
+    path: "/hakkimizda",
+    label: "Hakkımızda",
+    title: "Hakkımızda — Bağımsız Tarife Karşılaştırma | tarifesec.net.tr",
+    description:
+      "tarifesec.net.tr nasıl çalışır, fiyatlar nasıl güncellenir ve bağımsızlığımızı nasıl koruyoruz.",
+    changefreq: "monthly",
+    priority: "0.5",
+  },
+  {
+    path: "/iletisim",
+    label: "İletişim",
+    title: "İletişim | tarifesec.net.tr",
+    description:
+      "Soru, öneri ve kişisel verilerinizle ilgili talepleriniz için bize ulaşın.",
+    changefreq: "monthly",
+    priority: "0.5",
+  },
+  {
+    path: "/kvkk",
+    label: "KVKK Aydınlatma Metni",
+    title: "KVKK Aydınlatma Metni | tarifesec.net.tr",
+    description:
+      "6698 sayılı Kişisel Verilerin Korunması Kanunu kapsamında kişisel verilerinizin nasıl işlendiği.",
+    changefreq: "yearly",
+    priority: "0.3",
+  },
+  {
+    path: "/gizlilik",
+    label: "Gizlilik Politikası",
+    title: "Gizlilik Politikası | tarifesec.net.tr",
+    description:
+      "Hangi bilgileri sakladığımız, nasıl koruduğumuz ve haklarınız.",
+    changefreq: "yearly",
+    priority: "0.3",
+  },
+  {
+    path: "/cerez-politikasi",
+    label: "Çerez Politikası",
+    title: "Çerez Politikası | tarifesec.net.tr",
+    description:
+      "Sitede kullanılan çerezler, ne işe yaradıkları ve nasıl yönetebileceğiniz.",
+    changefreq: "yearly",
+    priority: "0.3",
+  },
+  {
     path: "/blog",
     label: "Rehber",
     title: "İnternet ve Mobil Tarife Rehberi — Bağımsız Yazılar | tarifesec.net.tr",
