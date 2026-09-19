@@ -211,8 +211,24 @@ başlayan satırlar veritabanı kurulumunu gösterir.
 PostgreSQL bağlı değil (bkz. adım 1). Günlükte
 `DATABASE_URL tanımlı değil` yazar.
 
-**Ziyaretçi sayacı her dağıtımda sıfırlanıyor**
-Veritabanı bağlı değil; sayaç bellekte tutuluyor demektir.
+**Ziyaretçi sayacı "1.001"de takılı / artmıyor**
+Önce şunu açın:
+
+```
+https://www.tarifesec.net.tr/api/visitors
+```
+
+- `"kaynak": "veritabani"` → sayaç KALICI çalışıyor. Sayının artmaması
+  normaldir: **aynı tarayıcı gün içinde bir kez sayılır** (çerez: `tsv`).
+  Kendinizi tekrar saydırmak için gizli pencere açın veya çerezi silin;
+  ertesi gün aynı tarayıcı yeniden sayılır.
+- `"kaynak": "bellek"` + `uyari` alanı → veritabanına yazılamıyor. Sayı her
+  yeniden başlatmada 1.000 tabanına döner, bu yüzden hep "1.001" görünür.
+  Nedeni `/api/health` çıktısındaki `sayac.sorun` satırında yazar; çözüm için
+  adım 1'e bakın (PostgreSQL bağlı mı).
+
+Veritabanı geri geldiğinde, bağlantı kopukken toplanan ziyaretler kaybolmaz —
+ilk başarılı yazmada tek işlemde veritabanına eklenir.
 
 **Fiyatlar eski**
 Panelde "bayat" sayısına bakın, "Şimdi tara" deneyin, olmazsa elle güncelleyin.

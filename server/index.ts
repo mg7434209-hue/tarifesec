@@ -9,7 +9,7 @@ import mobileRouter from "./routes/mobile";
 import leadsRouter from "./routes/leads";
 import blogRouter from "./routes/blog";
 import adminRouter from "./routes/admin";
-import visitorsRouter from "./routes/visitors";
+import visitorsRouter, { counterState } from "./routes/visitors";
 import speedTestRouter from "./routes/speedtest";
 import seoRouter from "./routes/seo";
 import setupRouter from "./routes/setup";
@@ -97,13 +97,16 @@ app.get("/api/health", async (_req, res) => {
   const out: Record<string, unknown> = {
     status: "ok",
     timestamp: new Date().toISOString(),
+    // Ziyaretçi sayacı kalıcı mı yoksa bellekte mi tutuluyor
+    sayac: counterState(),
   };
 
   if (!process.env.DATABASE_URL) {
     out.database = "yapılandırılmamış";
     out.sorun =
       "DATABASE_URL tanımlı değil. Railway'de PostgreSQL servisi ekleyin — " +
-      "paketler görünmez, ziyaretçi sayacı sıfırlanır ve fiyat şeması üretilemez.";
+      "paketler görünmez, ziyaretçi sayacı her dağıtımda 1.000'e döner " +
+      "ve fiyat şeması üretilemez.";
     return res.status(503).json(out);
   }
 
