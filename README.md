@@ -230,12 +230,43 @@ görüyordu. Bu yüzden HTML artık **sunucuda** üretilir:
 Dördü de `server/routes/seo.ts` içinde, DB'den **canlı** üretilir; statik
 kopya tutulmaz (veri bayatlamasın).
 
+### Açılış sayfaları (operatör / tür)
+
+`shared/landings.ts` TEK kaynaktır: `/internet/superonline`, `/internet/fiber`,
+`/internet/taahhutsuz`, `/internet/100-mbps`, `/internet/en-ucuz`,
+`/mobil-tarifeler/faturali`, `/mobil-tarifeler/turkcell` … Her kayıt aynı veriyi
+bir süzgeçle daraltır; kendi başlığı, giriş metni ve SSS'i vardır. Sunucu (SSR,
+JSON-LD, sitemap, llms.txt) ve istemci (`pages/Landing.tsx`) aynı süzgeci
+kullanır. **Süzgece uyan kayıt yoksa sayfa 404 döner ve sitemap'e/iç
+bağlantılara girmez** (ör. faturasız tarife eklenince `/mobil-tarifeler/faturasiz`
+kendiliğinden açılır). Yeni sayfa = listeye bir kayıt.
+
+### Teknik SEO kuralları
+
+- **SSS görünür olmalı:** FAQPage şemasındaki sorular `shared/faq.ts`'ten gelir
+  ve istemcide `components/Sss.tsx` ile sayfada gösterilir. Şema var, metin yok
+  = Google yönergesi ihlali.
+- **robots.txt:** `/api/packages`, `/api/mobile`, `/api/blog` açıktır —
+  Googlebot sayfayı JS ile çizerken bunlara erişemezse liste boş görünür. API
+  yanıtları `X-Robots-Tag: noindex` taşır. İsimle anılan AI botları `*`
+  grubunu yok saydığı için engeller onların grubunda da yazılıdır.
+- **Tek adres:** www'suz → www, http → https, sondaki `/` → çizgisiz (301).
+  `*.up.railway.app` adresi `noindex` başlığı alır.
+- **Sıkıştırma:** `compression` (hız testi uçları hariç).
+- **Paylaşım görseli:** `og-tarifesec.jpg` (1200×630) ve `logo-512.png` —
+  sosyal ağlar SVG göstermez. SVG kaynak değişirse `node tools/og-gorsel.mjs`.
+- **lastmod / dateModified:** verinin gerçek değişim tarihi (paket
+  `updatedAt`/`lastScrapedAt`); kurumsal sayfalar `shared/site.ts`
+  `contentUpdatedAt`. Her istekte "bugün" yazılmaz.
+- **İş ortağı bağlantıları** (`affiliateUrl`) `rel="sponsored"` taşır.
+- WebSite şemasında **SearchAction yok** — sitede `?q=` araması yok.
+
 ### Yeni rota eklerken
 
 1. `client/src/App.tsx` — rota tanımı
 2. `shared/routes.ts` — başlık/açıklama (sitemap ve SSR otomatik kapsar)
 3. `server/seo/content.ts` — taranabilir içerik (gerekiyorsa)
-4. `server/seo/faq.ts` — sayfaya ait SSS (varsa)
+4. `shared/faq.ts` — sayfaya ait SSS (varsa) + sayfada `<Sss>` bileşeni
 
 ## Klasör Yapısı
 

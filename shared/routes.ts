@@ -21,7 +21,7 @@ export const ROUTES: RouteMeta[] = [
   {
     path: "/",
     label: "Ana Sayfa",
-    title: "İnternet ve Mobil Tarife Karşılaştırma 2026 | tarifesec.net.tr",
+    title: "İnternet Paketleri ve Mobil Tarifeler 2026 | tarifesec.net.tr",
     description:
       "Superonline, Türk Telekom, Vodafone, Turkcell ve TurkNet ev interneti paketlerini ve mobil tarifeleri tek sayfada tarafsız karşılaştırın. Güncel fiyatlar, ücretsiz hız testi.",
     changefreq: "daily",
@@ -30,7 +30,7 @@ export const ROUTES: RouteMeta[] = [
   {
     path: "/paket-karsilastir",
     label: "Ev İnterneti",
-    title: "Ev İnterneti Paket Karşılaştırma — Fiber ve Kablosuz Fiyatları | tarifesec.net.tr",
+    title: "Ev İnterneti Paketleri ve Fiyatları 2026 | tarifesec.net.tr",
     description:
       "Fiber, kablosuz ve ADSL ev interneti paketlerini hız, aylık ücret ve taahhüt süresine göre filtreleyin. Superonline, Türk Telekom, Vodafone ve TurkNet fiyatları yan yana.",
     changefreq: "daily",
@@ -39,7 +39,7 @@ export const ROUTES: RouteMeta[] = [
   {
     path: "/mobil-tarifeler",
     label: "Mobil Tarifeler",
-    title: "Mobil Tarife Karşılaştırma — Faturalı ve Faturasız Fiyatlar | tarifesec.net.tr",
+    title: "Mobil Hat Tarifeleri ve Fiyatları 2026 | tarifesec.net.tr",
     description:
       "Turkcell, Vodafone ve Türk Telekom faturalı ile faturasız mobil hat tarifelerini GB, dakika ve aylık ücrete göre karşılaştırın.",
     changefreq: "daily",
@@ -48,7 +48,7 @@ export const ROUTES: RouteMeta[] = [
   {
     path: "/hiz-testi",
     label: "Hız Testi",
-    title: "İnternet Hız Testi — Ücretsiz Download, Upload ve Ping Ölçümü | tarifesec.net.tr",
+    title: "İnternet Hız Testi: Download, Upload ve Ping Ölç | tarifesec.net.tr",
     description:
       "İnternet hızınızı ücretsiz ölçün: indirme, yükleme ve ping değerleri. Sonucunuzu diğer kullanıcıların ortalamasıyla karşılaştırın, paketinizin hakkını alıp almadığınızı görün.",
     changefreq: "weekly",
@@ -102,7 +102,7 @@ export const ROUTES: RouteMeta[] = [
   {
     path: "/blog",
     label: "Rehber",
-    title: "İnternet ve Mobil Tarife Rehberi — Bağımsız Yazılar | tarifesec.net.tr",
+    title: "İnternet ve Mobil Tarife Rehberi | tarifesec.net.tr",
     description:
       "Fiber altyapı, taahhüt şartları, numara taşıma ve doğru paket seçimi üzerine bağımsız rehber yazıları.",
     changefreq: "weekly",

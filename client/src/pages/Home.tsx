@@ -3,6 +3,9 @@ import { Zap, Smartphone, BarChart3, ArrowRight, CheckCircle, Shield } from "luc
 import TeklifFormu from "@/components/TeklifFormu";
 import PartnerCard from "@/components/PartnerCard";
 import { useRouteSeo } from "@/lib/hooks";
+import LandingLinks from "@/components/LandingLinks";
+import Sss from "@/components/Sss";
+import { FAQ } from "@shared/faq";
 
 const OPERATORS = [
   { name: "Superonline", color: "#0097a7" },
@@ -117,6 +120,12 @@ export default function Home() {
         ))}
       </section>
 
+      {/* Operatöre ve türe göre listeler — iç bağlantı ağı */}
+      <section className="max-w-5xl mx-auto px-4 pb-16">
+        <LandingLinks kind="internet" />
+        <LandingLinks kind="mobil" />
+      </section>
+
       {/* Teklif formu — gerçek dönüşüm noktası */}
       <section className="max-w-5xl mx-auto px-4 pb-16">
         <TeklifFormu />
@@ -145,6 +154,10 @@ export default function Home() {
             </p>
           </div>
         </div>
+      </section>
+
+      <section className="max-w-5xl mx-auto px-4 pb-16">
+        <Sss items={FAQ["/"] ?? []} />
       </section>
     </div>
   );

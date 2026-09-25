@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import VisitCounter from "./VisitCounter";
 import { PARTNERS, PARTNER_REL } from "@shared/partners";
 import { LEGAL_DOCS } from "@shared/legal";
+import { LANDINGS } from "@shared/landings";
+import { useLiveLandings } from "@/lib/landing";
 
 const NAV = [
   { label: "Ana Sayfa", href: "/" },
@@ -16,6 +18,8 @@ const NAV = [
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [location] = useLocation();
+  const live = useLiveLandings();
+  const popular = LANDINGS.filter((l) => live.has(l.path));
 
   // Rota değişince mobil menüyü kapat ve sayfanın başına dön
   useEffect(() => {
@@ -109,6 +113,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 </li>
               ))}
             </ul>
+            {popular.length > 0 && (
+              <>
+                <h3 className="font-semibold mt-6 mb-3 text-sm uppercase tracking-wide text-blue-300">Popüler listeler</h3>
+                <ul className="space-y-2 text-sm text-blue-100">
+                  {popular.map((l) => (
+                    <li key={l.path}>
+                      <Link href={l.path} className="hover:text-white transition-colors">{l.label}</Link>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
           </div>
           <div>
             <h3 className="font-semibold mb-3 text-sm uppercase tracking-wide text-blue-300">İş Ortakları</h3>

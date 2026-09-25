@@ -15,6 +15,7 @@ import { summarize, summarizeMobile } from "./data";
 import { byContext, PARTNER_REL, type PartnerContext } from "../../shared/partners";
 import { legalBySlug } from "../../shared/legal";
 import { SITE_INFO, hasContactPhone, hasContactAddress } from "../../shared/site";
+import { LANDINGS, landingSummary, type Landing, type LandingKind } from "../../shared/landings";
 
 const faqBlock = (items: Faq[]) =>
   !items.length
@@ -58,6 +59,20 @@ export const freshnessLine = (rows: { lastScrapedAt: Date | null }[]) => {
       `Kesin fiyat için operatörün resmi sayfasını ziyaret edin.</small></p>`;
 };
 
+/**
+ * Açılış sayfalarına iç bağlantılar. İstemcideki <LandingLinks> ile AYNI
+ * liste — yalnızca verisi olan sayfalar (boş sayfa 404'tür, ona bağlantı
+ * verilmez).
+ */
+export const landingLinks = (kind: LandingKind, live: Set<string>, exclude?: string) => {
+  const list = LANDINGS.filter((l) => l.kind === kind && l.path !== exclude && live.has(l.path));
+  if (!list.length) return "";
+  const title = kind === "internet" ? "Ev interneti: operatöre ve türe göre" : "Mobil tarifeler: operatöre ve hat türüne göre";
+  return `<nav aria-label="${esc(title)}"><h2>${esc(title)}</h2><ul>${list
+    .map((l) => `<li><a href="${esc(l.path)}">${esc(l.label)}</a></li>`)
+    .join("")}</ul></nav>`;
+};
+
 const pkgRow = (p: Pkg) => {
   const feats = (() => {
     try {
@@ -74,7 +89,9 @@ const pkgRow = (p: Pkg) => {
       p.uploadSpeed ? ` · ${esc(p.uploadSpeed)} Mbps yükleme` : ""
     } · ${esc(p.dataLimit ?? "Limitsiz")}${
       p.commitmentMonths ? ` · ${esc(p.commitmentMonths)} ay taahhüt` : ""
-    }${p.priceNoCommitment ? ` · taahhütsüz ${tl(p.priceNoCommitment)}` : ""}${
+    }${p.priceNoCommitment ? ` · taahhütsüz ${tl(p.priceNoCommitment)}${
+      p.priceNoCommitment > p.priceMonthly ? ` (+${tl(p.priceNoCommitment - p.priceMonthly)})` : ""
+    }` : ""}${
       p.modemIncluded ? " · modem dahil" : ""
     }</p>
     ${feats.length ? `<ul>${feats.map((f: string) => `<li>${esc(f)}</li>`).join("")}</ul>` : ""}
@@ -91,7 +108,7 @@ const mobileRow = (t: Mobile) => `<li>
   </li>`;
 
 /** Ana sayfa */
-export function homeContent(pkgs: Pkg[], mobile: Mobile[]): string {
+export function homeContent(pkgs: Pkg[], mobile: Mobile[], live: Set<string>): string {
   const s = summarize(pkgs);
   const m = summarizeMobile(mobile);
 
@@ -126,12 +143,14 @@ ${tl(m.minPrice)} ile ${tl(m.maxPrice)} arasında. En uygun tarife:
 </ul>
 
 ${s ? `<h2>Öne çıkan paketler</h2><ul>${pkgs.slice(0, 6).map(pkgRow).join("")}</ul>` : ""}
+${landingLinks("internet", live)}
+${landingLinks("mobil", live)}
 ${partnerBlock("genel")}
 ${faqBlock(FAQ["/"] ?? [])}`;
 }
 
 /** Ev interneti karşılaştırma */
-export function packagesContent(pkgs: Pkg[]): string {
+export function packagesContent(pkgs: Pkg[], live: Set<string>): string {
   const s = summarize(pkgs);
   const byOperator = new Map<string, Pkg[]>();
   for (const p of pkgs) {
@@ -172,12 +191,13 @@ ${[...byOperator.entries()]
   </ul>
 </section>
 
+${landingLinks("internet", live)}
 ${partnerBlock("internet")}
 ${faqBlock(FAQ["/paket-karsilastir"] ?? [])}`;
 }
 
 /** Mobil tarifeler */
-export function mobileContent(rows: Mobile[]): string {
+export function mobileContent(rows: Mobile[], live: Set<string>): string {
   const m = summarizeMobile(rows);
   const byOperator = new Map<string, Mobile[]>();
   for (const t of rows) {
@@ -202,8 +222,28 @@ ${[...byOperator.entries()]
   )
   .join("")}
 
+${landingLinks("mobil", live)}
 ${partnerBlock("internet")}
 ${faqBlock(FAQ["/mobil-tarifeler"] ?? [])}`;
+}
+
+/** Arama niyetine özel açılış sayfası (shared/landings.ts) */
+export function landingContent(l: Landing, rows: (Pkg | Mobile)[], live: Set<string>): string {
+  const isNet = l.kind === "internet";
+  const summary = landingSummary(l, rows as any);
+  const back = isNet
+    ? `<p>Tüm operatörleri filtrelemek için <a href="/paket-karsilastir">ev interneti karşılaştırma</a> sayfasına bakın.</p>`
+    : `<p>Tüm operatörleri filtrelemek için <a href="/mobil-tarifeler">mobil tarife karşılaştırma</a> sayfasına bakın.</p>`;
+
+  return `<h1>${esc(l.h1)}</h1>
+${l.intro.map((para) => `<p>${esc(para)}</p>`).join("\n")}
+${summary ? `<p><strong>${esc(summary)}</strong></p>` : ""}
+${freshnessLine(rows)}
+<ol>${rows.map((r) => (isNet ? pkgRow(r as Pkg) : mobileRow(r as Mobile))).join("")}</ol>
+${back}
+${landingLinks(l.kind, live, l.path)}
+${partnerBlock("internet")}
+${faqBlock(l.faq)}`;
 }
 
 /** Hız testi */

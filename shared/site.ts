@@ -22,6 +22,9 @@ export const SITE_INFO = {
     address: "",
   },
 
+  /** Kurumsal sayfaların (hakkımızda, iletişim) son içerik güncellemesi */
+  contentUpdatedAt: "2026-09-25",
+
   /** Yasal metinlerin son güncellenme tarihi */
   legalUpdatedAt: "2026-09-14",
 } as const;

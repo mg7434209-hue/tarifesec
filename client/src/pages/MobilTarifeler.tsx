@@ -5,6 +5,10 @@ import { Phone, Star, ExternalLink } from "lucide-react";
 import PartnerCard from "@/components/PartnerCard";
 import TeklifFormu from "@/components/TeklifFormu";
 import { useRouteSeo, parseFeatures } from "@/lib/hooks";
+import LandingLinks from "@/components/LandingLinks";
+import Sss from "@/components/Sss";
+import { FAQ } from "@shared/faq";
+import { PARTNER_REL } from "@shared/partners";
 
 const OPERATORS = [
   { value: "", label: "Tüm Operatörler" },
@@ -52,7 +56,7 @@ export default function MobilTarifeler() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">
-      <h1 className="text-2xl font-bold text-gray-900 mb-1">Mobil Hat Tarifeleri</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-1">Mobil Hat Tarifeleri Karşılaştırma</h1>
       <p className="text-sm text-gray-500 mb-6">Turkcell, Vodafone ve Türk Telekom güncel faturalı hat fiyatları</p>
 
       {/* Filters */}
@@ -128,7 +132,7 @@ export default function MobilTarifeler() {
               <a
                 href={t.affiliateUrl ?? t.officialUrl ?? "#"}
                 target="_blank"
-                rel="noopener noreferrer"
+                rel={t.affiliateUrl ? PARTNER_REL : "noopener noreferrer"}
                 className="mt-auto flex items-center justify-center gap-1.5 border border-gray-300 text-gray-700 text-sm font-medium py-2.5 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 Başvur <ExternalLink className="w-3.5 h-3.5" />
@@ -138,6 +142,8 @@ export default function MobilTarifeler() {
         })}
       </div>
 
+      <LandingLinks kind="mobil" />
+
       <div className="mt-10">
         <PartnerCard context="internet" placement="sonucAlti" />
       </div>
@@ -145,6 +151,8 @@ export default function MobilTarifeler() {
       <div className="mt-10">
         <TeklifFormu packageInterest="Mobil tarife" />
       </div>
+
+      <Sss items={FAQ["/mobil-tarifeler"] ?? []} />
     </div>
   );
 }

@@ -6,7 +6,8 @@
  * içerir — böylece model, siteyi taramadan doğru rakamı alıntılayabilir.
  */
 import { SITE, SITE_NAME } from "./meta";
-import { getPackages, getMobile, getPosts, summarize, summarizeMobile } from "./data";
+import { getPackages, getMobile, getPosts, summarize, summarizeMobile, liveLandings } from "./data";
+import { LANDINGS } from "../../shared/landings";
 import { FAQ } from "./faq";
 import { fullName } from "./util";
 import { PARTNERS } from "../../shared/partners";
@@ -14,8 +15,11 @@ import { PARTNERS } from "../../shared/partners";
 const stamp = () => new Date().toISOString().slice(0, 10);
 
 export async function llmsTxt(): Promise<string> {
-  const [pkgs, mob] = await Promise.all([getPackages(), getMobile()]);
+  const [pkgs, mob, live] = await Promise.all([getPackages(), getMobile(), liveLandings()]);
   const s = summarize(pkgs);
+  const landingLines = LANDINGS.filter((l) => live.has(l.path))
+    .map((l) => `- [${l.label}](${SITE}${l.path}): ${l.description}`)
+    .join("\n");
   const m = summarizeMobile(mob);
 
   return `# ${SITE_NAME}
@@ -38,7 +42,7 @@ ${m ? `- Mobil tarife: ${m.count} tarife, operatörler ${m.operators.join(", ")}
 - [Mobil tarifeler](${SITE}/mobil-tarifeler): faturalı ve faturasız hat tarifeleri
 - [İnternet hız testi](${SITE}/hiz-testi): tarayıcı üzerinden indirme, yükleme ve ping ölçümü
 - [Rehber](${SITE}/blog): tarife seçimi ve altyapı üzerine yazılar
-
+${landingLines ? `\n## Operatöre ve türe göre listeler\n${landingLines}\n` : ""}
 ## Ayrıntılı veri
 - [llms-full.txt](${SITE}/llms-full.txt): tüm paketlerin ve tarifelerin güncel fiyat listesi
 
