@@ -1,6 +1,5 @@
 import { Link } from "wouter";
 import { Zap, Smartphone, BarChart3, ArrowRight, CheckCircle, Shield } from "lucide-react";
-import TeklifFormu from "@/components/TeklifFormu";
 import PartnerCard from "@/components/PartnerCard";
 import { useRouteSeo } from "@/lib/hooks";
 import LandingLinks from "@/components/LandingLinks";
@@ -124,11 +123,6 @@ export default function Home() {
       <section className="max-w-5xl mx-auto px-4 pb-16">
         <LandingLinks kind="internet" />
         <LandingLinks kind="mobil" />
-      </section>
-
-      {/* Teklif formu — gerçek dönüşüm noktası */}
-      <section className="max-w-5xl mx-auto px-4 pb-16">
-        <TeklifFormu />
       </section>
 
       {/* İş ortakları */}

@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchPackages } from "@/lib/api";
 import { Wifi, Star, ExternalLink, SlidersHorizontal, TrendingUp, TrendingDown, AlertTriangle } from "lucide-react";
-import TeklifFormu from "@/components/TeklifFormu";
 import PartnerCard from "@/components/PartnerCard";
 import { useRouteSeo, parseFeatures } from "@/lib/hooks";
 import LandingLinks from "@/components/LandingLinks";
@@ -225,9 +224,6 @@ export default function PaketKarsilastirma() {
         <PartnerCard context="internet" placement="sonucAlti" />
       </div>
 
-      <div className="mt-10">
-        <TeklifFormu packageInterest="Ev interneti" />
-      </div>
 
       <Sss items={FAQ["/paket-karsilastir"] ?? []} />
 

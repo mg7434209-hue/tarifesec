@@ -1,7 +1,6 @@
 import { Mail, Phone, MapPin, Shield } from "lucide-react";
 import { SITE_INFO, hasContactPhone, hasContactAddress } from "@shared/site";
 import { useRouteSeo } from "@/lib/hooks";
-import TeklifFormu from "@/components/TeklifFormu";
 
 /**
  * İletişim sayfası.
@@ -58,7 +57,6 @@ export default function Iletisim() {
         </p>
       </div>
 
-      <TeklifFormu />
     </div>
   );
 }

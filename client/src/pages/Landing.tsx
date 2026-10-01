@@ -8,7 +8,6 @@ import { useSeo, parseFeatures } from "@/lib/hooks";
 import { useAllPackages, useAllMobile } from "@/lib/landing";
 import LandingLinks from "@/components/LandingLinks";
 import PartnerCard from "@/components/PartnerCard";
-import TeklifFormu from "@/components/TeklifFormu";
 import Sss from "@/components/Sss";
 import NotFound from "./NotFound";
 
@@ -95,9 +94,6 @@ export default function Landing() {
 
       <Sss items={landing.faq} />
 
-      <div className="mt-10">
-        <TeklifFormu packageInterest={landing.label} />
-      </div>
     </div>
   );
 }

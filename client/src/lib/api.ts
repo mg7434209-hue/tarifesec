@@ -35,24 +35,6 @@ export async function fetchMobile(params?: {
   return getJson(`${BASE}/mobile?${qs}`, "Tarifeler yüklenemedi");
 }
 
-export async function submitLead(data: {
-  name?: string;
-  phone: string;
-  city?: string;
-  packageInterest?: string;
-  /** honeypot — insan kullanıcı doldurmaz */
-  website?: string;
-}) {
-  const res = await fetch(`${BASE}/leads`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ...data, source: "tarifesec" }),
-  });
-  const body = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(body?.error ?? "Gönderim başarısız");
-  return body;
-}
-
 /** Ziyaretçi sayacı — gün içinde bir kez sayılır, toplam 1000'den başlar. */
 export type VisitorStats = { total: number; today: number; online: number };
 

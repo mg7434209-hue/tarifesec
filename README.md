@@ -198,7 +198,8 @@ eklenir. Kartlar `PartnerCard` ile basılır.
 - Alan yükseklikleri `AD_PLACEMENTS`'te **sabit** rezerve edilir — içerik geç
   gelse bile sayfa zıplamaz (CLS = 0).
 - Yerleşimler: ana sayfa, paket/mobil listelerinin altı, hız testi sonucu ve
-  teklif formu sonrası teşekkür ekranı; ayrıca footer şeridi.
+  ayrıca footer şeridi. ("Size en uygun tarifeyi bulalım" teklif formu 01.10.2026'da kaldırıldı;
+  `/api/leads` ucu ve admin paneldeki eski kayıtlar duruyor.)
 - Aynı bağlantılar sunucu tarafı içeriğe de basılır — kullanıcının gördüğüyle
   botun gördüğü **aynıdır** (cloaking yok).
 
@@ -306,7 +307,7 @@ tarifesec/
 │   ├── public/          # favicon, OG görseli
 │   └── src/
 │       ├── pages/       # Home, PaketKarsilastirma, MobilTarifeler, HizTesti, Blog, NotFound
-│       ├── components/  # Layout, VisitCounter, TeklifFormu
+│       ├── components/  # Layout, VisitCounter, Sss, LandingLinks
 │       └── lib/         # api.ts (fetch), hooks.ts (useSeo, useCountUp, parseFeatures)
 ├── server/
 │   ├── index.ts         # Express entry + güvenlik başlıkları + SSR servis

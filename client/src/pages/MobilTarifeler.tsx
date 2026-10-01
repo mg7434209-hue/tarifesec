@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchMobile } from "@/lib/api";
 import { Phone, Star, ExternalLink } from "lucide-react";
 import PartnerCard from "@/components/PartnerCard";
-import TeklifFormu from "@/components/TeklifFormu";
 import { useRouteSeo, parseFeatures } from "@/lib/hooks";
 import LandingLinks from "@/components/LandingLinks";
 import Sss from "@/components/Sss";
@@ -152,9 +151,6 @@ export default function MobilTarifeler() {
         <PartnerCard context="internet" placement="sonucAlti" />
       </div>
 
-      <div className="mt-10">
-        <TeklifFormu packageInterest="Mobil tarife" />
-      </div>
 
       <Sss items={FAQ["/mobil-tarifeler"] ?? []} />
     </div>
