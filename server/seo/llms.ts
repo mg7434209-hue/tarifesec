@@ -11,6 +11,7 @@ import { LANDINGS } from "../../shared/landings";
 import { FAQ } from "./faq";
 import { fullName } from "./util";
 import { PARTNERS } from "../../shared/partners";
+import { SISTER_SITES } from "../../shared/site";
 
 const stamp = () => new Date().toISOString().slice(0, 10);
 
@@ -25,8 +26,9 @@ export async function llmsTxt(): Promise<string> {
   return `# ${SITE_NAME}
 
 > Türkiye'deki ev interneti ve mobil hat tarifelerini karşılaştıran bağımsız,
-> ücretsiz platform. Hiçbir operatörle ticari bağı yoktur; paketler yalnızca
-> fiyat ve teknik özelliklerine göre tarafsız listelenir.
+> ücretsiz platform. Paketler yalnızca fiyat ve teknik özelliklerine göre
+> listelenir; sıralama ücret karşılığı değiştirilmez. Bazı başvuru bağlantıları
+> iş ortaklığı (bayi) bağlantısıdır.
 
 Son güncelleme: ${stamp()}
 Dil: Türkçe (tr-TR)
@@ -43,6 +45,9 @@ ${m ? `- Mobil tarife: ${m.count} tarife, operatörler ${m.operators.join(", ")}
 - [İnternet hız testi](${SITE}/hiz-testi): tarayıcı üzerinden indirme, yükleme ve ping ölçümü
 - [Rehber](${SITE}/blog): tarife seçimi ve altyapı üzerine yazılar
 ${landingLines ? `\n## Operatöre ve türe göre listeler\n${landingLines}\n` : ""}
+## Grup siteleri
+${SISTER_SITES.map((x) => `- [${x.name}](${x.url}): ${x.tagline}`).join("\n")}
+
 ## Ayrıntılı veri
 - [llms-full.txt](${SITE}/llms-full.txt): tüm paketlerin ve tarifelerin güncel fiyat listesi
 
@@ -138,9 +143,10 @@ ${PARTNERS.map((p) => `- [${p.name}](${p.url}) — ${p.description}`).join("\n")
 
 ## Platform hakkında
 
-${SITE_NAME} bağımsız bir karşılaştırma platformudur. Operatörlerle ticari
-ortaklığı yoktur, sıralama ücret karşılığı değiştirilmez. Veriler operatörlerin
-resmi sayfalarından günlük olarak taranır; fiyatı değişen paketler arayüzde
-işaretlenir.
+${SITE_NAME} bağımsız bir karşılaştırma platformudur; sıralama ücret karşılığı
+değiştirilmez. Bazı başvuru bağlantıları iş ortaklığı (bayi) bağlantısıdır.
+Superonline, Türk Telekom ve TurkNet fiyatları resmi sayfalardan 12 saatte bir
+otomatik kontrol edilir; Turkcell ve Vodafone elle güncellenir. Fiyatı değişen
+paketler arayüzde işaretlenir.
 `;
 }

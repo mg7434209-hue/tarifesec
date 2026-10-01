@@ -9,6 +9,7 @@ import LandingLinks from "@/components/LandingLinks";
 import Sss from "@/components/Sss";
 import { FAQ } from "@shared/faq";
 import { PARTNER_REL } from "@shared/partners";
+import { checkedLabel } from "@shared/freshness";
 
 const OPERATORS = [
   { value: "", label: "Tüm Operatörler" },
@@ -196,9 +197,7 @@ export default function PaketKarsilastirma() {
               )}
 
               <div className="text-xs text-gray-300 mb-3">
-                {pkg.lastScrapedAt
-                  ? `Son kontrol: ${new Date(pkg.lastScrapedAt).toLocaleDateString("tr-TR")}`
-                  : "Manuel güncelleme"}
+                {checkedLabel(pkg)}
               </div>
 
               <a

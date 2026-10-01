@@ -9,6 +9,7 @@ import LandingLinks from "@/components/LandingLinks";
 import Sss from "@/components/Sss";
 import { FAQ } from "@shared/faq";
 import { PARTNER_REL } from "@shared/partners";
+import { checkedLabel } from "@shared/freshness";
 
 const OPERATORS = [
   { value: "", label: "Tüm Operatörler" },
@@ -129,6 +130,9 @@ export default function MobilTarifeler() {
                   {features.map((f: string) => <li key={f}>✓ {f}</li>)}
                 </ul>
               )}
+              <p className="text-xs text-gray-300 mb-3">
+                {checkedLabel(t)}
+              </p>
               <a
                 href={t.affiliateUrl ?? t.officialUrl ?? "#"}
                 target="_blank"

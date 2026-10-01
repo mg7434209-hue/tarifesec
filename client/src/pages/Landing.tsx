@@ -2,6 +2,7 @@ import { Link, useLocation } from "wouter";
 import { ExternalLink, Wifi, Phone, ChevronRight } from "lucide-react";
 import { landingByPath, filterPackages, filterMobile, landingSummary } from "@shared/landings";
 import { PARTNER_REL } from "@shared/partners";
+import { checkedLabel } from "@shared/freshness";
 import { useSeo, parseFeatures } from "@/lib/hooks";
 import { useAllPackages, useAllMobile } from "@/lib/landing";
 import LandingLinks from "@/components/LandingLinks";
@@ -120,6 +121,15 @@ function Basvur({ affiliateUrl, officialUrl }: { affiliateUrl?: string | null; o
   );
 }
 
+/** Son kontrol tarihi — sunucu çıktısıyla aynı kural */
+function Kontrol({ r }: { r: any }) {
+  return (
+    <p className="text-xs text-gray-400 mb-3">
+      {checkedLabel(r)}
+    </p>
+  );
+}
+
 function PkgCard({ p }: { p: any }) {
   const features = parseFeatures(p.features);
   const fark = p.priceNoCommitment && p.priceNoCommitment > p.priceMonthly ? p.priceNoCommitment - p.priceMonthly : 0;
@@ -148,6 +158,7 @@ function PkgCard({ p }: { p: any }) {
           {features.map((f) => <li key={f}>✓ {f}</li>)}
         </ul>
       )}
+      <Kontrol r={p} />
       <Basvur affiliateUrl={p.affiliateUrl} officialUrl={p.officialUrl} />
     </li>
   );
@@ -174,6 +185,7 @@ function MobileCard({ t }: { t: any }) {
         </span>
         <span>{t.minuteLimit ? `${t.minuteLimit} dakika` : "Sınırsız dakika"}</span>
       </p>
+      <Kontrol r={t} />
       <Basvur affiliateUrl={t.affiliateUrl} officialUrl={t.officialUrl} />
     </li>
   );

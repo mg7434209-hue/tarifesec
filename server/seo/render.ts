@@ -8,7 +8,7 @@ import { FAQ, faqJsonLd } from "./faq";
 import * as content from "./content";
 import { getPackages, getMobile, getPosts, getPostBySlug, landingRows, liveLandings, lastChanged } from "./data";
 import { landingByPath } from "../../shared/landings";
-import { SITE_INFO } from "../../shared/site";
+import { SITE_INFO, SISTER_SITES } from "../../shared/site";
 
 export type Rendered = { html: string; status: number };
 
@@ -78,6 +78,12 @@ function inject(template: string, headHtml: string, bodyHtml: string): string {
     .replace(/\n(?:[ \t]*\n)+/g, "\n");
 
   out = out.replace("</head>", `    ${headHtml}\n  </head>`);
+
+  // Sayfanın en üstündeki grup siteleri şeridi (Layout.tsx ile aynı)
+  const sister = `<nav aria-label="Grup sitelerimiz"><p>Grup sitelerimiz: ${SISTER_SITES.map(
+    (x) => `<a href="${esc(x.url)}" rel="noopener">${esc(x.name)}</a> — ${esc(x.tagline)}`
+  ).join(" · ")}</p></nav>`;
+  bodyHtml = sister + bodyHtml;
 
   // Taranabilir içerik #root içine basılır; React mount olunca değiştirir.
   out = out.replace(

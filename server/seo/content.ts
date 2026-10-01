@@ -14,6 +14,7 @@ import type { Pkg, Mobile, Post } from "./data";
 import { summarize, summarizeMobile } from "./data";
 import { byContext, PARTNER_REL, type PartnerContext } from "../../shared/partners";
 import { legalBySlug } from "../../shared/legal";
+import { checkedLabel } from "../../shared/freshness";
 import { SITE_INFO, hasContactPhone, hasContactAddress } from "../../shared/site";
 import { LANDINGS, landingSummary, type Landing, type LandingKind } from "../../shared/landings";
 
@@ -73,6 +74,7 @@ export const landingLinks = (kind: LandingKind, live: Set<string>, exclude?: str
     .join("")}</ul></nav>`;
 };
 
+
 const pkgRow = (p: Pkg) => {
   const feats = (() => {
     try {
@@ -95,6 +97,7 @@ const pkgRow = (p: Pkg) => {
       p.modemIncluded ? " · modem dahil" : ""
     }</p>
     ${feats.length ? `<ul>${feats.map((f: string) => `<li>${esc(f)}</li>`).join("")}</ul>` : ""}
+    <p><small>${esc(checkedLabel(p))}</small></p>
   </li>`;
 };
 
@@ -105,6 +108,7 @@ const mobileRow = (t: Mobile) => `<li>
     } · ${t.minuteLimit ? `${esc(t.minuteLimit)} dakika` : "sınırsız dakika"} · ${
       t.isContract ? "faturalı" : "faturasız"
     } hat</p>
+    <p><small>${esc(checkedLabel(t))}</small></p>
   </li>`;
 
 /** Ana sayfa */
@@ -115,7 +119,7 @@ export function homeContent(pkgs: Pkg[], mobile: Mobile[], live: Set<string>): s
   return `<h1>Türkiye'nin Tüm İnternet ve Mobil Tarifelerini Tek Yerde Karşılaştırın</h1>
 <p>tarifesec.net.tr, Superonline, Türk Telekom, Vodafone, Turkcell ve TurkNet
 ev interneti paketlerini ve mobil hat tarifelerini bağımsız olarak karşılaştıran
-ücretsiz bir platformdur. Hiçbir operatörle ticari bağımız yoktur.</p>
+ücretsiz bir platformdur. Sıralama ücret karşılığı değiştirilmez; bazı başvuru bağlantıları iş ortaklığı (bayi) bağlantısıdır ve fiyatı ya da sıralamayı etkilemez.</p>
 
 ${
   s
@@ -341,12 +345,15 @@ export function aboutContent(): string {
 sayfada karşılaştırmanızı sağlayan bağımsız bir platformdur.</p>
 
 <section><h2>Bağımsızlık</h2>
-<p>Hiçbir operatörle ticari ortaklığımız yoktur ve sıralamalar ücret karşılığı
-değiştirilmez. Sitede iş ortaklarımıza ait sponsorlu bağlantılar bulunur; bunlar
+<p>Sıralamalar ücret karşılığı değiştirilmez; paketler yalnızca fiyat ve teknik
+özelliklerine göre listelenir. Bazı başvuru bağlantıları iş ortaklığı (bayi)
+bağlantısıdır; bunlar fiyatı ve sıralamayı etkilemez. Sitede iş ortaklarımıza ait sponsorlu bağlantılar bulunur; bunlar
 açıkça "reklam" olarak işaretlenir ve karşılaştırma sonuçlarını etkilemez.</p></section>
 
 <section><h2>Veriler nasıl güncelleniyor?</h2>
-<p>Fiyatlar operatörlerin resmi sayfalarından düzenli olarak taranır. Emin
+<p>Superonline, Türk Telekom ve TurkNet fiyatları resmi sayfalardan 12 saatte bir
+otomatik kontrol edilir; Turkcell ve Vodafone fiyatları elle güncellenir. Her
+paketin yanında son kontrol tarihi yazar. Emin
 olunamayan hiçbir değer yayınlanmaz: belirsiz eşleşmeler ve olağandışı fiyat
 sıçramaları otomatik uygulanmaz, elle kontrol edilir.</p></section>
 

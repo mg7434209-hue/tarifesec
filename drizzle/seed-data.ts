@@ -8,13 +8,14 @@ export const SEED_PACKAGES: InsertPackage[] = [
     // ── Superonline Fiber (isFeatured = true, Bayi B9613) ──
     {
       operator: "Superonline", operatorSlug: "superonline", type: "fiber",
-      name: "Fiber 100 Mbps", downloadSpeed: 100, uploadSpeed: 100,
-      priceMonthly: 699, priceNoCommitment: 849, commitmentMonths: 24,
+      name: "Fiber 100 Mbps", downloadSpeed: 100, uploadSpeed: null,
+      // Online'a özel kampanya, 12 ay (bkz. drizzle/data-updates.ts)
+      priceMonthly: 950, priceNoCommitment: null, commitmentMonths: 12,
       dataLimit: "Limitsiz", modemIncluded: true, installationFee: 0,
-      features: JSON.stringify(["WiFi 6 Modem", "Limitsiz", "7/24 Destek"]),
+      features: JSON.stringify(["Online'a özel kampanya", "Modem dahil", "Ücretsiz kurulum", "YouTube Premium"]),
       isFeatured: true,
       affiliateUrl: "https://superonline.net",
-      officialUrl: "https://superonline.net/fiber",
+      officialUrl: "https://www.superonline.net/ev-interneti/100-mbps",
     },
     {
       operator: "Superonline", operatorSlug: "superonline", type: "fiber",
@@ -88,10 +89,11 @@ export const SEED_PACKAGES: InsertPackage[] = [
     {
       operator: "TurkNet", operatorSlug: "turknet", type: "fiber",
       name: "TurkNet 100 Mbps", downloadSpeed: 100, uploadSpeed: 20,
-      priceMonthly: 609, priceNoCommitment: 749, commitmentMonths: 24,
+      // 19.06.2026 zammı: 949,90 ₺ (bkz. drizzle/data-updates.ts)
+      priceMonthly: 950, priceNoCommitment: 950, commitmentMonths: 0,
       dataLimit: "Limitsiz", modemIncluded: true,
       features: JSON.stringify(["Şeffaf Fiyat", "Altyapı Bağımsız"]),
-      officialUrl: "https://turknet.net.tr",
+      officialUrl: "https://www.turk.net/",
     },
   ];
 

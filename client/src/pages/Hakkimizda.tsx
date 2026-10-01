@@ -19,12 +19,12 @@ export default function Hakkimizda() {
         {
           icon: Scale,
           title: "Bağımsızlık",
-          text: "Hiçbir operatörle ticari ortaklığımız yoktur ve sıralamalar ücret karşılığı değiştirilmez. Paketler yalnızca fiyat ve teknik özelliklerine göre listelenir. Sitede iş ortaklarımıza ait sponsorlu bağlantılar bulunur; bunlar açıkça 'reklam' olarak işaretlenir ve karşılaştırma sonuçlarını etkilemez.",
+          text: "Sıralamalar ücret karşılığı değiştirilmez; paketler yalnızca fiyat ve teknik özelliklerine göre listelenir. Bazı başvuru bağlantıları iş ortaklığı (bayi) bağlantısıdır; fiyatı ve sıralamayı etkilemez. Sitede iş ortaklarımıza ait sponsorlu bağlantılar bulunur; bunlar açıkça 'reklam' olarak işaretlenir ve karşılaştırma sonuçlarını etkilemez.",
         },
         {
           icon: RefreshCw,
           title: "Veriler nasıl güncelleniyor?",
-          text: "Fiyatlar operatörlerin resmi sayfalarından düzenli olarak taranır. Emin olunamayan hiçbir değer yayınlanmaz: belirsiz eşleşmeler ve olağandışı fiyat sıçramaları otomatik olarak uygulanmaz, elle kontrol edilir. Her paketin en son ne zaman kontrol edildiğini karşılaştırma sayfasında görebilirsiniz.",
+          text: "Superonline, Türk Telekom ve TurkNet fiyatları resmi sayfalardan 12 saatte bir otomatik kontrol edilir; Turkcell ve Vodafone fiyatları elle güncellenir. Emin olunamayan hiçbir değer yayınlanmaz: belirsiz eşleşmeler ve olağandışı fiyat sıçramaları otomatik olarak uygulanmaz, elle kontrol edilir. Her paketin en son ne zaman kontrol edildiğini karşılaştırma sayfasında görebilirsiniz.",
         },
         {
           icon: Shield,

@@ -148,8 +148,9 @@ export default function Home() {
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-1">Neden tarifesec.net.tr?</h2>
             <p className="text-sm text-gray-500">
-              Herhangi bir operatörle ticari bağımız yoktur. Tüm karşılaştırmalar
-              operatörlerin resmi sitelerindeki güncel fiyatlara dayanır. Amacımız
+              Sıralama ücret karşılığı değiştirilmez; bazı başvuru bağlantıları iş
+              ortaklığı (bayi) bağlantısıdır ve fiyatı ya da sıralamayı etkilemez.
+              Karşılaştırmalar operatörlerin resmi sitelerindeki fiyatlara dayanır. Amacımız
               tek bir yerde en doğru bilgiyle doğru kararı vermenize yardımcı olmaktır.
             </p>
           </div>

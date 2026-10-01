@@ -22,11 +22,11 @@ export const FAQ: Record<string, Faq[]> = {
     },
     {
       q: "Fiyatlar ne sıklıkla güncelleniyor?",
-      a: "Operatör fiyatları günlük olarak taranır ve değişiklikler karta işlenir. Fiyatı değişen paketlerde 'fiyat arttı' veya 'fiyat düştü' rozeti gösterilir. Kesin fiyat için başvuru öncesi operatörün resmi sayfasını kontrol etmeniz önerilir.",
+      a: "Superonline, Türk Telekom ve TurkNet fiyatları resmi sayfalardan 12 saatte bir otomatik kontrol edilir; Turkcell ve Vodafone fiyatları elle güncellenir. Her paketin yanında son kontrol tarihi yazar. Fiyatı değişen paketlerde 'fiyat arttı' veya 'fiyat düştü' rozeti gösterilir. Kesin fiyat için başvuru öncesi operatörün resmi sayfasını kontrol etmeniz önerilir.",
     },
     {
       q: "Hangi operatörlerle çalışıyorsunuz?",
-      a: "Hiçbir operatörle ticari bağımız yoktur. Platform bağımsızdır; paketler tarafsız biçimde, yalnızca fiyat ve teknik özelliklerine göre listelenir.",
+      a: "Paketler yalnızca fiyat ve teknik özelliklerine göre listelenir; sıralama ücret karşılığı değiştirilmez. Bazı başvuru bağlantıları iş ortaklığı (bayi) bağlantısıdır; bu bağlantılar fiyatı ve sıralamayı etkilemez.",
     },
   ],
 
@@ -72,7 +72,7 @@ export const FAQ: Record<string, Faq[]> = {
     },
     {
       q: "5G tarifeleri Türkiye'de kullanılabiliyor mu?",
-      a: "Operatörler 5G uyumlu tarifeler sunsa da 5G şebekesi tüm illerde yaygın değildir. Cihazınız ve bulunduğunuz bölge desteklemiyorsa tarife 4.5G hızında çalışır.",
+      a: "Evet. 5G hizmeti 1 Nisan 2026'da Turkcell, Vodafone ve Türk Telekom'da 81 ilde ticari olarak başladı; kapsama özellikle il ve ilçe merkezlerinde genişliyor. 5G için hem telefonunuzun 5G desteklemesi hem de bulunduğunuz yerde 5G kapsaması olması gerekir; yoksa hat 4.5G'de çalışır.",
     },
   ],
 

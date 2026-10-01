@@ -76,6 +76,11 @@ ucundan beslenir.
 - Bot/crawler/headless istekler User-Agent'a göre elenir.
 - Kalıcı veri PostgreSQL'de: `site_counters` (toplam) + `visit_days` (günlük).
 - DB erişilemezse bellek içi yedeğe düşer; rozet hiçbir durumda hata göstermez.
+- **Canlı:** rozet üç değer gösterir — toplam, bugün ve "şu an sitede" (son 5 dk
+  içinde sayfası açık tekil ziyaretçi; IP+UA karması, ham IP saklanmaz, yalnız
+  bellekte). Sekme açıkken dakikada bir tazelenir.
+- `GET /api/visitors` yanıtındaki `persistent: false` → veritabanı yok, sayaç
+  her yeniden başlatmada sıfırlanır. Railway'de PostgreSQL bağlı olmalı.
 
 Taban değeri değiştirmek için `VISITOR_BASE` ortam değişkenini ayarlayın —
 koda sayı gömmeyin.
@@ -160,6 +165,24 @@ nofollow` basar. Şifre `ADMIN_SECRET`; yalnızca `sessionStorage`'da tutulur.
 - "Fiyat değişti" rozetlerini onaylama
 - Bayat veri uyarısı, tarama durumu ve son tur özeti
 - "Şimdi tara" ile elle tetikleme
+
+## Grup Siteleri (üst şerit)
+
+`shared/site.ts` → `SISTER_SITES` (GESPA Enerji, Göksoylar). Her sayfanın en
+üstündeki şerit, footer "Grup Sitelerimiz" sütunu, SSR çıktısı ve llms.txt
+buradan okur. Kendi sitelerimiz olduğu için `rel="sponsored"` taşımaz.
+
+## Fiyat Güncelliği
+
+- Başlangıç verisi (`drizzle/seed-data.ts`) yalnız BOŞ tabloya yazılır; canlı
+  veriyi düzeltmez. Kaynaklı düzeltmeler `drizzle/data-updates.ts`'e yazılır ve
+  açılışta BİR kez uygulanır — satırın fiyatı beklenen eski değer değilse
+  (admin düzeltmiş) dokunulmaz.
+- Kartlardaki "Son kontrol" tarihi `shared/freshness.ts` kuralıdır: tarama
+  tarihi ya da gerçek güncelleme. Hiç dokunulmamış başlangıç verisi
+  "Fiyat henüz doğrulanmadı" yazar — kurulum tarihi kontrol tarihi gibi
+  gösterilmez. Admin panelinden fiyat kaydedildiğinde işaret kalkar.
+- Yeni rehber yazıları (`drizzle/seed-posts.ts`) slug'ı yoksa canlıya da eklenir.
 
 ## Reklam Alanları ve İş Ortakları
 

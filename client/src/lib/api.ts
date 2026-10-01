@@ -54,12 +54,18 @@ export async function submitLead(data: {
 }
 
 /** Ziyaretçi sayacı — gün içinde bir kez sayılır, toplam 1000'den başlar. */
-export async function fetchVisitors(): Promise<{ total: number; today: number }> {
+export type VisitorStats = { total: number; today: number; online: number };
+
+export async function fetchVisitors(): Promise<VisitorStats | null> {
   try {
     const data = await getJson(`${BASE}/visitors`, "Sayaç okunamadı");
-    return { total: Number(data.total) || VISITOR_MIN, today: Number(data.today) || 0 };
+    return {
+      total: Number(data.total) || VISITOR_MIN,
+      today: Number(data.today) || 0,
+      online: Number(data.online) || 0,
+    };
   } catch {
-    return { total: VISITOR_MIN, today: 0 };
+    return null;
   }
 }
 

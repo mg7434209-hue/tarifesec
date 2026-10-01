@@ -94,6 +94,72 @@ Yükleme hızını da göz ardı etmeyin. Fiber paketlerde yükleme hızı genel
 
 Mevcut bağlantınızın gerçek hızını ölçmeden karar vermeyin. Hız testi sayfamızda ölçüm yapıp sonucu paketinizle karşılaştırabilir, gerçekten yükseltmeye ihtiyacınız olup olmadığını görebilirsiniz.`,
   },
+  {
+    title: "Türkiye'de 5G: Nasıl Kullanılır, Neye Dikkat Etmeli? (2026)",
+    slug: "turkiyede-5g-nasil-kullanilir",
+    category: "Rehber",
+    excerpt:
+      "5G 1 Nisan 2026'da 81 ilde ticari olarak başladı. Telefonunuzda 5G'yi kullanmak için gerekenler ve tarife seçerken dikkat edilecekler.",
+    content: `Türkiye'de 5G hizmeti 1 Nisan 2026'da Turkcell, Vodafone ve Türk Telekom'da 81 ilde aynı anda ticari olarak başladı. Kapsama ilk aşamada il ve ilçe merkezlerinde yoğundur ve operatörlerin açıkladığı plana göre genişlemeye devam ediyor.
+
+5G'yi kullanabilmek için üç koşulun birlikte sağlanması gerekir: telefonunuzun 5G desteklemesi, bulunduğunuz noktada 5G kapsaması olması ve hattınızın 5G kullanımına açık olması. Bu üçünden biri eksikse telefon otomatik olarak 4.5G'ye geçer; aramalarınız ve internetiniz kesilmez.
+
+Telefonunuzun 5G desteklediğini ayarlar menüsündeki mobil ağ seçeneklerinden görebilirsiniz. Tercih edilen ağ türü listesinde 5G seçeneği yoksa cihaz 5G desteklemiyordur ya da yazılım güncellemesi gerekiyordur.
+
+5G daha yüksek hız sağlar, ancak hız arttıkça veri tüketimi de artar. Aynı videoyu daha yüksek çözünürlükte izlediğinizde paketiniz daha hızlı biter. Tarife seçerken aylık GB miktarına ve paket bittiğinde uygulanacak ücrete özellikle bakın.
+
+Evde sabit internet yerine 5G modem kullanmayı düşünüyorsanız, kapsamanın evinizin içinde de güçlü olduğundan emin olun. Mobil şebeke üzerinden çalışan ev internetinde hız, baz istasyonunun yoğunluğuna göre gün içinde değişebilir.
+
+Güncel mobil tarifeleri karşılaştırmak için mobil tarifeler sayfamızı, mevcut bağlantınızın gerçek hızını görmek için hız testi sayfamızı kullanabilirsiniz.`,
+  },
+  {
+    title: "Wi-Fi Hızınızı Artırmanın 8 Yolu",
+    slug: "wifi-hizi-nasil-artirilir",
+    category: "Rehber",
+    excerpt:
+      "Paketiniz hızlı ama evde internet yavaş mı? Modem yerinden kanal seçimine, ek ücret ödemeden Wi-Fi hızını artırmanın pratik yolları.",
+    content: `Paketinizin hızı ile cihazınıza ulaşan hız çoğu zaman aynı değildir. Aradaki fark genellikle hattan değil, evin içindeki kablosuz bağlantıdan kaynaklanır. Yeni pakete geçmeden önce aşağıdaki adımları deneyin.
+
+1. Önce kabloyla ölçün. Bilgisayarı modeme Ethernet kablosuyla bağlayıp hız testi yapın. Kabloda hız normalse sorun hatta değil, Wi-Fi'dadır.
+
+2. Modemi evin ortasına ve yükseğe taşıyın. Dolap içi, televizyon arkası ve yere yakın konumlar sinyali belirgin biçimde zayıflatır. Kalın duvarlar, aynalar ve akvaryumlar da sinyali keser.
+
+3. 5 GHz bandını kullanın. Modeminiz destekliyorsa yakın odalarda 5 GHz ağına bağlanın; 2,4 GHz daha uzağa ulaşır ama daha yavaştır ve komşu ağlarla daha çok çakışır.
+
+4. Kanalı değiştirin. Apartmanlarda onlarca ağ aynı kanalı kullanabilir. Modem arayüzünden kanal seçimini otomatiğe alın ya da daha boş bir kanal seçin.
+
+5. Modemi yeniden başlatın ve yazılımını güncelleyin. Uzun süre kapanmadan çalışan modemlerde performans düşebilir; üretici güncellemeleri de kararlılığı artırır.
+
+6. Bağlı cihazları gözden geçirin. Arka planda güncelleme indiren konsol, televizyon veya bulut yedeklemesi yapan bir bilgisayar, diğer cihazların hızını düşürür.
+
+7. Geniş evde ağ genişletici yerine mesh sistemi düşünün. Basit tekrarlayıcılar hızı yarıya indirebilir; mesh sistemler kapsamayı daha verimli dağıtır.
+
+8. Eski cihazların sınırını hesaba katın. Birkaç yıllık telefon veya dizüstü bilgisayarlar, yeni Wi-Fi standartlarını desteklemediği için modem ne kadar hızlı olursa olsun belirli bir hızın üzerine çıkamaz.
+
+Bu adımlardan sonra kabloyla ölçülen hız da paketinizin belirgin altında kalıyorsa operatörünüze arıza kaydı açın. Daha hızlı bir paket düşünüyorsanız ev interneti karşılaştırma sayfamızdan seçenekleri inceleyebilirsiniz.`,
+  },
+  {
+    title: "İnternet Faturası Nasıl Düşürülür? 2026 Zamlarına Karşı 6 Öneri",
+    slug: "internet-faturasi-nasil-dusurulur",
+    category: "Rehber",
+    excerpt:
+      "2026'da ev interneti fiyatları yükseldi. Taahhüt bitimi, peşin ödeme, doğru hız seçimi ve kampanya takibiyle aylık faturayı düşürmenin yolları.",
+    content: `2026 yılında ev interneti fiyatlarında belirgin artışlar yaşandı. Örneğin TurkNet, 19 Haziran 2026'dan itibaren 100 Mbps paketinin aylık ücretini 699,90 TL'den 949,90 TL'ye yükseltti. Diğer operatörlerde de kampanya fiyatları dönem dönem güncelleniyor. Faturanızı düşürmek için şu adımları değerlendirin.
+
+1. Gerçek ihtiyacınızı ölçün. Çoğu evde 100 Mbps yeterlidir. Hız testi yapın; kullanmadığınız bir hıza fazla ödüyorsanız bir alt pakete geçmek en hızlı tasarruftur.
+
+2. Taahhüt bitiş tarihini takip edin. Taahhüt sona erdiğinde abonelik genellikle kampanyasız liste fiyatından devam eder. Bitişten önce operatörünüzü arayıp yeni kampanya isteyin ya da alternatifleri karşılaştırın.
+
+3. Peşin ödeme seçeneklerine bakın. Bazı operatörler 12 aylık peşin ödemede aylık maliyeti belirgin biçimde düşürür ve fiyatı bu süre boyunca sabitler.
+
+4. Yeni müşteri kampanyalarını karşılaştırın. Operatörler yeni abonelere ilk aylarda indirimli fiyat sunar. İndirimli dönem bittiğinde ödeyeceğiniz tutarı da hesaba katarak toplam maliyeti karşılaştırın.
+
+5. Ek ücretleri kontrol edin. Modem kirası, kurulum bedeli ve ek hizmetler (TV, statik IP, ek hız paketi) faturayı büyütebilir. Kullanmadığınız ek hizmetleri kapatın.
+
+6. Taahhütsüz ile taahhütlü fiyatı kendi senaryonuza göre hesaplayın. Kısa süre kalacaksanız cayma bedeli riskini, uzun süre kalacaksanız aylık farkın toplamını karşılaştırın.
+
+Güncel paketleri fiyat, hız ve taahhüde göre yan yana görmek için ev interneti karşılaştırma sayfamızı kullanabilirsiniz. Başvuru öncesi kesin fiyatı mutlaka operatörün resmi sitesinden doğrulayın.`,
+  },
 ];
 
 export type SeedPost = (typeof SEED_POSTS)[number];

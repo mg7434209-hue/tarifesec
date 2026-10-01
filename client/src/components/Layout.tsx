@@ -1,11 +1,12 @@
 import { Link, useLocation } from "wouter";
-import { Menu, X, Wifi } from "lucide-react";
+import { Menu, X, Wifi, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 import VisitCounter from "./VisitCounter";
 import { PARTNERS, PARTNER_REL } from "@shared/partners";
 import { LEGAL_DOCS } from "@shared/legal";
 import { LANDINGS } from "@shared/landings";
 import { useLiveLandings } from "@/lib/landing";
+import { SISTER_SITES } from "@shared/site";
 
 const NAV = [
   { label: "Ana Sayfa", href: "/" },
@@ -29,6 +30,31 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Grup siteleri şeridi — sayfanın en üstünde, her sayfada görünür */}
+      <div className="bg-gradient-to-r from-[#1a237e] to-[#0097a7] text-white text-xs">
+        <div className="max-w-6xl mx-auto px-4 py-1.5 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+          <span className="inline-flex items-center gap-1 text-blue-100">
+            <Sun className="w-3.5 h-3.5 text-amber-300" aria-hidden="true" />
+            Grup sitelerimiz:
+          </span>
+          {SISTER_SITES.map((site) => (
+            <a
+              key={site.id}
+              href={site.url}
+              target="_blank"
+              rel="noopener"
+              data-sister={site.id}
+              className="inline-flex items-center gap-1 font-semibold hover:underline underline-offset-2"
+              title={site.tagline}
+            >
+              {site.name}
+              <span className="hidden sm:inline font-normal text-blue-100">— {site.tagline}</span>
+              <span aria-hidden="true">↗</span>
+            </a>
+          ))}
+        </div>
+      </div>
+
       {/* Navbar */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
@@ -129,7 +155,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <div>
             <h3 className="font-semibold mb-3 text-sm uppercase tracking-wide text-blue-300">İş Ortakları</h3>
             <ul className="space-y-2 text-sm text-blue-100 mb-5">
-              {PARTNERS.map((p) => (
+              {/* Grup sitesi olan ortak aşağıda "Grup Sitelerimiz"de zaten var */}
+              {PARTNERS.filter((p) => !SISTER_SITES.some((x) => p.url.includes(x.host.replace(/^www\./, "")))).map((p) => (
                 <li key={p.id}>
                   <a
                     href={p.url}
@@ -138,6 +165,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     className="hover:text-white transition-colors inline-flex items-center gap-1.5"
                   >
                     {p.name} <span className="text-[10px] text-blue-400">↗</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+            <h3 className="font-semibold mb-3 text-sm uppercase tracking-wide text-blue-300">Grup Sitelerimiz</h3>
+            <ul className="space-y-2 text-sm text-blue-100 mb-5">
+              {SISTER_SITES.map((site) => (
+                <li key={site.id}>
+                  <a href={site.url} target="_blank" rel="noopener" className="hover:text-white transition-colors">
+                    {site.name} <span className="text-blue-300">— {site.host}</span> ↗
                   </a>
                 </li>
               ))}
