@@ -10,6 +10,7 @@ import Sss from "@/components/Sss";
 import { FAQ } from "@shared/faq";
 import { PARTNER_REL } from "@shared/partners";
 import { checkedLabel } from "@shared/freshness";
+import { speedText } from "@shared/format";
 
 const OPERATORS = [
   { value: "", label: "Tüm Operatörler" },
@@ -186,7 +187,7 @@ export default function PaketKarsilastirma() {
               )}
 
               <div className="flex items-center gap-3 text-sm text-gray-600 mb-3">
-                <span className="flex items-center gap-1"><Wifi className="w-3.5 h-3.5 text-[#0097a7]" />{pkg.downloadSpeed} Mbps</span>
+                <span className="flex items-center gap-1"><Wifi className="w-3.5 h-3.5 text-[#0097a7]" />{speedText(pkg.downloadSpeed)}</span>
                 <span>{pkg.dataLimit ?? "Limitsiz"}</span>
               </div>
 

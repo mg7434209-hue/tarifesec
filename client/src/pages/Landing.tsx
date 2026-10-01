@@ -3,6 +3,7 @@ import { ExternalLink, Wifi, Phone, ChevronRight } from "lucide-react";
 import { landingByPath, filterPackages, filterMobile, landingSummary } from "@shared/landings";
 import { PARTNER_REL } from "@shared/partners";
 import { checkedLabel } from "@shared/freshness";
+import { speedText } from "@shared/format";
 import { useSeo, parseFeatures } from "@/lib/hooks";
 import { useAllPackages, useAllMobile } from "@/lib/landing";
 import LandingLinks from "@/components/LandingLinks";
@@ -142,7 +143,7 @@ function PkgCard({ p }: { p: any }) {
         <span className="text-xs text-gray-400">/ay</span>
       </div>
       <p className="text-sm text-gray-600 mb-3 flex flex-wrap gap-x-3 gap-y-1">
-        <span className="inline-flex items-center gap-1"><Wifi className="w-3.5 h-3.5 text-[#0097a7]" />{p.downloadSpeed} Mbps</span>
+        <span className="inline-flex items-center gap-1"><Wifi className="w-3.5 h-3.5 text-[#0097a7]" />{speedText(p.downloadSpeed)}</span>
         {p.uploadSpeed ? <span>{p.uploadSpeed} Mbps yükleme</span> : null}
         <span>{p.dataLimit ?? "Limitsiz"}</span>
         {p.commitmentMonths ? <span>{p.commitmentMonths} ay taahhüt</span> : null}

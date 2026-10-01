@@ -183,6 +183,10 @@ buradan okur. Kendi sitelerimiz olduğu için `rel="sponsored"` taşımaz.
   "Fiyat henüz doğrulanmadı" yazar — kurulum tarihi kontrol tarihi gibi
   gösterilmez. Admin panelinden fiyat kaydedildiğinde işaret kalkar.
 - Yeni rehber yazıları (`drizzle/seed-posts.ts`) slug'ı yoksa canlıya da eklenir.
+- **3 günde bir güncelleme:** prosedür `docs/fiyat-guncelleme.md`. Doğrulanamayan
+  kayıt tahmini fiyatla bırakılmaz, `isActive: false` ile yayından kalkar;
+  satıştan kalkan paket en yakın güncel ürüne çevrilir (`replaces: true`).
+- `downloadSpeed: 0` = sabit hız yok (5G Superbox); metin `shared/format.ts`.
 
 ## Reklam Alanları ve İş Ortakları
 

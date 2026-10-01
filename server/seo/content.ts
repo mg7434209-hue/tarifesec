@@ -15,6 +15,7 @@ import { summarize, summarizeMobile } from "./data";
 import { byContext, PARTNER_REL, type PartnerContext } from "../../shared/partners";
 import { legalBySlug } from "../../shared/legal";
 import { checkedLabel } from "../../shared/freshness";
+import { speedText, speedTextLong } from "../../shared/format";
 import { SITE_INFO, hasContactPhone, hasContactAddress } from "../../shared/site";
 import { LANDINGS, landingSummary, type Landing, type LandingKind } from "../../shared/landings";
 
@@ -87,7 +88,7 @@ const pkgRow = (p: Pkg) => {
 
   return `<li>
     <h3>${esc(fullName(p.operator, p.name))}</h3>
-    <p><strong>${tl(p.priceMonthly)}/ay</strong> · ${esc(p.downloadSpeed)} Mbps indirme${
+    <p><strong>${tl(p.priceMonthly)}/ay</strong> · ${esc(speedTextLong(p.downloadSpeed))}${
       p.uploadSpeed ? ` · ${esc(p.uploadSpeed)} Mbps yükleme` : ""
     } · ${esc(p.dataLimit ?? "Limitsiz")}${
       p.commitmentMonths ? ` · ${esc(p.commitmentMonths)} ay taahhüt` : ""
@@ -127,7 +128,7 @@ ${
 Fiyatlar aylık <strong>${tl(s.minPrice)}</strong> ile <strong>${tl(s.maxPrice)}</strong> arasında,
 en yüksek hız <strong>${s.maxSpeed} Mbps</strong>. En uygun paket:
 <strong>${esc(fullName(s.cheapest.operator, s.cheapest.name))}</strong> —
-${tl(s.cheapest.priceMonthly)}/ay, ${s.cheapest.downloadSpeed} Mbps.</p>`
+${tl(s.cheapest.priceMonthly)}/ay, ${esc(speedText(s.cheapest.downloadSpeed))}.</p>`
     : ""
 }
 ${
@@ -210,7 +211,7 @@ export function mobileContent(rows: Mobile[], live: Set<string>): string {
   }
 
   return `<h1>Mobil Hat Tarifeleri Karşılaştırma</h1>
-<p>Turkcell, Vodafone ve Türk Telekom faturalı ve faturasız mobil tarifelerini
+<p>Faturalı ve faturasız mobil tarifeleri
 aylık ücret, internet (GB) ve dakika bakımından karşılaştırın.</p>
 ${
   m

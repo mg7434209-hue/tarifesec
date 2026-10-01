@@ -12,6 +12,7 @@ import { FAQ } from "./faq";
 import { fullName } from "./util";
 import { PARTNERS } from "../../shared/partners";
 import { SISTER_SITES } from "../../shared/site";
+import { speedTextLong } from "../../shared/format";
 
 const stamp = () => new Date().toISOString().slice(0, 10);
 
@@ -66,7 +67,7 @@ export async function llmsFullTxt(): Promise<string> {
       const bits = [
         fullName(p.operator, p.name),
         `${p.priceMonthly} ₺/ay`,
-        `${p.downloadSpeed} Mbps indirme`,
+        speedTextLong(p.downloadSpeed),
         p.uploadSpeed ? `${p.uploadSpeed} Mbps yükleme` : null,
         p.dataLimit ?? "Limitsiz",
         p.type === "fiber" ? "fiber" : p.type === "kablosuz" ? "kablosuz" : "ADSL/VDSL",

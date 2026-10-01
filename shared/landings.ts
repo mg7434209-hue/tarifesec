@@ -143,7 +143,7 @@ export const LANDINGS: Landing[] = [
     label: "Fiber İnternet Paketleri",
     title: `Fiber İnternet Paketleri ${YIL} — Tüm Operatörlerin Fiyatları`,
     description:
-      "Superonline, Türk Telekom, Vodafone ve TurkNet fiber internet paketleri tek listede: aylık ücret, indirme ve yükleme hızı, taahhüt süresi.",
+      "Superonline, Türk Telekom ve TurkNet fiber internet paketleri tek listede: aylık ücret, indirme ve yükleme hızı, taahhüt süresi.",
     h1: `Fiber İnternet Paketleri (${YIL})`,
     intro: [
       "Fiber internet, veriyi eve kadar optik kablo ile taşır. Bakır hatlara göre mesafeye bağlı hız kaybı çok düşüktür, gecikme (ping) genellikle 20 ms'in altında kalır ve yüksek hızlarda kararlı çalışır.",
@@ -247,9 +247,9 @@ export const LANDINGS: Landing[] = [
     path: "/mobil-tarifeler/faturali",
     kind: "mobil",
     label: "Faturalı Hat Tarifeleri",
-    title: `Faturalı Hat Tarifeleri ${YIL} — Turkcell, Vodafone, Türk Telekom`,
+    title: `Faturalı Hat Tarifeleri ${YIL} — Turkcell ve Vodafone Fiyatları`,
     description:
-      "Turkcell, Vodafone ve Türk Telekom faturalı hat tarifeleri: aylık ücret, GB ve dakika bilgisi tek listede, fiyata göre sıralı.",
+      "Turkcell ve Vodafone faturalı hat tarifeleri: aylık ücret, GB ve dakika bilgisi tek listede, fiyata göre sıralı.",
     h1: `Faturalı Hat Tarifeleri (${YIL})`,
     intro: [
       "Faturalı hatta kullanım bedeli ay sonunda faturalanır. Aynı internet miktarı için GB başına maliyet genellikle faturasız hatlardan düşüktür; buna karşılık tarifeler çoğunlukla taahhütle sunulur.",
@@ -289,7 +289,7 @@ export const LANDINGS: Landing[] = [
     label: "Turkcell Tarifeleri",
     title: `Turkcell Tarifeleri ${YIL} — Faturalı Paket Fiyatları`,
     description:
-      "Turkcell mobil hat tarifelerinin güncel aylık fiyatları, GB ve dakika bilgisi. Vodafone ve Türk Telekom tarifeleriyle karşılaştırın.",
+      "Turkcell mobil hat tarifelerinin güncel aylık fiyatları, GB ve dakika bilgisi. diğer operatörlerin tarifeleriyle karşılaştırın.",
     h1: `Turkcell Tarifeleri ve Fiyatları (${YIL})`,
     intro: [
       "Turkcell, abone sayısı bakımından Türkiye'nin en büyük mobil operatörüdür. Aşağıda Turkcell tarifeleri aylık ücrete göre sıralanmıştır.",
@@ -309,7 +309,7 @@ export const LANDINGS: Landing[] = [
     label: "Vodafone Tarifeleri",
     title: `Vodafone Tarifeleri ${YIL} — Faturalı Paket Fiyatları`,
     description:
-      "Vodafone mobil hat tarifelerinin güncel aylık fiyatları, GB ve dakika bilgisi. Turkcell ve Türk Telekom tarifeleriyle karşılaştırın.",
+      "Vodafone mobil hat tarifelerinin güncel aylık fiyatları, GB ve dakika bilgisi. diğer operatörlerin tarifeleriyle karşılaştırın.",
     h1: `Vodafone Tarifeleri ve Fiyatları (${YIL})`,
     intro: [
       "Vodafone Türkiye'deki üç mobil operatörden biridir. Aşağıda Vodafone tarifeleri aylık ücrete göre sıralanmıştır.",

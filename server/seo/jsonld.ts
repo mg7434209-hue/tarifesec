@@ -7,6 +7,7 @@ import { SITE, SITE_NAME, OG_IMAGE, LOGO } from "./meta";
 import { fullName } from "./util";
 import type { Pkg, Mobile } from "./data";
 import { SITE_INFO } from "../../shared/site";
+import { speedTextLong } from "../../shared/format";
 
 export function organization() {
   return {
@@ -111,7 +112,7 @@ export function packageList(pkgs: Pkg[], opts: { name?: string; url?: string } =
         name: fullName(p.operator, p.name),
         category: p.type === "fiber" ? "Fiber internet" : p.type === "kablosuz" ? "Kablosuz internet" : "ADSL/VDSL",
         brand: { "@type": "Brand", name: p.operator },
-        description: `${p.downloadSpeed} Mbps indirme hızı, ${p.dataLimit ?? "limitsiz"} kullanım${
+        description: `${speedTextLong(p.downloadSpeed)}, ${p.dataLimit ?? "limitsiz"} kullanım${
           p.commitmentMonths ? `, ${p.commitmentMonths} ay taahhüt` : ""
         }.`,
         offers: {

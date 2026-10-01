@@ -32,7 +32,7 @@ export const ROUTES: RouteMeta[] = [
     label: "Ev İnterneti",
     title: "Ev İnterneti Paketleri ve Fiyatları 2026 | tarifesec.net.tr",
     description:
-      "Fiber, kablosuz ve ADSL ev interneti paketlerini hız, aylık ücret ve taahhüt süresine göre filtreleyin. Superonline, Türk Telekom, Vodafone ve TurkNet fiyatları yan yana.",
+      "Fiber, kablosuz ve ADSL ev interneti paketlerini hız, aylık ücret ve taahhüt süresine göre filtreleyin. Superonline, Türk Telekom ve TurkNet fiyatları yan yana.",
     changefreq: "daily",
     priority: "0.9",
   },
@@ -41,7 +41,7 @@ export const ROUTES: RouteMeta[] = [
     label: "Mobil Tarifeler",
     title: "Mobil Hat Tarifeleri ve Fiyatları 2026 | tarifesec.net.tr",
     description:
-      "Turkcell, Vodafone ve Türk Telekom faturalı ile faturasız mobil hat tarifelerini GB, dakika ve aylık ücrete göre karşılaştırın.",
+      "Turkcell ve Vodafone başta olmak üzere mobil hat tarifelerini GB, dakika ve aylık ücrete göre karşılaştırın.",
     changefreq: "daily",
     priority: "0.9",
   },

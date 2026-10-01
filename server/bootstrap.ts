@@ -15,7 +15,7 @@ import fs from "fs";
 import { db } from "../drizzle/db";
 import { and, eq, sql } from "drizzle-orm";
 import { packages, mobileTariffs, blogPosts, settings } from "../drizzle/schema";
-import { PACKAGE_UPDATES } from "../drizzle/data-updates";
+import { DATA_UPDATES } from "../drizzle/data-updates";
 import { SEED_PACKAGES, SEED_MOBILE } from "../drizzle/seed-data";
 import { SEED_POSTS } from "../drizzle/seed-posts";
 
@@ -91,36 +91,38 @@ async function applyDataUpdates() {
   const [row] = await db.select().from(settings).where(eq(settings.key, KEY));
   const done = new Set<string>(row ? JSON.parse(row.value) : []);
 
-  for (const u of PACKAGE_UPDATES) {
+  for (const u of DATA_UPDATES) {
     if (done.has(u.id)) continue;
-    const where = and(
-      eq(packages.operatorSlug, u.match.operatorSlug),
-      eq(packages.type, u.match.type),
-      eq(packages.downloadSpeed, u.match.downloadSpeed)
-    );
-    const rows = await db.select().from(packages).where(where);
+    const table = u.table === "packages" ? packages : mobileTariffs;
+    const where = and(eq(table.operatorSlug, u.match.operatorSlug), eq(table.name, u.match.name));
+    const rows = await db.select().from(table).where(where);
+    const target = u.set.priceMonthly ?? u.expectPrice;
 
     if (rows.length === 1 && rows[0].priceMonthly === u.expectPrice) {
-      const { features, ...rest } = u.set;
-      const up = u.set.priceMonthly > u.expectPrice;
+      const { features, ...rest } = u.set as typeof u.set & { features?: string[] };
+      const changed = !u.replaces && target !== u.expectPrice;
       await db
-        .update(packages)
+        .update(table)
         .set({
           ...rest,
           ...(features ? { features: JSON.stringify(features) } : {}),
-          previousPrice: u.expectPrice,
-          priceChanged: true,
-          priceChangeDirection: up ? "up" : "down",
+          // Aynı ürünün fiyatı değiştiyse rozet + üstü çizili eski fiyat;
+          // başka ürüne geçildiyse (replaces) kıyas gösterilmez.
+          previousPrice: changed ? u.expectPrice : null,
+          priceChanged: changed,
+          priceChangeDirection: changed ? (target > u.expectPrice ? "up" : "down") : "none",
           updatedAt: new Date(),
-        })
-        .where(eq(packages.id, rows[0].id));
-      console.log(`[bootstrap] fiyat düzeltmesi uygulandı: ${u.id}`);
-    } else if (rows.length === 1 && rows[0].priceMonthly === u.set.priceMonthly) {
+        } as any)
+        .where(eq(table.id, rows[0].id));
+      console.log(`[bootstrap] veri güncellemesi uygulandı: ${u.id}`);
+    } else if (rows.length === 1 && rows[0].priceMonthly === target && u.set.isActive !== false) {
       // Zaten güncel (yeni kurulum güncel başlangıç verisiyle açıldı)
+    } else if (rows.length === 0 && (u.set.isActive === false || u.replaces)) {
+      // Yeni kurulumda eski satır hiç yok — yapılacak bir şey yok
     } else {
-      // Fiyat elle/taramayla değişmiş ya da satır yok — dokunma, işaretle
+      // Fiyat elle/taramayla değişmiş ya da satır bulunamadı — dokunma
       console.warn(
-        `[bootstrap] fiyat düzeltmesi atlandı (${u.id}): ${rows.length} satır, ` +
+        `[bootstrap] veri güncellemesi atlandı (${u.id}): ${rows.length} satır, ` +
           `mevcut fiyat ${rows[0]?.priceMonthly ?? "-"}, beklenen ${u.expectPrice}`
       );
     }

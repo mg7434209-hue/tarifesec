@@ -58,7 +58,7 @@ export default function MobilTarifeler() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">
       <h1 className="text-2xl font-bold text-gray-900 mb-1">Mobil Hat Tarifeleri Karşılaştırma</h1>
-      <p className="text-sm text-gray-500 mb-6">Turkcell, Vodafone ve Türk Telekom güncel faturalı hat fiyatları</p>
+      <p className="text-sm text-gray-500 mb-6">Operatörlerin güncel faturalı hat fiyatları</p>
 
       {/* Filters */}
       <div className="bg-white border border-gray-200 rounded-xl p-4 mb-6 flex flex-wrap gap-3">
