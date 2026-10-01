@@ -17,6 +17,7 @@ const BlogYazisi = lazy(() => import("./pages/Blog").then((m) => ({ default: m.B
 const Hakkimizda = lazy(() => import("./pages/Hakkimizda"));
 const Iletisim = lazy(() => import("./pages/Iletisim"));
 const Yasal = lazy(() => import("./pages/Yasal"));
+const Landing = lazy(() => import("./pages/Landing"));
 const Admin = lazy(() => import("./pages/Admin"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -37,6 +38,9 @@ export default function App() {
             <Route path="/" component={Home} />
             <Route path="/paket-karsilastir" component={PaketKarsilastirma} />
             <Route path="/mobil-tarifeler" component={MobilTarifeler} />
+            {/* Operatöre / türe göre açılış sayfaları — shared/landings.ts */}
+            <Route path="/internet/:slug" component={Landing} />
+            <Route path="/mobil-tarifeler/:slug" component={Landing} />
             <Route path="/hiz-testi" component={HizTesti} />
             <Route path="/blog" component={BlogListesi} />
             <Route path="/blog/:slug" component={BlogYazisi} />

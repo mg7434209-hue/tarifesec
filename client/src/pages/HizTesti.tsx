@@ -8,6 +8,8 @@ import { fetchSpeedStats, saveSpeedResult } from "@/lib/api";
 import { useRouteSeo } from "@/lib/hooks";
 import SpeedGauge from "@/components/SpeedGauge";
 import PartnerCard from "@/components/PartnerCard";
+import Sss from "@/components/Sss";
+import { FAQ } from "@shared/faq";
 import {
   measurePing, measureDownload, measureUpload, rate, pingRate,
   type Phase, type Result,
@@ -256,6 +258,8 @@ export default function HizTesti() {
           Wi-Fi üzerinden yapılan ölçümler mesafe ve duvar sayısına göre düşük çıkabilir.
         </p>
       </div>
+
+      <Sss items={FAQ["/hiz-testi"] ?? []} />
     </div>
   );
 }

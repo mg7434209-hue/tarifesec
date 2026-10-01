@@ -9,17 +9,49 @@
  *   bellek içi yedeğe düşer, site hiçbir durumda hata vermez.
  */
 import { Router } from "express";
+import { createHash } from "crypto";
 import { db } from "../../drizzle/db";
 import { siteCounters, visitDays } from "../../drizzle/schema";
 import { eq, sql } from "drizzle-orm";
 import { config } from "../config";
+import { rateLimit } from "../middleware/rateLimit";
 
 const router = Router();
 
 const TOTAL_KEY = "visits_total";
 
+/**
+ * "Şu an sitede" — son ONLINE_WINDOW_MS içinde nabız atan tekil ziyaretçi.
+ * Yalnız bellekte tutulur; kimlik IP+UA karmasıdır, ham IP SAKLANMAZ.
+ * (Tek süreç varsayılır; Railway'de tek örnek çalışır.)
+ */
+const ONLINE_WINDOW_MS = 5 * 60 * 1000;
+const online = new Map<string, number>();
+
+function visitorKey(req: any): string {
+  return createHash("sha256")
+    .update(`${req.ip ?? ""}|${req.headers["user-agent"] ?? ""}`)
+    .digest("hex")
+    .slice(0, 24);
+}
+
+function touchOnline(key: string): number {
+  const now = Date.now();
+  online.set(key, now);
+  for (const [k, t] of online) if (now - t > ONLINE_WINDOW_MS) online.delete(k);
+  return online.size;
+}
+
+function onlineCount(): number {
+  const now = Date.now();
+  let n = 0;
+  for (const t of online.values()) if (now - t <= ONLINE_WINDOW_MS) n++;
+  return n;
+}
+
 /** DB düşerse kullanılacak yedek sayaç */
 const memory = { total: 0, days: new Map<string, number>() };
+let usingMemory = false;
 
 const BOT_RE =
   /bot|crawl|spider|slurp|bingpreview|facebookexternalhit|whatsapp|telegram|headless|phantom|puppeteer|playwright|lighthouse|curl|wget|python-requests|axios|go-http|okhttp|monitor|uptime|pingdom|gtmetrix|semrush|ahrefs|mj12|dotbot|petal|yandex|applebot|duckduck/i;
@@ -74,17 +106,21 @@ async function increment(day: string): Promise<{ total: number; today: number }>
   return { total: totalRow?.value ?? 0, today: dayRow?.count ?? 0 };
 }
 
-router.get("/", async (req, res) => {
+router.get("/", rateLimit(config.rateLimit.visitors), async (req, res) => {
   const day = todayKey();
   const alreadyCounted = Boolean(req.cookies?.[config.visitors.cookieName]);
   const bot = isBot(req.headers["user-agent"]);
   const shouldCount = !alreadyCounted && !bot;
 
   let counts: { total: number; today: number };
+  // Nabız: bot değilse "şu an sitede" listesini tazeler (sayaç ARTMAZ)
+  const nowOnline = bot ? onlineCount() : touchOnline(visitorKey(req));
 
   try {
     counts = shouldCount ? await increment(day) : await readCounts(day);
+    usingMemory = false;
   } catch (err) {
+    usingMemory = true;
     // DB yoksa/düşükse sayacı bellekten sun — footer rozeti bozulmasın
     console.error("[visitors] DB hatası, bellek yedeği kullanılıyor:", (err as Error).message);
     if (shouldCount) {
@@ -110,7 +146,12 @@ router.get("/", async (req, res) => {
   res.json({
     total: config.visitors.base + counts.total,
     today: counts.today,
+    // Kendisi sayılmasa da (bot/önizleme) en az 1 göstermek yanıltıcı olur;
+    // gerçek sayı neyse o.
+    online: nowOnline,
     counted: shouldCount,
+    /** false → veritabanı yok, sayaç yeniden başlatmada sıfırlanır */
+    persistent: !usingMemory,
   });
 });
 

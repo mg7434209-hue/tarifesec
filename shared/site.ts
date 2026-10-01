@@ -22,9 +22,35 @@ export const SITE_INFO = {
     address: "",
   },
 
+  /** Kurumsal sayfaların (hakkımızda, iletişim) son içerik güncellemesi */
+  contentUpdatedAt: "2026-09-25",
+
   /** Yasal metinlerin son güncellenme tarihi */
   legalUpdatedAt: "2026-09-14",
 } as const;
 
 export const hasContactPhone = () => SITE_INFO.company.phone.trim().length > 0;
 export const hasContactAddress = () => SITE_INFO.company.address.trim().length > 0;
+
+/**
+ * Aynı ekibe ait diğer siteler — TEK DOĞRU KAYNAK.
+ * Sayfanın en üstündeki şerit (Layout.tsx), footer ve llms.txt buradan okur.
+ * Kendi sitelerimiz olduğu için bağlantılar "sponsored" DEĞİLDİR; yine de
+ * ziyaretçiye ayrı bir site olduğu açıkça yazılır.
+ */
+export const SISTER_SITES = [
+  {
+    id: "gespa",
+    name: "GESPA Enerji",
+    url: "https://www.gespaenerji.com",
+    host: "www.gespaenerji.com",
+    tagline: "Güneş enerjisi (GES) kurulumu ve solar ürünler",
+  },
+  {
+    id: "goksoylar",
+    name: "Göksoylar",
+    url: "https://www.goksoylar.com.tr",
+    host: "www.goksoylar.com.tr",
+    tagline: "Güneş enerji sistemleri · Manavgat",
+  },
+] as const;

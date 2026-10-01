@@ -76,6 +76,11 @@ ucundan beslenir.
 - Bot/crawler/headless istekler User-Agent'a göre elenir.
 - Kalıcı veri PostgreSQL'de: `site_counters` (toplam) + `visit_days` (günlük).
 - DB erişilemezse bellek içi yedeğe düşer; rozet hiçbir durumda hata göstermez.
+- **Canlı:** rozet üç değer gösterir — toplam, bugün ve "şu an sitede" (son 5 dk
+  içinde sayfası açık tekil ziyaretçi; IP+UA karması, ham IP saklanmaz, yalnız
+  bellekte). Sekme açıkken dakikada bir tazelenir.
+- `GET /api/visitors` yanıtındaki `persistent: false` → veritabanı yok, sayaç
+  her yeniden başlatmada sıfırlanır. Railway'de PostgreSQL bağlı olmalı.
 
 Taban değeri değiştirmek için `VISITOR_BASE` ortam değişkenini ayarlayın —
 koda sayı gömmeyin.
@@ -161,6 +166,28 @@ nofollow` basar. Şifre `ADMIN_SECRET`; yalnızca `sessionStorage`'da tutulur.
 - Bayat veri uyarısı, tarama durumu ve son tur özeti
 - "Şimdi tara" ile elle tetikleme
 
+## Grup Siteleri (üst şerit)
+
+`shared/site.ts` → `SISTER_SITES` (GESPA Enerji, Göksoylar). Her sayfanın en
+üstündeki şerit, footer "Grup Sitelerimiz" sütunu, SSR çıktısı ve llms.txt
+buradan okur. Kendi sitelerimiz olduğu için `rel="sponsored"` taşımaz.
+
+## Fiyat Güncelliği
+
+- Başlangıç verisi (`drizzle/seed-data.ts`) yalnız BOŞ tabloya yazılır; canlı
+  veriyi düzeltmez. Kaynaklı düzeltmeler `drizzle/data-updates.ts`'e yazılır ve
+  açılışta BİR kez uygulanır — satırın fiyatı beklenen eski değer değilse
+  (admin düzeltmiş) dokunulmaz.
+- Kartlardaki "Son kontrol" tarihi `shared/freshness.ts` kuralıdır: tarama
+  tarihi ya da gerçek güncelleme. Hiç dokunulmamış başlangıç verisi
+  "Fiyat henüz doğrulanmadı" yazar — kurulum tarihi kontrol tarihi gibi
+  gösterilmez. Admin panelinden fiyat kaydedildiğinde işaret kalkar.
+- Yeni rehber yazıları (`drizzle/seed-posts.ts`) slug'ı yoksa canlıya da eklenir.
+- **3 günde bir güncelleme:** prosedür `docs/fiyat-guncelleme.md`. Doğrulanamayan
+  kayıt tahmini fiyatla bırakılmaz, `isActive: false` ile yayından kalkar;
+  satıştan kalkan paket en yakın güncel ürüne çevrilir (`replaces: true`).
+- `downloadSpeed: 0` = sabit hız yok (5G Superbox); metin `shared/format.ts`.
+
 ## Reklam Alanları ve İş Ortakları
 
 `shared/partners.ts` tek doğru kaynaktır; yeni ortak eklemek için listeye satır
@@ -171,7 +198,8 @@ eklenir. Kartlar `PartnerCard` ile basılır.
 - Alan yükseklikleri `AD_PLACEMENTS`'te **sabit** rezerve edilir — içerik geç
   gelse bile sayfa zıplamaz (CLS = 0).
 - Yerleşimler: ana sayfa, paket/mobil listelerinin altı, hız testi sonucu ve
-  teklif formu sonrası teşekkür ekranı; ayrıca footer şeridi.
+  ayrıca footer şeridi. ("Size en uygun tarifeyi bulalım" teklif formu 01.10.2026'da kaldırıldı;
+  `/api/leads` ucu ve admin paneldeki eski kayıtlar duruyor.)
 - Aynı bağlantılar sunucu tarafı içeriğe de basılır — kullanıcının gördüğüyle
   botun gördüğü **aynıdır** (cloaking yok).
 
@@ -230,12 +258,43 @@ görüyordu. Bu yüzden HTML artık **sunucuda** üretilir:
 Dördü de `server/routes/seo.ts` içinde, DB'den **canlı** üretilir; statik
 kopya tutulmaz (veri bayatlamasın).
 
+### Açılış sayfaları (operatör / tür)
+
+`shared/landings.ts` TEK kaynaktır: `/internet/superonline`, `/internet/fiber`,
+`/internet/taahhutsuz`, `/internet/100-mbps`, `/internet/en-ucuz`,
+`/mobil-tarifeler/faturali`, `/mobil-tarifeler/turkcell` … Her kayıt aynı veriyi
+bir süzgeçle daraltır; kendi başlığı, giriş metni ve SSS'i vardır. Sunucu (SSR,
+JSON-LD, sitemap, llms.txt) ve istemci (`pages/Landing.tsx`) aynı süzgeci
+kullanır. **Süzgece uyan kayıt yoksa sayfa 404 döner ve sitemap'e/iç
+bağlantılara girmez** (ör. faturasız tarife eklenince `/mobil-tarifeler/faturasiz`
+kendiliğinden açılır). Yeni sayfa = listeye bir kayıt.
+
+### Teknik SEO kuralları
+
+- **SSS görünür olmalı:** FAQPage şemasındaki sorular `shared/faq.ts`'ten gelir
+  ve istemcide `components/Sss.tsx` ile sayfada gösterilir. Şema var, metin yok
+  = Google yönergesi ihlali.
+- **robots.txt:** `/api/packages`, `/api/mobile`, `/api/blog` açıktır —
+  Googlebot sayfayı JS ile çizerken bunlara erişemezse liste boş görünür. API
+  yanıtları `X-Robots-Tag: noindex` taşır. İsimle anılan AI botları `*`
+  grubunu yok saydığı için engeller onların grubunda da yazılıdır.
+- **Tek adres:** www'suz → www, http → https, sondaki `/` → çizgisiz (301).
+  `*.up.railway.app` adresi `noindex` başlığı alır.
+- **Sıkıştırma:** `compression` (hız testi uçları hariç).
+- **Paylaşım görseli:** `og-tarifesec.jpg` (1200×630) ve `logo-512.png` —
+  sosyal ağlar SVG göstermez. SVG kaynak değişirse `node tools/og-gorsel.mjs`.
+- **lastmod / dateModified:** verinin gerçek değişim tarihi (paket
+  `updatedAt`/`lastScrapedAt`); kurumsal sayfalar `shared/site.ts`
+  `contentUpdatedAt`. Her istekte "bugün" yazılmaz.
+- **İş ortağı bağlantıları** (`affiliateUrl`) `rel="sponsored"` taşır.
+- WebSite şemasında **SearchAction yok** — sitede `?q=` araması yok.
+
 ### Yeni rota eklerken
 
 1. `client/src/App.tsx` — rota tanımı
 2. `shared/routes.ts` — başlık/açıklama (sitemap ve SSR otomatik kapsar)
 3. `server/seo/content.ts` — taranabilir içerik (gerekiyorsa)
-4. `server/seo/faq.ts` — sayfaya ait SSS (varsa)
+4. `shared/faq.ts` — sayfaya ait SSS (varsa) + sayfada `<Sss>` bileşeni
 
 ## Klasör Yapısı
 
@@ -248,7 +307,7 @@ tarifesec/
 │   ├── public/          # favicon, OG görseli
 │   └── src/
 │       ├── pages/       # Home, PaketKarsilastirma, MobilTarifeler, HizTesti, Blog, NotFound
-│       ├── components/  # Layout, VisitCounter, TeklifFormu
+│       ├── components/  # Layout, VisitCounter, Sss, LandingLinks
 │       └── lib/         # api.ts (fetch), hooks.ts (useSeo, useCountUp, parseFeatures)
 ├── server/
 │   ├── index.ts         # Express entry + güvenlik başlıkları + SSR servis

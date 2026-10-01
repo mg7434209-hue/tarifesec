@@ -20,6 +20,8 @@ export const SOURCES: Source[] = [
     operatorSlug: "superonline",
     label: "Superonline",
     urls: [
+      "https://www.superonline.net/ev-interneti/100-mbps",
+      "https://www.superonline.net/ev-interneti/fiber-internet",
       "https://www.superonline.net/bireysel/internet/fiber-internet-paketleri",
       "https://www.superonline.net/fiber-internet",
     ],
@@ -28,8 +30,10 @@ export const SOURCES: Source[] = [
     operatorSlug: "turknet",
     label: "TurkNet",
     urls: [
+      // TurkNet'in alan adı turk.net'tir; eski turknet.net.tr yedekte kalır
+      "https://www.turk.net/tarifelerimiz",
+      "https://www.turk.net/gigafiber",
       "https://www.turknet.net.tr/internet-paketleri",
-      "https://www.turknet.net.tr/",
     ],
   },
   {

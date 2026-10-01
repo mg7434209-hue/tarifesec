@@ -5,7 +5,9 @@
 import { Router } from "express";
 import { SITE } from "../seo/meta";
 import { ROUTES } from "../seo/meta";
-import { getPosts } from "../seo/data";
+import { getPosts, getPackages, getMobile, liveLandings, lastChanged } from "../seo/data";
+import { LANDINGS } from "../../shared/landings";
+import { SITE_INFO } from "../../shared/site";
 import { llmsTxt, llmsFullTxt } from "../seo/llms";
 
 const router = Router();
@@ -34,17 +36,32 @@ router.get("/robots.txt", (_req, res) => {
     "meta-externalagent", "Bytespider", "Amazonbot", "cohere-ai",
   ];
 
+  /**
+   * Sayfanın render için çektiği OKUMA uçları açık kalır. Googlebot sayfayı
+   * JS ile çizerken /api/packages'e erişemezse, React SSR içeriğini
+   * "Yükleniyor…" ile değiştirir ve Google'ın gördüğü son hâl boş liste olur.
+   * Uçların kendisi X-Robots-Tag: noindex taşır (server/index.ts), dizine
+   * girmez. En uzun eşleşen kural kazanır: Allow /api/packages > Disallow /api/.
+   */
+  const rules = `Allow: /
+Allow: /api/packages
+Allow: /api/mobile
+Allow: /api/blog
+Disallow: /api/
+Disallow: /admin`;
+
   text(
     res,
     `# ${SITE}
 # Yapay zekâ tarayıcılarına açıktır — içerik alıntılanabilir.
 
 User-agent: *
-Allow: /
-Disallow: /api/
-Disallow: /admin
+${rules}
 
-${aiBots.map((b) => `User-agent: ${b}\nAllow: /`).join("\n\n")}
+# İsimle eşleşen bot "User-agent: *" grubunu YOK SAYAR (RFC 9309); bu yüzden
+# engeller bu grupta da tekrarlanır — yoksa AI botları /admin ve /api/'yi tarar.
+${aiBots.map((b) => `User-agent: ${b}`).join("\n")}
+${rules}
 
 # Yapay zekâ için yapılandırılmış özet
 # ${SITE}/llms.txt
@@ -55,16 +72,46 @@ Sitemap: ${SITE}/sitemap.xml
   );
 });
 
+/**
+ * sitemap.xml — lastmod GERÇEK değişim tarihidir.
+ *
+ * Her istekte "bugün" yazmak, Google'ın lastmod'a güvenmeyi bırakmasına yol
+ * açar. Veri sayfaları paketlerin/tarifelerin son güncellemesini, kurumsal
+ * ve yasal sayfalar shared/site.ts'teki tarihleri taşır.
+ */
 router.get("/sitemap.xml", async (_req, res) => {
-  const posts = await getPosts();
-  const today = new Date().toISOString().slice(0, 10);
+  const [posts, pkgs, mob, live] = await Promise.all([getPosts(), getPackages(), getMobile(), liveLandings()]);
+  const day = (d: Date | null | undefined) => (d ? d.toISOString().slice(0, 10) : null);
+  const fallback = SITE_INFO.contentUpdatedAt;
+
+  const pkgDate = day(lastChanged(pkgs));
+  const mobDate = day(lastChanged(mob));
+  const postDate = day(lastChanged(posts));
+  const newest = [pkgDate, mobDate].filter(Boolean).sort().pop() ?? null;
+
+  const routeDate: Record<string, string | null> = {
+    "/": newest,
+    "/paket-karsilastir": pkgDate,
+    "/mobil-tarifeler": mobDate,
+    "/blog": postDate,
+    "/kvkk": SITE_INFO.legalUpdatedAt,
+    "/gizlilik": SITE_INFO.legalUpdatedAt,
+    "/cerez-politikasi": SITE_INFO.legalUpdatedAt,
+  };
 
   const urls = [
     ...ROUTES.map((r) => ({
       loc: `${SITE}${r.path}`,
-      lastmod: today,
+      lastmod: routeDate[r.path] ?? fallback,
       changefreq: r.changefreq,
       priority: r.priority,
+    })),
+    // Yalnızca verisi olan açılış sayfaları — boş olanlar 404 döner
+    ...LANDINGS.filter((l) => live.has(l.path)).map((l) => ({
+      loc: `${SITE}${l.path}`,
+      lastmod: (l.kind === "internet" ? pkgDate : mobDate) ?? fallback,
+      changefreq: "daily",
+      priority: "0.8",
     })),
     ...posts.map((p) => ({
       loc: `${SITE}/blog/${p.slug}`,

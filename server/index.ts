@@ -1,5 +1,6 @@
 import express from "express";
 import cookieParser from "cookie-parser";
+import compression from "compression";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
@@ -43,6 +44,50 @@ const serveSite = hasBuild && !isDev;
 app.set("trust proxy", 1);
 app.disable("x-powered-by");
 
+/**
+ * Sıkıştırma — HTML, JSON, JS, CSS, sitemap, llms.txt.
+ * Railway kenarı yanıtları sıkıştırmıyor; sıkıştırmasız HTML/JS LCP'yi ve
+ * Core Web Vitals'ı doğrudan kötüleştirir. Hız testi uçları HARİÇ: rastgele
+ * baytları sıkıştırmaya çalışmak CPU harcar ve ölçümü bozar.
+ */
+app.use(
+  compression({
+    filter: (req, res) => !req.path.startsWith("/api/speedtest") && compression.filter(req, res),
+  })
+);
+
+/**
+ * Tek adres kuralı (yinelenen içerik önlemi):
+ *  - www'suz alan adı → www (301)          tarifesec.net.tr → www.tarifesec.net.tr
+ *  - http → https (301)                    yalnız kanonik alan adında
+ *  - sondaki eğik çizgi → çizgisiz (301)   /paket-karsilastir/ → /paket-karsilastir
+ * Railway'in *.up.railway.app adresi dizine girmesin diye noindex başlığı alır.
+ */
+const canonicalUrl = new URL(config.site.url);
+const canonicalHost = canonicalUrl.host;
+const apexHost = canonicalHost.replace(/^www\./, "");
+app.use((req, res, next) => {
+  const host = String(req.headers.host ?? "").toLowerCase();
+  const proto = String(req.headers["x-forwarded-proto"] ?? req.protocol).split(",")[0].trim();
+  const isCanonicalFamily = host === canonicalHost || host === apexHost;
+
+  if (host.endsWith(".up.railway.app")) res.setHeader("X-Robots-Tag", "noindex, nofollow");
+  if (req.path.startsWith("/api/") || (req.method !== "GET" && req.method !== "HEAD")) return next();
+
+  const needsSlash = req.path.length > 1 && req.path.endsWith("/");
+  const needsHost = isCanonicalFamily && host !== canonicalHost;
+  const needsHttps = isCanonicalFamily && canonicalUrl.protocol === "https:" && proto === "http";
+  if (!needsSlash && !needsHost && !needsHttps) return next();
+
+  const qs = req.originalUrl.slice(req.path.length);
+  // Baştaki çoklu eğik çizgi tekilleştirilir: "//kotu.site/" → göreli
+  // yönlendirmede protokolsüz adres (açık yönlendirme) olmasın.
+  const trimmed = needsSlash ? req.path.replace(/\/+$/, "") : req.path;
+  const pathOnly = "/" + trimmed.replace(/^\/+/, "");
+  const origin = isCanonicalFamily ? `${canonicalUrl.protocol}//${canonicalHost}` : "";
+  res.redirect(301, `${origin}${pathOnly}${qs}`);
+});
+
 // Hız testi yüklemesi application/octet-stream gönderir; express.json ve
 // urlencoded yalnızca kendi içerik türlerini ayrıştırdığı için ham gövde
 // speedtest rotasına dokunulmadan ulaşır.
@@ -76,6 +121,12 @@ if (isDev) {
 app.use(seoRouter);
 
 // ─── API ──────────────────────────────────────────────────────────────────────
+// Sayfaların çektiği JSON uçları robots.txt'te taranabilir (render için),
+// ama arama sonuçlarına girmemeli.
+app.use("/api", (_req, res, next) => {
+  res.setHeader("X-Robots-Tag", "noindex");
+  next();
+});
 app.use("/api/packages", packagesRouter);
 app.use("/api/mobile", mobileRouter);
 app.use("/api/leads", leadsRouter);
@@ -148,13 +199,16 @@ if (serveSite) {
   // Şablon bir kez okunur
   const template = fs.readFileSync(indexFile, "utf8");
 
-  // Hash'li varlıklar uzun süre, index.html hiç önbelleğe alınmaz
+  // Hash'li varlıklar (dist/client/assets) bir yıl; adı sabit dosyalar
+  // (og görseli, logo, favicon) bir gün — değişince eski kopya takılı kalmasın.
   app.use(
     express.static(distPath, {
       index: false,
       setHeaders(res, filePath) {
-        if (/\.(js|css|woff2?|png|jpe?g|svg|webp|avif)$/.test(filePath)) {
+        if (filePath.includes(`${path.sep}assets${path.sep}`)) {
           res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+        } else if (/\.(png|jpe?g|svg|webp|avif|ico)$/.test(filePath)) {
+          res.setHeader("Cache-Control", "public, max-age=86400");
         }
       },
     })

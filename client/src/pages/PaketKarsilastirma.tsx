@@ -2,9 +2,14 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchPackages } from "@/lib/api";
 import { Wifi, Star, ExternalLink, SlidersHorizontal, TrendingUp, TrendingDown, AlertTriangle } from "lucide-react";
-import TeklifFormu from "@/components/TeklifFormu";
 import PartnerCard from "@/components/PartnerCard";
 import { useRouteSeo, parseFeatures } from "@/lib/hooks";
+import LandingLinks from "@/components/LandingLinks";
+import Sss from "@/components/Sss";
+import { FAQ } from "@shared/faq";
+import { PARTNER_REL } from "@shared/partners";
+import { checkedLabel } from "@shared/freshness";
+import { speedText } from "@shared/format";
 
 const OPERATORS = [
   { value: "", label: "Tüm Operatörler" },
@@ -97,7 +102,7 @@ export default function PaketKarsilastirma() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">
-      <h1 className="text-2xl font-bold text-gray-900 mb-1">İnternet Paketi Karşılaştırma</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-1">Ev İnterneti Paket Karşılaştırma</h1>
       <p className="text-sm text-gray-500 mb-6">Tüm operatörlerin ev interneti paketlerini filtreleyin</p>
 
       <div className="bg-white border border-gray-200 rounded-xl p-4 mb-6 grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -181,7 +186,7 @@ export default function PaketKarsilastirma() {
               )}
 
               <div className="flex items-center gap-3 text-sm text-gray-600 mb-3">
-                <span className="flex items-center gap-1"><Wifi className="w-3.5 h-3.5 text-[#0097a7]" />{pkg.downloadSpeed} Mbps</span>
+                <span className="flex items-center gap-1"><Wifi className="w-3.5 h-3.5 text-[#0097a7]" />{speedText(pkg.downloadSpeed)}</span>
                 <span>{pkg.dataLimit ?? "Limitsiz"}</span>
               </div>
 
@@ -192,15 +197,14 @@ export default function PaketKarsilastirma() {
               )}
 
               <div className="text-xs text-gray-300 mb-3">
-                {pkg.lastScrapedAt
-                  ? `Son kontrol: ${new Date(pkg.lastScrapedAt).toLocaleDateString("tr-TR")}`
-                  : "Manuel güncelleme"}
+                {checkedLabel(pkg)}
               </div>
 
               <a
                 href={pkg.affiliateUrl ?? pkg.officialUrl ?? "#"}
                 target="_blank"
-                rel="noopener noreferrer"
+                // İş ortaklığı bağlantısı Google kuralı gereği "sponsored" işaretlenir
+                rel={pkg.affiliateUrl ? PARTNER_REL : "noopener noreferrer"}
                 className={`mt-auto flex items-center justify-center gap-1.5 text-sm font-semibold py-2.5 rounded-lg transition-colors ${
                   pkg.affiliateUrl
                     ? "bg-[#0097a7] hover:bg-[#00838f] text-white"
@@ -214,13 +218,14 @@ export default function PaketKarsilastirma() {
         })}
       </div>
 
+      <LandingLinks kind="internet" />
+
       <div className="mt-10">
         <PartnerCard context="internet" placement="sonucAlti" />
       </div>
 
-      <div className="mt-10">
-        <TeklifFormu packageInterest="Ev interneti" />
-      </div>
+
+      <Sss items={FAQ["/paket-karsilastir"] ?? []} />
 
       {!isLoading && pkgs.length === 0 && (
         <div className="text-center py-16 text-gray-400">

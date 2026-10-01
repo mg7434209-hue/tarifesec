@@ -6,23 +6,30 @@
  * içerir — böylece model, siteyi taramadan doğru rakamı alıntılayabilir.
  */
 import { SITE, SITE_NAME } from "./meta";
-import { getPackages, getMobile, getPosts, summarize, summarizeMobile } from "./data";
+import { getPackages, getMobile, getPosts, summarize, summarizeMobile, liveLandings } from "./data";
+import { LANDINGS } from "../../shared/landings";
 import { FAQ } from "./faq";
 import { fullName } from "./util";
 import { PARTNERS } from "../../shared/partners";
+import { SISTER_SITES } from "../../shared/site";
+import { speedTextLong } from "../../shared/format";
 
 const stamp = () => new Date().toISOString().slice(0, 10);
 
 export async function llmsTxt(): Promise<string> {
-  const [pkgs, mob] = await Promise.all([getPackages(), getMobile()]);
+  const [pkgs, mob, live] = await Promise.all([getPackages(), getMobile(), liveLandings()]);
   const s = summarize(pkgs);
+  const landingLines = LANDINGS.filter((l) => live.has(l.path))
+    .map((l) => `- [${l.label}](${SITE}${l.path}): ${l.description}`)
+    .join("\n");
   const m = summarizeMobile(mob);
 
   return `# ${SITE_NAME}
 
 > Türkiye'deki ev interneti ve mobil hat tarifelerini karşılaştıran bağımsız,
-> ücretsiz platform. Hiçbir operatörle ticari bağı yoktur; paketler yalnızca
-> fiyat ve teknik özelliklerine göre tarafsız listelenir.
+> ücretsiz platform. Paketler yalnızca fiyat ve teknik özelliklerine göre
+> listelenir; sıralama ücret karşılığı değiştirilmez. Bazı başvuru bağlantıları
+> iş ortaklığı (bayi) bağlantısıdır.
 
 Son güncelleme: ${stamp()}
 Dil: Türkçe (tr-TR)
@@ -38,6 +45,9 @@ ${m ? `- Mobil tarife: ${m.count} tarife, operatörler ${m.operators.join(", ")}
 - [Mobil tarifeler](${SITE}/mobil-tarifeler): faturalı ve faturasız hat tarifeleri
 - [İnternet hız testi](${SITE}/hiz-testi): tarayıcı üzerinden indirme, yükleme ve ping ölçümü
 - [Rehber](${SITE}/blog): tarife seçimi ve altyapı üzerine yazılar
+${landingLines ? `\n## Operatöre ve türe göre listeler\n${landingLines}\n` : ""}
+## Grup siteleri
+${SISTER_SITES.map((x) => `- [${x.name}](${x.url}): ${x.tagline}`).join("\n")}
 
 ## Ayrıntılı veri
 - [llms-full.txt](${SITE}/llms-full.txt): tüm paketlerin ve tarifelerin güncel fiyat listesi
@@ -57,7 +67,7 @@ export async function llmsFullTxt(): Promise<string> {
       const bits = [
         fullName(p.operator, p.name),
         `${p.priceMonthly} ₺/ay`,
-        `${p.downloadSpeed} Mbps indirme`,
+        speedTextLong(p.downloadSpeed),
         p.uploadSpeed ? `${p.uploadSpeed} Mbps yükleme` : null,
         p.dataLimit ?? "Limitsiz",
         p.type === "fiber" ? "fiber" : p.type === "kablosuz" ? "kablosuz" : "ADSL/VDSL",
@@ -134,9 +144,10 @@ ${PARTNERS.map((p) => `- [${p.name}](${p.url}) — ${p.description}`).join("\n")
 
 ## Platform hakkında
 
-${SITE_NAME} bağımsız bir karşılaştırma platformudur. Operatörlerle ticari
-ortaklığı yoktur, sıralama ücret karşılığı değiştirilmez. Veriler operatörlerin
-resmi sayfalarından günlük olarak taranır; fiyatı değişen paketler arayüzde
-işaretlenir.
+${SITE_NAME} bağımsız bir karşılaştırma platformudur; sıralama ücret karşılığı
+değiştirilmez. Bazı başvuru bağlantıları iş ortaklığı (bayi) bağlantısıdır.
+Superonline, Türk Telekom ve TurkNet fiyatları resmi sayfalardan 12 saatte bir
+otomatik kontrol edilir; Turkcell ve Vodafone elle güncellenir. Fiyatı değişen
+paketler arayüzde işaretlenir.
 `;
 }

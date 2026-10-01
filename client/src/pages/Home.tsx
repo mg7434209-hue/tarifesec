@@ -1,8 +1,10 @@
 import { Link } from "wouter";
 import { Zap, Smartphone, BarChart3, ArrowRight, CheckCircle, Shield } from "lucide-react";
-import TeklifFormu from "@/components/TeklifFormu";
 import PartnerCard from "@/components/PartnerCard";
 import { useRouteSeo } from "@/lib/hooks";
+import LandingLinks from "@/components/LandingLinks";
+import Sss from "@/components/Sss";
+import { FAQ } from "@shared/faq";
 
 const OPERATORS = [
   { name: "Superonline", color: "#0097a7" },
@@ -23,7 +25,7 @@ const FEATURES = [
   {
     icon: Smartphone,
     title: "Mobil Tarifeler",
-    desc: "Turkcell, Vodafone ve Türk Telekom güncel faturalı hat fiyatlarını karşılaştır.",
+    desc: "Turkcell ve Vodafone güncel faturalı hat fiyatlarını karşılaştır.",
     href: "/mobil-tarifeler",
     cta: "Tarifeyi Seç",
   },
@@ -117,9 +119,10 @@ export default function Home() {
         ))}
       </section>
 
-      {/* Teklif formu — gerçek dönüşüm noktası */}
+      {/* Operatöre ve türe göre listeler — iç bağlantı ağı */}
       <section className="max-w-5xl mx-auto px-4 pb-16">
-        <TeklifFormu />
+        <LandingLinks kind="internet" />
+        <LandingLinks kind="mobil" />
       </section>
 
       {/* İş ortakları */}
@@ -139,12 +142,17 @@ export default function Home() {
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-1">Neden tarifesec.net.tr?</h2>
             <p className="text-sm text-gray-500">
-              Herhangi bir operatörle ticari bağımız yoktur. Tüm karşılaştırmalar
-              operatörlerin resmi sitelerindeki güncel fiyatlara dayanır. Amacımız
+              Sıralama ücret karşılığı değiştirilmez; bazı başvuru bağlantıları iş
+              ortaklığı (bayi) bağlantısıdır ve fiyatı ya da sıralamayı etkilemez.
+              Karşılaştırmalar operatörlerin resmi sitelerindeki fiyatlara dayanır. Amacımız
               tek bir yerde en doğru bilgiyle doğru kararı vermenize yardımcı olmaktır.
             </p>
           </div>
         </div>
+      </section>
+
+      <section className="max-w-5xl mx-auto px-4 pb-16">
+        <Sss items={FAQ["/"] ?? []} />
       </section>
     </div>
   );

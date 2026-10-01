@@ -14,7 +14,10 @@ import type { Pkg, Mobile, Post } from "./data";
 import { summarize, summarizeMobile } from "./data";
 import { byContext, PARTNER_REL, type PartnerContext } from "../../shared/partners";
 import { legalBySlug } from "../../shared/legal";
+import { checkedLabel } from "../../shared/freshness";
+import { speedText, speedTextLong } from "../../shared/format";
 import { SITE_INFO, hasContactPhone, hasContactAddress } from "../../shared/site";
+import { LANDINGS, landingSummary, type Landing, type LandingKind } from "../../shared/landings";
 
 const faqBlock = (items: Faq[]) =>
   !items.length
@@ -58,6 +61,21 @@ export const freshnessLine = (rows: { lastScrapedAt: Date | null }[]) => {
       `Kesin fiyat için operatörün resmi sayfasını ziyaret edin.</small></p>`;
 };
 
+/**
+ * Açılış sayfalarına iç bağlantılar. İstemcideki <LandingLinks> ile AYNI
+ * liste — yalnızca verisi olan sayfalar (boş sayfa 404'tür, ona bağlantı
+ * verilmez).
+ */
+export const landingLinks = (kind: LandingKind, live: Set<string>, exclude?: string) => {
+  const list = LANDINGS.filter((l) => l.kind === kind && l.path !== exclude && live.has(l.path));
+  if (!list.length) return "";
+  const title = kind === "internet" ? "Ev interneti: operatöre ve türe göre" : "Mobil tarifeler: operatöre ve hat türüne göre";
+  return `<nav aria-label="${esc(title)}"><h2>${esc(title)}</h2><ul>${list
+    .map((l) => `<li><a href="${esc(l.path)}">${esc(l.label)}</a></li>`)
+    .join("")}</ul></nav>`;
+};
+
+
 const pkgRow = (p: Pkg) => {
   const feats = (() => {
     try {
@@ -70,14 +88,17 @@ const pkgRow = (p: Pkg) => {
 
   return `<li>
     <h3>${esc(fullName(p.operator, p.name))}</h3>
-    <p><strong>${tl(p.priceMonthly)}/ay</strong> · ${esc(p.downloadSpeed)} Mbps indirme${
+    <p><strong>${tl(p.priceMonthly)}/ay</strong> · ${esc(speedTextLong(p.downloadSpeed))}${
       p.uploadSpeed ? ` · ${esc(p.uploadSpeed)} Mbps yükleme` : ""
     } · ${esc(p.dataLimit ?? "Limitsiz")}${
       p.commitmentMonths ? ` · ${esc(p.commitmentMonths)} ay taahhüt` : ""
-    }${p.priceNoCommitment ? ` · taahhütsüz ${tl(p.priceNoCommitment)}` : ""}${
+    }${p.priceNoCommitment ? ` · taahhütsüz ${tl(p.priceNoCommitment)}${
+      p.priceNoCommitment > p.priceMonthly ? ` (+${tl(p.priceNoCommitment - p.priceMonthly)})` : ""
+    }` : ""}${
       p.modemIncluded ? " · modem dahil" : ""
     }</p>
     ${feats.length ? `<ul>${feats.map((f: string) => `<li>${esc(f)}</li>`).join("")}</ul>` : ""}
+    <p><small>${esc(checkedLabel(p))}</small></p>
   </li>`;
 };
 
@@ -88,17 +109,18 @@ const mobileRow = (t: Mobile) => `<li>
     } · ${t.minuteLimit ? `${esc(t.minuteLimit)} dakika` : "sınırsız dakika"} · ${
       t.isContract ? "faturalı" : "faturasız"
     } hat</p>
+    <p><small>${esc(checkedLabel(t))}</small></p>
   </li>`;
 
 /** Ana sayfa */
-export function homeContent(pkgs: Pkg[], mobile: Mobile[]): string {
+export function homeContent(pkgs: Pkg[], mobile: Mobile[], live: Set<string>): string {
   const s = summarize(pkgs);
   const m = summarizeMobile(mobile);
 
   return `<h1>Türkiye'nin Tüm İnternet ve Mobil Tarifelerini Tek Yerde Karşılaştırın</h1>
 <p>tarifesec.net.tr, Superonline, Türk Telekom, Vodafone, Turkcell ve TurkNet
 ev interneti paketlerini ve mobil hat tarifelerini bağımsız olarak karşılaştıran
-ücretsiz bir platformdur. Hiçbir operatörle ticari bağımız yoktur.</p>
+ücretsiz bir platformdur. Sıralama ücret karşılığı değiştirilmez; bazı başvuru bağlantıları iş ortaklığı (bayi) bağlantısıdır ve fiyatı ya da sıralamayı etkilemez.</p>
 
 ${
   s
@@ -106,7 +128,7 @@ ${
 Fiyatlar aylık <strong>${tl(s.minPrice)}</strong> ile <strong>${tl(s.maxPrice)}</strong> arasında,
 en yüksek hız <strong>${s.maxSpeed} Mbps</strong>. En uygun paket:
 <strong>${esc(fullName(s.cheapest.operator, s.cheapest.name))}</strong> —
-${tl(s.cheapest.priceMonthly)}/ay, ${s.cheapest.downloadSpeed} Mbps.</p>`
+${tl(s.cheapest.priceMonthly)}/ay, ${esc(speedText(s.cheapest.downloadSpeed))}.</p>`
     : ""
 }
 ${
@@ -126,12 +148,14 @@ ${tl(m.minPrice)} ile ${tl(m.maxPrice)} arasında. En uygun tarife:
 </ul>
 
 ${s ? `<h2>Öne çıkan paketler</h2><ul>${pkgs.slice(0, 6).map(pkgRow).join("")}</ul>` : ""}
+${landingLinks("internet", live)}
+${landingLinks("mobil", live)}
 ${partnerBlock("genel")}
 ${faqBlock(FAQ["/"] ?? [])}`;
 }
 
 /** Ev interneti karşılaştırma */
-export function packagesContent(pkgs: Pkg[]): string {
+export function packagesContent(pkgs: Pkg[], live: Set<string>): string {
   const s = summarize(pkgs);
   const byOperator = new Map<string, Pkg[]>();
   for (const p of pkgs) {
@@ -172,12 +196,13 @@ ${[...byOperator.entries()]
   </ul>
 </section>
 
+${landingLinks("internet", live)}
 ${partnerBlock("internet")}
 ${faqBlock(FAQ["/paket-karsilastir"] ?? [])}`;
 }
 
 /** Mobil tarifeler */
-export function mobileContent(rows: Mobile[]): string {
+export function mobileContent(rows: Mobile[], live: Set<string>): string {
   const m = summarizeMobile(rows);
   const byOperator = new Map<string, Mobile[]>();
   for (const t of rows) {
@@ -186,7 +211,7 @@ export function mobileContent(rows: Mobile[]): string {
   }
 
   return `<h1>Mobil Hat Tarifeleri Karşılaştırma</h1>
-<p>Turkcell, Vodafone ve Türk Telekom faturalı ve faturasız mobil tarifelerini
+<p>Faturalı ve faturasız mobil tarifeleri
 aylık ücret, internet (GB) ve dakika bakımından karşılaştırın.</p>
 ${
   m
@@ -202,8 +227,28 @@ ${[...byOperator.entries()]
   )
   .join("")}
 
+${landingLinks("mobil", live)}
 ${partnerBlock("internet")}
 ${faqBlock(FAQ["/mobil-tarifeler"] ?? [])}`;
+}
+
+/** Arama niyetine özel açılış sayfası (shared/landings.ts) */
+export function landingContent(l: Landing, rows: (Pkg | Mobile)[], live: Set<string>): string {
+  const isNet = l.kind === "internet";
+  const summary = landingSummary(l, rows as any);
+  const back = isNet
+    ? `<p>Tüm operatörleri filtrelemek için <a href="/paket-karsilastir">ev interneti karşılaştırma</a> sayfasına bakın.</p>`
+    : `<p>Tüm operatörleri filtrelemek için <a href="/mobil-tarifeler">mobil tarife karşılaştırma</a> sayfasına bakın.</p>`;
+
+  return `<h1>${esc(l.h1)}</h1>
+${l.intro.map((para) => `<p>${esc(para)}</p>`).join("\n")}
+${summary ? `<p><strong>${esc(summary)}</strong></p>` : ""}
+${freshnessLine(rows)}
+<ol>${rows.map((r) => (isNet ? pkgRow(r as Pkg) : mobileRow(r as Mobile))).join("")}</ol>
+${back}
+${landingLinks(l.kind, live, l.path)}
+${partnerBlock("internet")}
+${faqBlock(l.faq)}`;
 }
 
 /** Hız testi */
@@ -301,12 +346,15 @@ export function aboutContent(): string {
 sayfada karşılaştırmanızı sağlayan bağımsız bir platformdur.</p>
 
 <section><h2>Bağımsızlık</h2>
-<p>Hiçbir operatörle ticari ortaklığımız yoktur ve sıralamalar ücret karşılığı
-değiştirilmez. Sitede iş ortaklarımıza ait sponsorlu bağlantılar bulunur; bunlar
+<p>Sıralamalar ücret karşılığı değiştirilmez; paketler yalnızca fiyat ve teknik
+özelliklerine göre listelenir. Bazı başvuru bağlantıları iş ortaklığı (bayi)
+bağlantısıdır; bunlar fiyatı ve sıralamayı etkilemez. Sitede iş ortaklarımıza ait sponsorlu bağlantılar bulunur; bunlar
 açıkça "reklam" olarak işaretlenir ve karşılaştırma sonuçlarını etkilemez.</p></section>
 
 <section><h2>Veriler nasıl güncelleniyor?</h2>
-<p>Fiyatlar operatörlerin resmi sayfalarından düzenli olarak taranır. Emin
+<p>Superonline, Türk Telekom ve TurkNet fiyatları resmi sayfalardan 12 saatte bir
+otomatik kontrol edilir; Turkcell ve Vodafone fiyatları elle güncellenir. Her
+paketin yanında son kontrol tarihi yazar. Emin
 olunamayan hiçbir değer yayınlanmaz: belirsiz eşleşmeler ve olağandışı fiyat
 sıçramaları otomatik uygulanmaz, elle kontrol edilir.</p></section>
 
