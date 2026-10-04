@@ -25,7 +25,7 @@ const FEATURES = [
   {
     icon: Smartphone,
     title: "Mobil Tarifeler",
-    desc: "Turkcell ve Vodafone güncel faturalı hat fiyatlarını karşılaştır.",
+    desc: "Turkcell, Vodafone ve Türk Telekom güncel faturalı hat fiyatlarını karşılaştır.",
     href: "/mobil-tarifeler",
     cta: "Tarifeyi Seç",
   },

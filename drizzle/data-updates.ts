@@ -234,6 +234,31 @@ export const DATA_UPDATES: DataUpdate[] = [
     source: UNVERIFIED + " (Vodafone Evde Fiber için 499 / 799 / 1.039 TL gibi çelişkili değerler)",
   },
 
+  // ── 04.10.2026 — ikinci tur: yayından kaldırılanlar geri açıldı ─────────
+  {
+    id: "2026-10-04-vodafone-ev-to-fiber-200",
+    table: "packages",
+    match: { operatorSlug: "vodafone", name: "Vodafone Ev 100 Mbps" },
+    // 01.10'da isActive:false yapıldı; fiyat sütunu eski değerde kaldı
+    expectPrice: 679,
+    replaces: true,
+    set: {
+      name: "Vodafone Fiber 200",
+      type: "fiber",
+      downloadSpeed: 200,
+      uploadSpeed: null,
+      priceMonthly: 889,
+      priceNoCommitment: null,
+      commitmentMonths: 12,
+      dataLimit: "Limitsiz",
+      modemIncluded: true,
+      features: ["12 ay sabit fiyat", "Wi-Fi 6 modem dahil", "Ücretsiz kurulum", "Vodafone mobil müşterisine 120 ₺ indirim"],
+      officialUrl: "https://www.vodafone.com.tr/net/fiber-internet",
+      isActive: true,
+    },
+    source: "vodafone.com.tr/net/fiber-internet — Fiber 200, Wi-Fi 6 modem, 889 TL/ay, 12 ay sabit fiyat — doğrulama 04.10.2026",
+  },
+
   // ── Mobil ────────────────────────────────────────────────────────────────
   ...(
     [
@@ -301,6 +326,35 @@ export const DATA_UPDATES: DataUpdate[] = [
       expectPrice: oldPrice,
       set: { isActive: false },
       source: UNVERIFIED + " (Türk Telekom mobil için 205–1.100 TL arası çelişkili değerler)",
+    })
+  ),
+  ...(
+    [
+      ["Avantaj 8 GB", 429, "Yeni Dijital Lider 10 GB", 10, 365],
+      ["Avantaj 15 GB", 569, "Yeni Dijital Lider 20 GB", 20, 465],
+      ["Sınırsız Avantaj", 899, "Yeni Dijital Lider 40 GB", 40, 685],
+    ] as const
+  ).map(
+    ([old, oldPrice, name, gb, price]): DataUpdate => ({
+      id: `2026-10-04-tt-mobil-${gb}gb`,
+      table: "mobile",
+      match: { operatorSlug: "turk-telekom", name: old },
+      // 01.10'da isActive:false yapıldı; fiyat sütunu eski değerde kaldı
+      expectPrice: oldPrice,
+      replaces: true,
+      set: {
+        name,
+        gbLimit: gb,
+        minuteLimit: 1000,
+        smsLimit: 250,
+        priceMonthly: price,
+        isContract: true,
+        features: ["12 ay taahhüt", "1000 dk + 250 SMS", "Online'a özel"],
+        officialUrl: "https://bireysel.turktelekom.com.tr/mobil/yeni-musteri-tarife-ve-paketleri/faturali-tarifeler",
+        isActive: true,
+      },
+      source:
+        "bireysel.turktelekom.com.tr 'Yeni Dijital Lider' faturalı tarifeler (taahhütlü; 10 GB 365, 20 GB 465, 40 GB 685 TL) — doğrulama 04.10.2026",
     })
   ),
 ];

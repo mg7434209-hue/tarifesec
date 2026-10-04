@@ -2,7 +2,7 @@
  * Başlangıç verisi — hem CLI seed'i hem de sunucu açılışındaki otomatik
  * doldurma buradan okur (tek kaynak).
  *
- * Değerler 01.10.2026'da resmi operatör sayfalarından doğrulandı; kaynaklar
+ * Değerler 01.10.2026'da (Vodafone ev + Türk Telekom mobil 04.10.2026'da) resmi operatör sayfalarından doğrulandı; kaynaklar
  * drizzle/data-updates.ts'te. Fiyat değişince BURASI ve data-updates.ts
  * birlikte güncellenir (canlı veritabanını data-updates düzeltir).
  */
@@ -91,7 +91,15 @@ export const SEED_PACKAGES: InsertPackage[] = [
       ]),
       officialUrl: "https://www.turk.net/",
     },
-    // Vodafone ev interneti: 01.10.2026'da güncel fiyat doğrulanamadı — eklenmedi.
+    // ── Vodafone (04.10.2026, vodafone.com.tr) ──
+    {
+      operator: "Vodafone", operatorSlug: "vodafone", type: "fiber",
+      name: "Vodafone Fiber 200", downloadSpeed: 200, uploadSpeed: null,
+      priceMonthly: 889, priceNoCommitment: null, commitmentMonths: 12,
+      dataLimit: "Limitsiz", modemIncluded: true,
+      features: JSON.stringify(["12 ay sabit fiyat", "Wi-Fi 6 modem dahil", "Ücretsiz kurulum", "Vodafone mobil müşterisine 120 ₺ indirim"]),
+      officialUrl: "https://www.vodafone.com.tr/net/fiber-internet",
+    },
   ];
 
 const TC = (name: string, gb: number, price: number, featured = false): InsertMobileTariff => ({
@@ -108,6 +116,13 @@ const VF = (name: string, gb: number, price: number, featured = false): InsertMo
   officialUrl: "https://www.vodafone.com.tr/tarifeler/faturali-tarifeler",
 });
 
+const TT = (name: string, gb: number, price: number, featured = false): InsertMobileTariff => ({
+  operator: "Türk Telekom", operatorSlug: "turk-telekom", name,
+  gbLimit: gb, minuteLimit: 1000, smsLimit: 250, priceMonthly: price, isContract: true, isFeatured: featured,
+  features: JSON.stringify(["12 ay taahhüt", "1000 dk + 250 SMS", "Online'a özel"]),
+  officialUrl: "https://bireysel.turktelekom.com.tr/mobil/yeni-musteri-tarife-ve-paketleri/faturali-tarifeler",
+});
+
 export const SEED_MOBILE: InsertMobileTariff[] = [
     TC("5G Ultra Dijital 5 GB", 5, 400),
     TC("5G Ultra Dijital 15 GB", 15, 500),
@@ -116,5 +131,7 @@ export const SEED_MOBILE: InsertMobileTariff[] = [
     VF("5G Online Plus 20 GB", 20, 465),
     VF("5G Online Plus 30 GB", 30, 565),
     VF("5G Online Plus 50 GB", 50, 685),
-    // Türk Telekom mobil: 01.10.2026'da güncel fiyat doğrulanamadı — eklenmedi.
+    TT("Yeni Dijital Lider 10 GB", 10, 365),
+    TT("Yeni Dijital Lider 20 GB", 20, 465),
+    TT("Yeni Dijital Lider 40 GB", 40, 685),
   ];
