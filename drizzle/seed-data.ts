@@ -26,12 +26,13 @@ export const SEED_PACKAGES: InsertPackage[] = [
     {
       operator: "Superonline", operatorSlug: "superonline", type: "fiber",
       name: "Fiber 500 Mbps", downloadSpeed: 500, uploadSpeed: null,
-      priceMonthly: 950, priceNoCommitment: 1050, commitmentMonths: 12,
+      // 10.10.2026: 12 aylık kampanya sona erdi; taahhütsüz teklif (bkz. data-updates.ts)
+      priceMonthly: 1350, priceNoCommitment: 1350, commitmentMonths: 0,
       dataLimit: "Limitsiz", modemIncluded: true, installationFee: 0,
-      features: JSON.stringify(["Fiber Hızları Kampanyası", "Modem dahil", "Ücretsiz kurulum"]),
+      features: JSON.stringify(["Taahhütsüz", "500 Mbps'ye kadar", "Modem dahil"]),
       isFeatured: true,
       affiliateUrl: "https://superonline.net",
-      officialUrl: "https://www.superonline.net/ev-interneti/500-mbps-ye-kadar",
+      officialUrl: "https://www.superonline.net/ev-interneti/taahhutsuz",
     },
     {
       operator: "Superonline", operatorSlug: "superonline", type: "fiber",
@@ -67,7 +68,10 @@ export const SEED_PACKAGES: InsertPackage[] = [
       name: "Fiber 100 Mbps", downloadSpeed: 100, uploadSpeed: null,
       priceMonthly: 1145, priceNoCommitment: null, commitmentMonths: 12,
       dataLimit: "Limitsiz", modemIncluded: false,
-      features: TT_FEATS,
+      features: JSON.stringify([
+        "Online'da 12 Ay Avantaj Kampanyası", "Ücretsiz kurulum",
+        "Kampanya 31.12.2026'ya kadar", "Modem ücrete dahil değil (fiberde 85 ₺/ay)",
+      ]),
       officialUrl: "https://bireysel.turktelekom.com.tr/evde-internet/yeni-musteri-kampanyalari/onlineda-12-ay-avantaj-kampanyasi-100-mbps",
     },
     {

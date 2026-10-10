@@ -357,4 +357,41 @@ export const DATA_UPDATES: DataUpdate[] = [
         "bireysel.turktelekom.com.tr 'Yeni Dijital Lider' faturalı tarifeler (taahhütlü; 10 GB 365, 20 GB 465, 40 GB 685 TL) — doğrulama 04.10.2026",
     })
   ),
+  // ── 10.10.2026 ─────────────────────────────────────────────────────────
+  {
+    id: "2026-10-10-superonline-500-taahhutsuz",
+    table: "packages",
+    match: { operatorSlug: "superonline", name: "Fiber 500 Mbps" },
+    expectPrice: 950,
+    // 12 aylık 950 TL kampanyasının süresi dolmuş görünüyor (sayfa tarihi 1 Mart
+    // 2026); güncel ve doğrulanabilir teklif taahhütsüz paket — farklı koşul,
+    // "fiyat arttı" rozeti gösterilmez.
+    replaces: true,
+    set: {
+      priceMonthly: 1350,
+      priceNoCommitment: 1350,
+      commitmentMonths: 0,
+      modemIncluded: true,
+      features: ["Taahhütsüz", "500 Mbps'ye kadar", "Modem dahil"],
+      officialUrl: "https://www.superonline.net/ev-interneti/taahhutsuz",
+    },
+    source:
+      "superonline.net/ev-interneti/taahhutsuz — 'Taahhütsüz Fiberde Süper Teklif' 500 Mbps'ye kadar 1350 TL/ay, modem dahil — doğrulama 10.10.2026",
+  },
+  {
+    id: "2026-10-10-tt-fiber-100-modem",
+    table: "packages",
+    match: { operatorSlug: "turk-telekom", name: "Fiber 100 Mbps" },
+    expectPrice: 1145,
+    set: {
+      features: [
+        "Online'da 12 Ay Avantaj Kampanyası",
+        "Ücretsiz kurulum",
+        "Kampanya 31.12.2026'ya kadar",
+        "Modem ücrete dahil değil (fiberde 85 ₺/ay)",
+      ],
+    },
+    source:
+      "bireysel.turktelekom.com.tr Online'da 12 Ay Avantaj 100 Mbps — 1.145 TL/ay, fiber hatta modem 85 TL/ay — doğrulama 10.10.2026",
+  },
 ];
