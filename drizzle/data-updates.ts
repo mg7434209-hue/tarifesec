@@ -394,4 +394,15 @@ export const DATA_UPDATES: DataUpdate[] = [
     source:
       "bireysel.turktelekom.com.tr Online'da 12 Ay Avantaj 100 Mbps — 1.145 TL/ay, fiber hatta modem 85 TL/ay — doğrulama 10.10.2026",
   },
+  // ── 13.10.2026 ─────────────────────────────────────────────────────────
+  {
+    id: "2026-10-13-tt-fiber-500-off",
+    table: "packages",
+    match: { operatorSlug: "turk-telekom", name: "Fiber 500 Mbps" },
+    expectPrice: 1000,
+    set: { isActive: false },
+    source:
+      "13.10.2026: Türk Telekom'un kendi sayfaları çelişiyor — 'Online'da 12 Ay Avantaj 500 Mbps' sayfası 1.000 TL, " +
+      "daha yeni (19.06.2026) 100 Mbps kampanya sayfasının paket tablosu 500 Mbps için 1.380 TL. Doğrulanana kadar yayından kaldırıldı.",
+  },
 ];

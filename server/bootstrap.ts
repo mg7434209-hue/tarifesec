@@ -85,6 +85,14 @@ async function addMissingPosts() {
   console.log(`[bootstrap] ${missing.length} yeni rehber yazısı eklendi`);
 }
 
+/** Listede bu kayıttan SONRA aynı satırı hedefleyen bir güncelleme var mı? */
+function supersededLater(u: (typeof DATA_UPDATES)[number]): boolean {
+  const i = DATA_UPDATES.indexOf(u);
+  return DATA_UPDATES.slice(i + 1).some(
+    (v) => v.table === u.table && v.match.operatorSlug === u.match.operatorSlug && v.match.name === u.match.name
+  );
+}
+
 /** drizzle/data-updates.ts — kaynaklı fiyat düzeltmeleri, her biri bir kez */
 async function applyDataUpdates() {
   const KEY = "data_updates_applied";
@@ -119,6 +127,9 @@ async function applyDataUpdates() {
       // Zaten güncel (yeni kurulum güncel başlangıç verisiyle açıldı)
     } else if (rows.length === 0 && (u.set.isActive === false || u.replaces)) {
       // Yeni kurulumda eski satır hiç yok — yapılacak bir şey yok
+    } else if (supersededLater(u)) {
+      // Aynı satır için daha yeni bir güncelleme var (yeni kurulum güncel
+      // başlangıç verisiyle açıldı) — bu eski kayıt geçersiz, uyarı gereksiz
     } else {
       // Fiyat elle/taramayla değişmiş ya da satır bulunamadı — dokunma
       console.warn(

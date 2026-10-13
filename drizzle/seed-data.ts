@@ -10,7 +10,6 @@ import type { InsertPackage, InsertMobileTariff } from "./schema";
 
 const SO_FEATS = JSON.stringify(["Online'a özel kampanya", "Modem dahil", "Ücretsiz kurulum", "YouTube Premium"]);
 const SB_FEATS = JSON.stringify(["5G", "Wi-Fi 7 modem", "Kurulum gerektirmez"]);
-const TT_FEATS = JSON.stringify(["Online'da 12 Ay Avantaj Kampanyası", "Ücretsiz kurulum", "Kampanya 31.12.2026'ya kadar"]);
 
 export const SEED_PACKAGES: InsertPackage[] = [
     // ── Superonline Fiber (isFeatured = true, Bayi B9613) ──
@@ -74,14 +73,7 @@ export const SEED_PACKAGES: InsertPackage[] = [
       ]),
       officialUrl: "https://bireysel.turktelekom.com.tr/evde-internet/yeni-musteri-kampanyalari/onlineda-12-ay-avantaj-kampanyasi-100-mbps",
     },
-    {
-      operator: "Türk Telekom", operatorSlug: "turk-telekom", type: "fiber",
-      name: "Fiber 500 Mbps", downloadSpeed: 500, uploadSpeed: null,
-      priceMonthly: 1000, priceNoCommitment: null, commitmentMonths: 12,
-      dataLimit: "Limitsiz", modemIncluded: false,
-      features: TT_FEATS,
-      officialUrl: "https://bireysel.turktelekom.com.tr/evde-internet/yeni-musteri-kampanyalari/onlineda-12-ay-avantaj-kampanyasi-500-mbps",
-    },
+    // Türk Telekom Fiber 500: 13.10.2026'da resmi sayfalar çelişti (1.000 / 1.380 TL) — eklenmedi.
     // ── TurkNet (taahhütsüz; liste fiyatı 949,90 ₺) ──
     {
       operator: "TurkNet", operatorSlug: "turknet", type: "fiber",
