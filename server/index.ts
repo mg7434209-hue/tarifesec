@@ -163,6 +163,23 @@ app.get("/api/health", async (_req, res) => {
     const { sql } = await import("drizzle-orm");
     await db.execute(sql`select 1`);
     out.database = "bağlı";
+
+    // Ziyaretçi sayacı ve açılış kurulumu teşhisi
+    const { counterStatus } = await import("./routes/visitors");
+    const { bootstrapStatus } = await import("./bootstrap");
+    try {
+      const r: any = await db.execute(sql`select value from site_counters where key = 'visits_total'`);
+      const rows = r.rows ?? r;
+      out.ziyaretciSayaci = {
+        kalici: counterStatus.persistent,
+        kayitliToplam: Number(rows?.[0]?.value ?? 0),
+        sonHata: counterStatus.lastError,
+        sonHataZamani: counterStatus.lastErrorAt,
+      };
+    } catch (e) {
+      out.ziyaretciSayaci = { kalici: false, sorun: (e as Error).message };
+    }
+    out.kurulum = bootstrapStatus;
     res.json(out);
   } catch (err) {
     out.status = "degraded";

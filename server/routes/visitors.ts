@@ -52,6 +52,13 @@ function onlineCount(): number {
 /** DB düşerse kullanılacak yedek sayaç */
 const memory = { total: 0, days: new Map<string, number>() };
 let usingMemory = false;
+/** Son veritabanı hatası — /api/health'te görünür (teşhis) */
+export const counterStatus: { persistent: boolean; lastError: string | null; lastErrorAt: string | null } = {
+  persistent: true,
+  lastError: null,
+  lastErrorAt: null,
+};
+let repairTried = false;
 
 const BOT_RE =
   /bot|crawl|spider|slurp|bingpreview|facebookexternalhit|whatsapp|telegram|headless|phantom|puppeteer|playwright|lighthouse|curl|wget|python-requests|axios|go-http|okhttp|monitor|uptime|pingdom|gtmetrix|semrush|ahrefs|mj12|dotbot|petal|yandex|applebot|duckduck/i;
@@ -117,10 +124,26 @@ router.get("/", rateLimit(config.rateLimit.visitors), async (req, res) => {
   const nowOnline = bot ? onlineCount() : touchOnline(visitorKey(req));
 
   try {
-    counts = shouldCount ? await increment(day) : await readCounts(day);
+    try {
+      counts = shouldCount ? await increment(day) : await readCounts(day);
+    } catch (err) {
+      // Tablo yoksa (42P01) bir kez oluşturup yeniden dene — kendi kendini onarır
+      if (!repairTried && /does not exist|42P01/.test(String((err as any)?.code ?? "") + (err as Error).message)) {
+        repairTried = true;
+        const { ensureCoreTables } = await import("../bootstrap");
+        await ensureCoreTables();
+        counts = shouldCount ? await increment(day) : await readCounts(day);
+      } else {
+        throw err;
+      }
+    }
     usingMemory = false;
+    counterStatus.persistent = true;
   } catch (err) {
     usingMemory = true;
+    counterStatus.persistent = false;
+    counterStatus.lastError = (err as Error).message;
+    counterStatus.lastErrorAt = new Date().toISOString();
     // DB yoksa/düşükse sayacı bellekten sun — footer rozeti bozulmasın
     console.error("[visitors] DB hatası, bellek yedeği kullanılıyor:", (err as Error).message);
     if (shouldCount) {

@@ -79,6 +79,12 @@ ucundan beslenir.
 - **Canlı:** rozet üç değer gösterir — toplam, bugün ve "şu an sitede" (son 5 dk
   içinde sayfası açık tekil ziyaretçi; IP+UA karması, ham IP saklanmaz, yalnız
   bellekte). Sekme açıkken dakikada bir tazelenir.
+- **"Sayaç hep 1.000" arızası (14.10.2026):** açılış kurulumu tek try bloğundaydı;
+  veritabanı migration dışı kurulmuşsa `migrate()` "tablo zaten var" diye durur,
+  sayaç tabloları ve fiyat güncellemeleri hiç uygulanmazdı. Artık her adım ayrı
+  çalışır, `ensureCoreTables()` sayaç/ayar tablolarını garanti eder ve sayaç
+  tablo yoksa kendini onarır. Teşhis: `GET /api/health` → `ziyaretciSayaci`
+  (kalıcı mı, kayıtlı toplam, son hata) ve `kurulum` (adım adım durum).
 - `GET /api/visitors` yanıtındaki `persistent: false` → veritabanı yok, sayaç
   her yeniden başlatmada sıfırlanır. Railway'de PostgreSQL bağlı olmalı.
 

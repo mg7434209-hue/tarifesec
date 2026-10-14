@@ -147,19 +147,71 @@ async function applyDataUpdates() {
     .onConflictDoUpdate({ target: settings.key, set: { value, updatedAt: new Date() } });
 }
 
+/**
+ * Açılış durumu — /api/health ile tarayıcıdan okunur. Kurulumun hangi adımı
+ * başarısız oldu, artık sunucu günlüğüne bakmadan görülebilir.
+ */
+export const bootstrapStatus: Record<string, string> = {};
+
+/**
+ * Sayaç ve ayar tablolarını GARANTİ eder (idempotent).
+ *
+ * Üretim veritabanı ilk kurulumda migration dışı bir yolla (ör. drizzle-kit
+ * push) oluşturulduysa migrate() "tablo zaten var" hatasıyla durur ve sonraki
+ * tablolar hiç oluşmaz. site_counters / visit_days yoksa ziyaretçi sayacı
+ * yalnızca bellekte tutulur, her yeniden başlatmada 1.000'e döner — "sayaç
+ * hiç artmıyor" belirtisinin kaynağı budur. Bu adım migrate'ten BAĞIMSIZ çalışır.
+ */
+export async function ensureCoreTables(): Promise<void> {
+  await db.execute(sql`CREATE TABLE IF NOT EXISTS "site_counters" (
+    "key" varchar(50) PRIMARY KEY NOT NULL,
+    "value" integer DEFAULT 0 NOT NULL,
+    "updated_at" timestamp DEFAULT now() NOT NULL
+  )`);
+  await db.execute(sql`CREATE TABLE IF NOT EXISTS "visit_days" (
+    "day" varchar(10) PRIMARY KEY NOT NULL,
+    "count" integer DEFAULT 0 NOT NULL
+  )`);
+  await db.execute(sql`CREATE TABLE IF NOT EXISTS "settings" (
+    "key" varchar(60) PRIMARY KEY NOT NULL,
+    "value" text NOT NULL,
+    "updated_at" timestamp DEFAULT now() NOT NULL
+  )`);
+}
+
+/**
+ * Her adım AYRI denenir: eskiden tek try bloğundaydı ve migrate() hata
+ * verince veri yükleme, fiyat güncellemeleri ve tablo garantisi sessizce
+ * atlanıyordu.
+ */
+async function step(name: string, fn: () => Promise<void>) {
+  try {
+    await fn();
+    bootstrapStatus[name] = "ok";
+  } catch (err) {
+    const msg = (err as Error).message;
+    // "Tablo zaten var" = veritabanı migration dışı kurulmuş; sorun değil,
+    // eksik tablolar bir sonraki adımda (ensureCoreTables) tamamlanır.
+    // 42P07 = duplicate_table (PostgreSQL); drizzle asıl hatayı `cause`'ta taşır
+    const code = (err as any)?.cause?.code ?? (err as any)?.code;
+    const exists = name === "migrate" && code === "42P07";
+    bootstrapStatus[name] = exists ? "atlandı (tablolar zaten var)" : `hata: ${msg.split("\n")[0].slice(0, 200)}`;
+    if (exists) console.warn(`[bootstrap] ${name}: tablolar zaten var — eksikler ayrıca tamamlanıyor`);
+    else console.error(`[bootstrap] ${name} hatası:`, msg);
+  }
+}
+
 export async function bootstrap(): Promise<void> {
   if (!process.env.DATABASE_URL) {
     console.warn("[bootstrap] DATABASE_URL yok — kurulum atlandı");
+    bootstrapStatus.database = "yapılandırılmamış";
     return;
   }
 
-  try {
-    await migrate();
-    await seedIfEmpty();
-    await addMissingPosts();
-    await applyDataUpdates();
-  } catch (err) {
-    console.error("[bootstrap] kurulum hatası:", (err as Error).message);
-    console.error("[bootstrap] site çalışmaya devam ediyor; veritabanını kontrol edin.");
-  }
+  await step("migrate", migrate);
+  await step("tablolar", ensureCoreTables);
+  await step("baslangicVerisi", seedIfEmpty);
+  await step("rehberYazilari", addMissingPosts);
+  await step("fiyatGuncellemeleri", applyDataUpdates);
+  bootstrapStatus.zaman = new Date().toISOString();
 }
