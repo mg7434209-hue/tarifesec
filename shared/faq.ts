@@ -22,7 +22,7 @@ export const FAQ: Record<string, Faq[]> = {
     },
     {
       q: "Fiyatlar ne sıklıkla güncelleniyor?",
-      a: "Superonline, Türk Telekom ve TurkNet fiyatları resmi sayfalardan 12 saatte bir otomatik kontrol edilir; Turkcell ve Vodafone fiyatları elle güncellenir. Her paketin yanında son kontrol tarihi yazar. Fiyatı değişen paketlerde 'fiyat arttı' veya 'fiyat düştü' rozeti gösterilir. Kesin fiyat için başvuru öncesi operatörün resmi sayfasını kontrol etmeniz önerilir.",
+      a: "Tüm fiyatlar 3 günde bir operatörlerin resmi sayfalarından yeniden kontrol edilir; Superonline, Türk Telekom ve TurkNet sayfaları ayrıca 12 saatte bir otomatik taranır. Her paketin yanında son kontrol tarihi yazar. Fiyatı değişen paketlerde 'fiyat arttı' veya 'fiyat düştü' rozeti gösterilir. Kesin fiyat için başvuru öncesi operatörün resmi sayfasını kontrol etmeniz önerilir.",
     },
     {
       q: "Hangi operatörlerle çalışıyorsunuz?",
@@ -64,7 +64,7 @@ export const FAQ: Record<string, Faq[]> = {
     },
     {
       q: "Numara taşıma ne kadar sürer?",
-      a: "Numara taşıma işlemi genellikle 1 iş günü içinde tamamlanır. İşlem sırasında hattınız kısa süreli kapanabilir. Taşıma için kimlik ve mevcut hattınızın borcunun bulunmaması gerekir.",
+      a: "Numara taşıma birkaç iş günü içinde tamamlanır; uygulamada çoğunlukla 1 iş günü yeterlidir. İşlem sırasında hattınız kısa süreli kapanabilir. Taşıma için kimlik ve mevcut hattınızın borcunun bulunmaması gerekir.",
     },
     {
       q: "Kaç GB internet yeterli?",

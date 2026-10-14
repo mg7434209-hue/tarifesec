@@ -6,6 +6,16 @@ export const config = {
   site: {
     url: (process.env.SITE_URL || "https://www.tarifesec.net.tr").replace(/\/$/, ""),
     name: "tarifesec.net.tr",
+    /**
+     * Arama motoru doğrulama etiketleri — Railway Variables'tan girilir,
+     * koda yazılmaz. Google'ınki index.html'de sabittir (zaten doğrulandı).
+     *   BING_SITE_VERIFICATION   → <meta name="msvalidate.01">  (Bing Webmaster)
+     *   YANDEX_VERIFICATION      → <meta name="yandex-verification">
+     */
+    verification: {
+      bing: (process.env.BING_SITE_VERIFICATION ?? "").trim(),
+      yandex: (process.env.YANDEX_VERIFICATION ?? "").trim(),
+    },
   },
 
   /** Ziyaretçi sayacı */

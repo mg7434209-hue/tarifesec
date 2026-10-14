@@ -51,3 +51,8 @@ bu prosedür onun yedeğidir ve TÜM operatörleri kapsar.
 - [ ] Yayından kaldırılmış kayıtlar (`isActive: false`) için fiyat bulundu mu?
 - [ ] Kampanya bitiş tarihleri (`features` içindeki "… 'ya kadar") geçti mi?
 - [ ] 5G, zam, mevzuat gibi SSS/rehber bilgileri hâlâ doğru mu?
+- [ ] Rehber yazılarında (`drizzle/seed-posts.ts`) eskiyen rakam/tarih var mı?
+      (ör. "TurkNet 949,90 TL" gibi örnekler). Düzeltme seed-posts.ts'e yazılır;
+      admin düzenlemediyse canlıya kendiliğinden yansır.
+- [ ] Yeni ve kalıcı bir gelişme varsa (zam, mevzuat, yeni hizmet) kaynaklı
+      kısa bir rehber yazısı önerisini kullanıcıya bildir — kendiliğinden yazma.

@@ -295,6 +295,31 @@ kendiliğinden açılır). Yeni sayfa = listeye bir kayıt.
 - **İş ortağı bağlantıları** (`affiliateUrl`) `rel="sponsored"` taşır.
 - WebSite şemasında **SearchAction yok** — sitede `?q=` araması yok.
 
+### Rehber yazıları (blog)
+
+- Yazılar `drizzle/seed-posts.ts`'te; biçim `shared/blog-format.ts`: `## başlık`,
+  `### alt başlık`, `- madde`, `[metin](/site-ici-yol)`. HTML yorumlanmaz, dış
+  bağlantı yazılamaz. 3+ alt başlıklı yazıda içindekiler otomatik çıkar.
+- Her yazının altında "İlgili sayfalar" (`shared/blog-related.ts`).
+- Yeni yazı canlıya kendiliğinden eklenir; seed'de değiştirilen yazı, admin
+  panelinden elle düzenlenmemişse canlıda da güncellenir (`refreshSeedPosts`).
+- Kural: özet 70–160 karakter, en az 200 kelime, hukuki/mali iddia kaynaklı
+  ve sonunda "genel bilgilendirme" notu. `npm test` bunları denetler.
+
+### IndexNow ve doğrulama etiketleri (Railway Variables)
+
+- `INDEXNOW_KEY` — 8–128 harf/rakam. Anahtar dosyası `/<anahtar>.txt`'te
+  yayımlanır; açılışta fiyat veya yazı değiştiyse 2 dk sonra tüm sitemap
+  adresleri Bing/Yandex'e bildirilir. Durum: `/api/health` → `kurulum.indexNow`.
+- `BING_SITE_VERIFICATION`, `YANDEX_VERIFICATION` — Webmaster doğrulama meta
+  etiketleri. Google'ınki `client/index.html`'de.
+
+### SEO regresyon testi
+
+`tests/seo.test.ts` (`npm test` içinde): her sayfada tek `<h1>`, başlık
+20–75 / açıklama 50–170 karakter, mutlak canonical, geçerli JSON-LD, gerçek
+404, yazılarda kırık iç bağlantı ve ince içerik kontrolü.
+
 ### Yeni rota eklerken
 
 1. `client/src/App.tsx` — rota tanımı

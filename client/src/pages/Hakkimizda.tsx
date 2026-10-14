@@ -1,6 +1,9 @@
-import { Shield, Scale, RefreshCw } from "lucide-react";
+import { Shield, Scale, RefreshCw, CheckCircle2, Mail } from "lucide-react";
 import { useRouteSeo } from "@/lib/hooks";
 import { SITE_INFO } from "@shared/site";
+import { ABOUT_INTRO, ABOUT_SECTIONS } from "@shared/about";
+
+const ICONS = { scale: Scale, refresh: RefreshCw, check: CheckCircle2, mail: Mail, shield: Shield };
 
 export default function Hakkimizda() {
   useRouteSeo("/hakkimizda");
@@ -9,37 +12,21 @@ export default function Hakkimizda() {
     <div className="max-w-3xl mx-auto px-4 py-10">
       <h1 className="text-2xl font-bold text-gray-900 mb-3">Hakkımızda</h1>
       <p className="text-gray-600 mb-8 leading-relaxed">
-        {SITE_INFO.name}, Türkiye'deki ev interneti ve mobil hat tarifelerini tek
-        sayfada karşılaştırmanızı sağlayan bağımsız bir platformdur. Amacımız,
-        onlarca operatör sayfası arasında gezinmek zorunda kalmadan size uygun
-        paketi görebilmenizdir.
+        {SITE_INFO.name}, {ABOUT_INTRO}
       </p>
 
-      {[
-        {
-          icon: Scale,
-          title: "Bağımsızlık",
-          text: "Sıralamalar ücret karşılığı değiştirilmez; paketler yalnızca fiyat ve teknik özelliklerine göre listelenir. Bazı başvuru bağlantıları iş ortaklığı (bayi) bağlantısıdır; fiyatı ve sıralamayı etkilemez. Sitede iş ortaklarımıza ait sponsorlu bağlantılar bulunur; bunlar açıkça 'reklam' olarak işaretlenir ve karşılaştırma sonuçlarını etkilemez.",
-        },
-        {
-          icon: RefreshCw,
-          title: "Veriler nasıl güncelleniyor?",
-          text: "Superonline, Türk Telekom ve TurkNet fiyatları resmi sayfalardan 12 saatte bir otomatik kontrol edilir; Turkcell ve Vodafone fiyatları elle güncellenir. Emin olunamayan hiçbir değer yayınlanmaz: belirsiz eşleşmeler ve olağandışı fiyat sıçramaları otomatik olarak uygulanmaz, elle kontrol edilir. Her paketin en son ne zaman kontrol edildiğini karşılaştırma sayfasında görebilirsiniz.",
-        },
-        {
-          icon: Shield,
-          title: "Sorumluluk sınırı",
-          text: "Fiyatlar bilgilendirme amaçlıdır ve kampanyalara göre değişebilir. Başvuru yapmadan önce kesin fiyatı ve adresinizdeki altyapı uygunluğunu operatörün resmi sayfasından doğrulamanızı öneririz.",
-        },
-      ].map((b) => (
+      {ABOUT_SECTIONS.map((b) => {
+        const Icon = ICONS[b.key];
+        return (
         <section key={b.title} className="bg-white border border-gray-200 rounded-xl p-5 mb-4">
           <div className="flex items-center gap-2 mb-2">
-            <b.icon className="w-4 h-4 text-[#0097a7]" />
+            <Icon className="w-4 h-4 text-[#0097a7]" />
             <h2 className="font-semibold text-gray-900">{b.title}</h2>
           </div>
           <p className="text-sm text-gray-600 leading-relaxed">{b.text}</p>
         </section>
-      ))}
+        );
+      })}
     </div>
   );
 }

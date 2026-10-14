@@ -5,9 +5,8 @@
 import { Router } from "express";
 import { SITE } from "../seo/meta";
 import { ROUTES } from "../seo/meta";
-import { getPosts, getPackages, getMobile, liveLandings, lastChanged } from "../seo/data";
-import { LANDINGS } from "../../shared/landings";
-import { SITE_INFO } from "../../shared/site";
+import { sitemapEntries } from "../seo/sitemap";
+import { indexNowKey } from "../seo/indexnow";
 import { llmsTxt, llmsFullTxt } from "../seo/llms";
 
 const router = Router();
@@ -80,46 +79,7 @@ Sitemap: ${SITE}/sitemap.xml
  * ve yasal sayfalar shared/site.ts'teki tarihleri taşır.
  */
 router.get("/sitemap.xml", async (_req, res) => {
-  const [posts, pkgs, mob, live] = await Promise.all([getPosts(), getPackages(), getMobile(), liveLandings()]);
-  const day = (d: Date | null | undefined) => (d ? d.toISOString().slice(0, 10) : null);
-  const fallback = SITE_INFO.contentUpdatedAt;
-
-  const pkgDate = day(lastChanged(pkgs));
-  const mobDate = day(lastChanged(mob));
-  const postDate = day(lastChanged(posts));
-  const newest = [pkgDate, mobDate].filter(Boolean).sort().pop() ?? null;
-
-  const routeDate: Record<string, string | null> = {
-    "/": newest,
-    "/paket-karsilastir": pkgDate,
-    "/mobil-tarifeler": mobDate,
-    "/blog": postDate,
-    "/kvkk": SITE_INFO.legalUpdatedAt,
-    "/gizlilik": SITE_INFO.legalUpdatedAt,
-    "/cerez-politikasi": SITE_INFO.legalUpdatedAt,
-  };
-
-  const urls = [
-    ...ROUTES.map((r) => ({
-      loc: `${SITE}${r.path}`,
-      lastmod: routeDate[r.path] ?? fallback,
-      changefreq: r.changefreq,
-      priority: r.priority,
-    })),
-    // Yalnızca verisi olan açılış sayfaları — boş olanlar 404 döner
-    ...LANDINGS.filter((l) => live.has(l.path)).map((l) => ({
-      loc: `${SITE}${l.path}`,
-      lastmod: (l.kind === "internet" ? pkgDate : mobDate) ?? fallback,
-      changefreq: "daily",
-      priority: "0.8",
-    })),
-    ...posts.map((p) => ({
-      loc: `${SITE}/blog/${p.slug}`,
-      lastmod: new Date(p.updatedAt).toISOString().slice(0, 10),
-      changefreq: "monthly",
-      priority: "0.6",
-    })),
-  ];
+  const urls = await sitemapEntries();
 
   text(
     res,
@@ -139,6 +99,13 @@ ${urls
 `,
     "application/xml; charset=utf-8"
   );
+});
+
+/** IndexNow anahtar doğrulama dosyası — yalnız INDEXNOW_KEY tanımlıysa */
+router.get("/:key.txt", (req, res, next) => {
+  const key = indexNowKey();
+  if (!key || req.params.key !== key) return next();
+  text(res, key);
 });
 
 router.get("/llms.txt", async (_req, res) => text(res, await llmsTxt()));

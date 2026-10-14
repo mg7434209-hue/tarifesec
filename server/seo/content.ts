@@ -15,6 +15,9 @@ import { summarize, summarizeMobile } from "./data";
 import { byContext, PARTNER_REL, type PartnerContext } from "../../shared/partners";
 import { legalBySlug } from "../../shared/legal";
 import { checkedLabel } from "../../shared/freshness";
+import { parsePost, readingMinutes, type Inline } from "../../shared/blog-format";
+import { relatedFor } from "../../shared/blog-related";
+import { ABOUT_INTRO, ABOUT_SECTIONS } from "../../shared/about";
 import { speedText, speedTextLong } from "../../shared/format";
 import { SITE_INFO, hasContactPhone, hasContactAddress } from "../../shared/site";
 import { LANDINGS, landingSummary, type Landing, type LandingKind } from "../../shared/landings";
@@ -293,21 +296,49 @@ ${
 }`;
 }
 
-/** Tek blog yazısı */
-export function postContent(post: Post): string {
-  return `<article>
-  <h1>${esc(post.title)}</h1>
-  <p><small>${esc(post.category)} · ${new Date(post.createdAt).toLocaleDateString("tr-TR")} · ${esc(
-    post.author ?? "Editör"
-  )}</small></p>
-  ${post.excerpt ? `<p><strong>${esc(post.excerpt)}</strong></p>` : ""}
-  ${post.content
-    .split(/\n{2,}/)
-    .map((para) => `<p>${esc(para.trim())}</p>`)
-    .join("")}
-</article>`;
+/** Rehber yazısı gövdesi — istemcideki <YaziGovdesi> ile AYNI yapı */
+const inlineHtml = (parts: Inline[]) =>
+  parts.map((x) => ("href" in x ? `<a href="${esc(x.href)}">${esc(x.text)}</a>` : esc(x.text))).join("");
+
+export function postBodyHtml(content: string): string {
+  return parsePost(content)
+    .map((b) =>
+      b.type === "p"
+        ? `<p>${inlineHtml(b.parts)}</p>`
+        : b.type === "ul"
+        ? `<ul>${b.items.map((it) => `<li>${inlineHtml(it)}</li>`).join("")}</ul>`
+        : `<${b.type} id="${esc(b.id)}">${esc(b.text)}</${b.type}>`
+    )
+    .join("\n");
 }
 
+/** Tek blog yazısı */
+export function postContent(post: Post): string {
+  const trd = (d: Date | string) => new Date(d).toLocaleDateString("tr-TR");
+  const updated = new Date(post.updatedAt).getTime() - new Date(post.createdAt).getTime() > 864e5;
+  const toc = parsePost(post.content).filter((b) => b.type === "h2") as { text: string; id: string }[];
+  const related = relatedFor(post.slug, post.title);
+
+  return `<nav aria-label="Konum"><a href="/">Ana Sayfa</a> › <a href="/blog">Rehber</a> › ${esc(post.title)}</nav>
+<article>
+  <h1>${esc(post.title)}</h1>
+  <p><small>${esc(post.category)} · Yayın: ${trd(post.createdAt)}${
+    updated ? ` · Güncelleme: ${trd(post.updatedAt)}` : ""
+  } · ${readingMinutes(post.content)} dk okuma · ${esc(SITE_INFO.name)} editörlüğü</small></p>
+  ${post.excerpt ? `<p><strong>${esc(post.excerpt)}</strong></p>` : ""}
+  ${
+    toc.length >= 3
+      ? `<nav aria-label="İçindekiler"><h2>İçindekiler</h2><ol>${toc
+          .map((t) => `<li><a href="#${esc(t.id)}">${esc(t.text)}</a></li>`)
+          .join("")}</ol></nav>`
+      : ""
+  }
+  ${postBodyHtml(post.content)}
+</article>
+<aside><h2>İlgili sayfalar</h2><ul>${related
+    .map((r) => `<li><a href="${esc(r.href)}">${esc(r.label)}</a></li>`)
+    .join("")}</ul></aside>`;
+}
 
 /** KVKK / gizlilik / çerez metinleri */
 export function legalContent(slug: string): string {
@@ -342,24 +373,6 @@ Ayrıntılar <a href="/kvkk">KVKK Aydınlatma Metni</a>'ndedir.</p>`;
 
 export function aboutContent(): string {
   return `<h1>Hakkımızda</h1>
-<p>${esc(SITE_INFO.name)}, Türkiye'deki ev interneti ve mobil hat tarifelerini tek
-sayfada karşılaştırmanızı sağlayan bağımsız bir platformdur.</p>
-
-<section><h2>Bağımsızlık</h2>
-<p>Sıralamalar ücret karşılığı değiştirilmez; paketler yalnızca fiyat ve teknik
-özelliklerine göre listelenir. Bazı başvuru bağlantıları iş ortaklığı (bayi)
-bağlantısıdır; bunlar fiyatı ve sıralamayı etkilemez. Sitede iş ortaklarımıza ait sponsorlu bağlantılar bulunur; bunlar
-açıkça "reklam" olarak işaretlenir ve karşılaştırma sonuçlarını etkilemez.</p></section>
-
-<section><h2>Veriler nasıl güncelleniyor?</h2>
-<p>Superonline, Türk Telekom ve TurkNet fiyatları resmi sayfalardan 12 saatte bir
-otomatik kontrol edilir; Turkcell ve Vodafone fiyatları elle güncellenir. Her
-paketin yanında son kontrol tarihi yazar. Emin
-olunamayan hiçbir değer yayınlanmaz: belirsiz eşleşmeler ve olağandışı fiyat
-sıçramaları otomatik uygulanmaz, elle kontrol edilir.</p></section>
-
-<section><h2>Sorumluluk sınırı</h2>
-<p>Fiyatlar bilgilendirme amaçlıdır ve kampanyalara göre değişebilir. Başvuru
-öncesinde kesin fiyatı ve adresinizdeki altyapı uygunluğunu operatörün resmi
-sayfasından doğrulamanızı öneririz.</p></section>`;
+<p>${esc(SITE_INFO.name)}, ${esc(ABOUT_INTRO)}</p>
+${ABOUT_SECTIONS.map((sec) => `<section><h2>${esc(sec.title)}</h2><p>${esc(sec.text)}</p></section>`).join("\n")}`;
 }

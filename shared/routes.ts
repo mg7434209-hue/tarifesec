@@ -7,6 +7,8 @@
  *
  * Yeni rota eklerken: App.tsx + burası. Sitemap ve SSR otomatik kapsar.
  */
+import { YIL } from "./year";
+
 export type RouteMeta = {
   path: string;
   /** Breadcrumb ve menüde görünen kısa ad */
@@ -21,16 +23,16 @@ export const ROUTES: RouteMeta[] = [
   {
     path: "/",
     label: "Ana Sayfa",
-    title: "İnternet Paketleri ve Mobil Tarifeler 2026 | tarifesec.net.tr",
+    title: `İnternet Paketleri ve Mobil Tarifeler ${YIL} | tarifesec.net.tr`,
     description:
-      "Superonline, Türk Telekom, Vodafone, Turkcell ve TurkNet ev interneti paketlerini ve mobil tarifeleri tek sayfada tarafsız karşılaştırın. Güncel fiyatlar, ücretsiz hız testi.",
+      "Superonline, Türk Telekom, Vodafone, Turkcell ve TurkNet ev interneti ve mobil tarifelerini tarafsız karşılaştırın. Güncel fiyatlar, ücretsiz hız testi.",
     changefreq: "daily",
     priority: "1.0",
   },
   {
     path: "/paket-karsilastir",
     label: "Ev İnterneti",
-    title: "Ev İnterneti Paketleri ve Fiyatları 2026 | tarifesec.net.tr",
+    title: `Ev İnterneti Paketleri ve Fiyatları ${YIL} | tarifesec.net.tr`,
     description:
       "Fiber, kablosuz ve ADSL ev interneti paketlerini hız, aylık ücret ve taahhüt süresine göre filtreleyin. Superonline, Türk Telekom, Vodafone ve TurkNet fiyatları yan yana.",
     changefreq: "daily",
@@ -39,7 +41,7 @@ export const ROUTES: RouteMeta[] = [
   {
     path: "/mobil-tarifeler",
     label: "Mobil Tarifeler",
-    title: "Mobil Hat Tarifeleri ve Fiyatları 2026 | tarifesec.net.tr",
+    title: `Mobil Hat Tarifeleri ve Fiyatları ${YIL} | tarifesec.net.tr`,
     description:
       "Turkcell, Vodafone ve Türk Telekom mobil hat tarifelerini GB, dakika ve aylık ücrete göre karşılaştırın.",
     changefreq: "daily",
@@ -50,7 +52,7 @@ export const ROUTES: RouteMeta[] = [
     label: "Hız Testi",
     title: "İnternet Hız Testi: Download, Upload ve Ping Ölç | tarifesec.net.tr",
     description:
-      "İnternet hızınızı ücretsiz ölçün: indirme, yükleme ve ping değerleri. Sonucunuzu diğer kullanıcıların ortalamasıyla karşılaştırın, paketinizin hakkını alıp almadığınızı görün.",
+      "İnternet hızınızı ücretsiz ölçün: indirme, yükleme ve ping. Sonucu kullanıcı ortalamasıyla karşılaştırın, paketinizin hakkını alıp almadığınızı görün.",
     changefreq: "weekly",
     priority: "0.8",
   },
