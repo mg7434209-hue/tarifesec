@@ -146,8 +146,10 @@ ${PARTNERS.map((p) => `- [${p.name}](${p.url}) — ${p.description}`).join("\n")
 
 ${SITE_NAME} bağımsız bir karşılaştırma platformudur; sıralama ücret karşılığı
 değiştirilmez. Bazı başvuru bağlantıları iş ortaklığı (bayi) bağlantısıdır.
-Superonline, Türk Telekom ve TurkNet fiyatları resmi sayfalardan 12 saatte bir
-otomatik kontrol edilir; Turkcell ve Vodafone elle güncellenir. Fiyatı değişen
-paketler arayüzde işaretlenir.
+Tüm fiyatlar 3 günde bir operatörlerin resmi sayfalarından yeniden kontrol
+edilir; Superonline, Türk Telekom ve TurkNet sayfaları ayrıca 12 saatte bir
+otomatik taranır. Resmi kaynaklar çelişirse veya fiyat doğrulanamazsa tahmini
+rakam yayınlanmaz, paket listeden çıkarılır. Fiyatı değişen paketler arayüzde
+işaretlenir.
 `;
 }

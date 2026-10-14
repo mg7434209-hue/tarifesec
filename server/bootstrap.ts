@@ -11,6 +11,7 @@
  * günlüklere yazılır.
  */
 import path from "path";
+import { createHash } from "crypto";
 import fs from "fs";
 import { db } from "../drizzle/db";
 import { and, eq, sql } from "drizzle-orm";
@@ -83,7 +84,60 @@ async function addMissingPosts() {
     .insert(blogPosts)
     .values(missing.map((p) => ({ ...p, isPublished: true, author: "tarifesec.net.tr" })));
   console.log(`[bootstrap] ${missing.length} yeni rehber yazısı eklendi`);
+  contentChanged = true;
 }
+
+/**
+ * Var olan rehber yazılarını seed-posts.ts'teki GÜNCEL sürüme taşır.
+ *
+ * Güvenlik: yazı ancak admin tarafından elle düzenlenmemişse güncellenir.
+ * Ölçüt: veritabanındaki metnin özeti, en son bizim yazdığımız sürümün
+ * özetiyle aynı (settings → seed_post_hashes) YA DA yazı eklendiğinden beri
+ * hiç güncellenmemiş. Admin bir yazıyı değiştirdiyse dokunulmaz.
+ */
+async function refreshSeedPosts() {
+  const KEY = "seed_post_hashes";
+  const h = (t: string) => createHash("sha256").update(t).digest("hex").slice(0, 16);
+  const [row] = await db.select().from(settings).where(eq(settings.key, KEY));
+  const known: Record<string, string> = row ? JSON.parse(row.value) : {};
+  const rows = await db.select().from(blogPosts);
+  let n = 0;
+
+  for (const seed of SEED_POSTS) {
+    const cur = rows.find((r) => r.slug === seed.slug);
+    if (!cur) continue;
+    const seedSig = h(seed.title + seed.excerpt + seed.content);
+    const curSig = h(cur.title + (cur.excerpt ?? "") + cur.content);
+    if (curSig === seedSig) {
+      known[seed.slug] = seedSig;
+      continue;
+    }
+    const untouched =
+      known[seed.slug] === curSig ||
+      new Date(cur.updatedAt).getTime() - new Date(cur.createdAt).getTime() < 60_000;
+    if (!untouched) continue; // admin düzenlemiş — dokunma
+
+    await db
+      .update(blogPosts)
+      .set({ title: seed.title, excerpt: seed.excerpt, content: seed.content, updatedAt: new Date() })
+      .where(eq(blogPosts.id, cur.id));
+    known[seed.slug] = seedSig;
+    n++;
+  }
+
+  const value = JSON.stringify(known);
+  await db
+    .insert(settings)
+    .values({ key: KEY, value })
+    .onConflictDoUpdate({ target: settings.key, set: { value, updatedAt: new Date() } });
+  if (n) {
+    console.log(`[bootstrap] ${n} rehber yazısı güncel sürüme taşındı`);
+    contentChanged = true;
+  }
+}
+
+/** Bu açılışta içerik değişti mi? (IndexNow bildirimi için) */
+let contentChanged = false;
 
 /** Listede bu kayıttan SONRA aynı satırı hedefleyen bir güncelleme var mı? */
 function supersededLater(u: (typeof DATA_UPDATES)[number]): boolean {
@@ -123,6 +177,7 @@ async function applyDataUpdates() {
         } as any)
         .where(eq(table.id, rows[0].id));
       console.log(`[bootstrap] veri güncellemesi uygulandı: ${u.id}`);
+      contentChanged = true;
     } else if (rows.length === 1 && rows[0].priceMonthly === target && u.set.isActive !== false) {
       // Zaten güncel (yeni kurulum güncel başlangıç verisiyle açıldı)
     } else if (rows.length === 0 && (u.set.isActive === false || u.replaces)) {
@@ -212,6 +267,24 @@ export async function bootstrap(): Promise<void> {
   await step("tablolar", ensureCoreTables);
   await step("baslangicVerisi", seedIfEmpty);
   await step("rehberYazilari", addMissingPosts);
+  await step("rehberGuncelleme", refreshSeedPosts);
   await step("fiyatGuncellemeleri", applyDataUpdates);
   bootstrapStatus.zaman = new Date().toISOString();
+
+  // Fiyat veya yazı değiştiyse Bing/Yandex'e bildir (IndexNow). Yeni sürüm
+  // trafiği devralana kadar beklenir: arama motoru anahtar dosyasını ve
+  // sayfaları CANLI siteden okur.
+  if (contentChanged) {
+    const t = setTimeout(async () => {
+      try {
+        const { pingIndexNow } = await import("./seo/indexnow");
+        const { sitemapEntries } = await import("./seo/sitemap");
+        const r = await pingIndexNow((await sitemapEntries()).map((e) => e.loc));
+        bootstrapStatus.indexNow = r.error ? `gönderilmedi: ${r.error}` : `${r.sent} adres, HTTP ${r.status}`;
+      } catch (err) {
+        bootstrapStatus.indexNow = `hata: ${(err as Error).message}`;
+      }
+    }, 2 * 60 * 1000);
+    t.unref?.();
+  }
 }

@@ -9,10 +9,11 @@
     "check": "tsc --noEmit",
     "db:push": "drizzle-kit generate && drizzle-kit migrate",
     "db:seed": "tsx drizzle/seed.ts",
-    "test": "tsc --noEmit && tsx --test scraper/__tests__/*.test.ts",
+    "test": "tsc --noEmit && tsx --test scraper/__tests__/*.test.ts tests/*.test.ts",
     "db:seed:blog": "tsx drizzle/seed-blog.ts",
     "test:scraper": "tsx --test scraper/__tests__/*.test.ts",
-    "scrape": "tsx scraper/index.ts"
+    "scrape": "tsx scraper/index.ts",
+    "test:seo": "tsx --test tests/*.test.ts"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.2",

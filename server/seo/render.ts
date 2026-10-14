@@ -8,6 +8,8 @@ import { FAQ, faqJsonLd } from "./faq";
 import * as content from "./content";
 import { getPackages, getMobile, getPosts, getPostBySlug, landingRows, liveLandings, lastChanged } from "./data";
 import { landingByPath } from "../../shared/landings";
+import { plainText } from "../../shared/blog-format";
+import { config } from "../config";
 import { SITE_INFO, SISTER_SITES } from "../../shared/site";
 
 export type Rendered = { html: string; status: number };
@@ -55,6 +57,8 @@ function head(opts: {
     `<meta name="twitter:title" content="${esc(title)}" />`,
     `<meta name="twitter:description" content="${esc(description)}" />`,
     `<meta name="twitter:image" content="${OG_IMAGE.url}" />`,
+    ...(config.site.verification.bing ? [`<meta name="msvalidate.01" content="${esc(config.site.verification.bing)}" />`] : []),
+    ...(config.site.verification.yandex ? [`<meta name="yandex-verification" content="${esc(config.site.verification.yandex)}" />`] : []),
     ...jsonLd.map(jsonLdScript),
   ].join("\n    ");
 }
@@ -253,7 +257,7 @@ export async function renderRoute(pathname: string, template: string): Promise<R
     if (post && post.isPublished) {
       const canonical = `${SITE}/blog/${post.slug}`;
       const description =
-        post.excerpt ?? post.content.slice(0, 155).replace(/\s+\S*$/, "") + "…";
+        post.excerpt ?? plainText(post.content).slice(0, 155).replace(/\s+\S*$/, "") + "…";
 
       return {
         status: 200,

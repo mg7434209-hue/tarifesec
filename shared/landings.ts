@@ -17,6 +17,8 @@
  * otomatik kapsar.
  */
 
+import { YIL } from "./year";
+
 export type LandingKind = "internet" | "mobil";
 
 export type LandingFilter = {
@@ -47,7 +49,6 @@ export type Landing = {
   faq: LandingFaq[];
 };
 
-const YIL = 2026;
 
 export const LANDINGS: Landing[] = [
   // ── Ev interneti: operatörler ─────────────────────────────────────────────

@@ -8,6 +8,7 @@ import { fullName } from "./util";
 import type { Pkg, Mobile } from "./data";
 import { SITE_INFO } from "../../shared/site";
 import { speedTextLong } from "../../shared/format";
+import { plainText, readingMinutes } from "../../shared/blog-format";
 
 export function organization() {
   return {
@@ -182,7 +183,7 @@ export function speedTestApp() {
   };
 }
 
-export function article(post: { title: string; excerpt: string | null; slug: string; category: string; createdAt: Date | string; updatedAt: Date | string; author: string | null }) {
+export function article(post: { title: string; excerpt: string | null; slug: string; category: string; content: string; createdAt: Date | string; updatedAt: Date | string; author: string | null }) {
   return {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -190,6 +191,8 @@ export function article(post: { title: string; excerpt: string | null; slug: str
     headline: post.title,
     image: [OG_IMAGE.url],
     articleSection: post.category,
+    wordCount: plainText(post.content).split(" ").length,
+    timeRequired: `PT${readingMinutes(post.content)}M`,
     description: post.excerpt ?? undefined,
     datePublished: new Date(post.createdAt).toISOString(),
     dateModified: new Date(post.updatedAt).toISOString(),
