@@ -2,7 +2,7 @@
  * Başlangıç verisi — hem CLI seed'i hem de sunucu açılışındaki otomatik
  * doldurma buradan okur (tek kaynak).
  *
- * Değerler 01.10.2026'da resmi operatör sayfalarından doğrulandı; kaynaklar
+ * Değerler 01.10.2026'da (Vodafone ev + Türk Telekom mobil 04.10.2026'da) resmi operatör sayfalarından doğrulandı; kaynaklar
  * drizzle/data-updates.ts'te. Fiyat değişince BURASI ve data-updates.ts
  * birlikte güncellenir (canlı veritabanını data-updates düzeltir).
  */
@@ -10,7 +10,6 @@ import type { InsertPackage, InsertMobileTariff } from "./schema";
 
 const SO_FEATS = JSON.stringify(["Online'a özel kampanya", "Modem dahil", "Ücretsiz kurulum", "YouTube Premium"]);
 const SB_FEATS = JSON.stringify(["5G", "Wi-Fi 7 modem", "Kurulum gerektirmez"]);
-const TT_FEATS = JSON.stringify(["Online'da 12 Ay Avantaj Kampanyası", "Ücretsiz kurulum", "Kampanya 31.12.2026'ya kadar"]);
 
 export const SEED_PACKAGES: InsertPackage[] = [
     // ── Superonline Fiber (isFeatured = true, Bayi B9613) ──
@@ -26,12 +25,13 @@ export const SEED_PACKAGES: InsertPackage[] = [
     {
       operator: "Superonline", operatorSlug: "superonline", type: "fiber",
       name: "Fiber 500 Mbps", downloadSpeed: 500, uploadSpeed: null,
-      priceMonthly: 950, priceNoCommitment: 1050, commitmentMonths: 12,
+      // 10.10.2026: 12 aylık kampanya sona erdi; taahhütsüz teklif (bkz. data-updates.ts)
+      priceMonthly: 1350, priceNoCommitment: 1350, commitmentMonths: 0,
       dataLimit: "Limitsiz", modemIncluded: true, installationFee: 0,
-      features: JSON.stringify(["Fiber Hızları Kampanyası", "Modem dahil", "Ücretsiz kurulum"]),
+      features: JSON.stringify(["Taahhütsüz", "500 Mbps'ye kadar", "Modem dahil"]),
       isFeatured: true,
       affiliateUrl: "https://superonline.net",
-      officialUrl: "https://www.superonline.net/ev-interneti/500-mbps-ye-kadar",
+      officialUrl: "https://www.superonline.net/ev-interneti/taahhutsuz",
     },
     {
       operator: "Superonline", operatorSlug: "superonline", type: "fiber",
@@ -67,17 +67,13 @@ export const SEED_PACKAGES: InsertPackage[] = [
       name: "Fiber 100 Mbps", downloadSpeed: 100, uploadSpeed: null,
       priceMonthly: 1145, priceNoCommitment: null, commitmentMonths: 12,
       dataLimit: "Limitsiz", modemIncluded: false,
-      features: TT_FEATS,
+      features: JSON.stringify([
+        "Online'da 12 Ay Avantaj Kampanyası", "Ücretsiz kurulum",
+        "Kampanya 31.12.2026'ya kadar", "Modem ücrete dahil değil (fiberde 85 ₺/ay)",
+      ]),
       officialUrl: "https://bireysel.turktelekom.com.tr/evde-internet/yeni-musteri-kampanyalari/onlineda-12-ay-avantaj-kampanyasi-100-mbps",
     },
-    {
-      operator: "Türk Telekom", operatorSlug: "turk-telekom", type: "fiber",
-      name: "Fiber 500 Mbps", downloadSpeed: 500, uploadSpeed: null,
-      priceMonthly: 1000, priceNoCommitment: null, commitmentMonths: 12,
-      dataLimit: "Limitsiz", modemIncluded: false,
-      features: TT_FEATS,
-      officialUrl: "https://bireysel.turktelekom.com.tr/evde-internet/yeni-musteri-kampanyalari/onlineda-12-ay-avantaj-kampanyasi-500-mbps",
-    },
+    // Türk Telekom Fiber 500: 13.10.2026'da resmi sayfalar çelişti (1.000 / 1.380 TL) — eklenmedi.
     // ── TurkNet (taahhütsüz; liste fiyatı 949,90 ₺) ──
     {
       operator: "TurkNet", operatorSlug: "turknet", type: "fiber",
@@ -91,7 +87,15 @@ export const SEED_PACKAGES: InsertPackage[] = [
       ]),
       officialUrl: "https://www.turk.net/",
     },
-    // Vodafone ev interneti: 01.10.2026'da güncel fiyat doğrulanamadı — eklenmedi.
+    // ── Vodafone (04.10.2026, vodafone.com.tr) ──
+    {
+      operator: "Vodafone", operatorSlug: "vodafone", type: "fiber",
+      name: "Vodafone Fiber 200", downloadSpeed: 200, uploadSpeed: null,
+      priceMonthly: 889, priceNoCommitment: null, commitmentMonths: 12,
+      dataLimit: "Limitsiz", modemIncluded: true,
+      features: JSON.stringify(["12 ay sabit fiyat", "Wi-Fi 6 modem dahil", "Ücretsiz kurulum", "Vodafone mobil müşterisine 120 ₺ indirim"]),
+      officialUrl: "https://www.vodafone.com.tr/net/fiber-internet",
+    },
   ];
 
 const TC = (name: string, gb: number, price: number, featured = false): InsertMobileTariff => ({
@@ -108,6 +112,13 @@ const VF = (name: string, gb: number, price: number, featured = false): InsertMo
   officialUrl: "https://www.vodafone.com.tr/tarifeler/faturali-tarifeler",
 });
 
+const TT = (name: string, gb: number, price: number, featured = false): InsertMobileTariff => ({
+  operator: "Türk Telekom", operatorSlug: "turk-telekom", name,
+  gbLimit: gb, minuteLimit: 1000, smsLimit: 250, priceMonthly: price, isContract: true, isFeatured: featured,
+  features: JSON.stringify(["12 ay taahhüt", "1000 dk + 250 SMS", "Online'a özel"]),
+  officialUrl: "https://bireysel.turktelekom.com.tr/mobil/yeni-musteri-tarife-ve-paketleri/faturali-tarifeler",
+});
+
 export const SEED_MOBILE: InsertMobileTariff[] = [
     TC("5G Ultra Dijital 5 GB", 5, 400),
     TC("5G Ultra Dijital 15 GB", 15, 500),
@@ -116,5 +127,7 @@ export const SEED_MOBILE: InsertMobileTariff[] = [
     VF("5G Online Plus 20 GB", 20, 465),
     VF("5G Online Plus 30 GB", 30, 565),
     VF("5G Online Plus 50 GB", 50, 685),
-    // Türk Telekom mobil: 01.10.2026'da güncel fiyat doğrulanamadı — eklenmedi.
+    TT("Yeni Dijital Lider 10 GB", 10, 365),
+    TT("Yeni Dijital Lider 20 GB", 20, 465),
+    TT("Yeni Dijital Lider 40 GB", 40, 685),
   ];

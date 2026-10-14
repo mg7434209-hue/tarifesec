@@ -234,6 +234,31 @@ export const DATA_UPDATES: DataUpdate[] = [
     source: UNVERIFIED + " (Vodafone Evde Fiber için 499 / 799 / 1.039 TL gibi çelişkili değerler)",
   },
 
+  // ── 04.10.2026 — ikinci tur: yayından kaldırılanlar geri açıldı ─────────
+  {
+    id: "2026-10-04-vodafone-ev-to-fiber-200",
+    table: "packages",
+    match: { operatorSlug: "vodafone", name: "Vodafone Ev 100 Mbps" },
+    // 01.10'da isActive:false yapıldı; fiyat sütunu eski değerde kaldı
+    expectPrice: 679,
+    replaces: true,
+    set: {
+      name: "Vodafone Fiber 200",
+      type: "fiber",
+      downloadSpeed: 200,
+      uploadSpeed: null,
+      priceMonthly: 889,
+      priceNoCommitment: null,
+      commitmentMonths: 12,
+      dataLimit: "Limitsiz",
+      modemIncluded: true,
+      features: ["12 ay sabit fiyat", "Wi-Fi 6 modem dahil", "Ücretsiz kurulum", "Vodafone mobil müşterisine 120 ₺ indirim"],
+      officialUrl: "https://www.vodafone.com.tr/net/fiber-internet",
+      isActive: true,
+    },
+    source: "vodafone.com.tr/net/fiber-internet — Fiber 200, Wi-Fi 6 modem, 889 TL/ay, 12 ay sabit fiyat — doğrulama 04.10.2026",
+  },
+
   // ── Mobil ────────────────────────────────────────────────────────────────
   ...(
     [
@@ -303,4 +328,81 @@ export const DATA_UPDATES: DataUpdate[] = [
       source: UNVERIFIED + " (Türk Telekom mobil için 205–1.100 TL arası çelişkili değerler)",
     })
   ),
+  ...(
+    [
+      ["Avantaj 8 GB", 429, "Yeni Dijital Lider 10 GB", 10, 365],
+      ["Avantaj 15 GB", 569, "Yeni Dijital Lider 20 GB", 20, 465],
+      ["Sınırsız Avantaj", 899, "Yeni Dijital Lider 40 GB", 40, 685],
+    ] as const
+  ).map(
+    ([old, oldPrice, name, gb, price]): DataUpdate => ({
+      id: `2026-10-04-tt-mobil-${gb}gb`,
+      table: "mobile",
+      match: { operatorSlug: "turk-telekom", name: old },
+      // 01.10'da isActive:false yapıldı; fiyat sütunu eski değerde kaldı
+      expectPrice: oldPrice,
+      replaces: true,
+      set: {
+        name,
+        gbLimit: gb,
+        minuteLimit: 1000,
+        smsLimit: 250,
+        priceMonthly: price,
+        isContract: true,
+        features: ["12 ay taahhüt", "1000 dk + 250 SMS", "Online'a özel"],
+        officialUrl: "https://bireysel.turktelekom.com.tr/mobil/yeni-musteri-tarife-ve-paketleri/faturali-tarifeler",
+        isActive: true,
+      },
+      source:
+        "bireysel.turktelekom.com.tr 'Yeni Dijital Lider' faturalı tarifeler (taahhütlü; 10 GB 365, 20 GB 465, 40 GB 685 TL) — doğrulama 04.10.2026",
+    })
+  ),
+  // ── 10.10.2026 ─────────────────────────────────────────────────────────
+  {
+    id: "2026-10-10-superonline-500-taahhutsuz",
+    table: "packages",
+    match: { operatorSlug: "superonline", name: "Fiber 500 Mbps" },
+    expectPrice: 950,
+    // 12 aylık 950 TL kampanyasının süresi dolmuş görünüyor (sayfa tarihi 1 Mart
+    // 2026); güncel ve doğrulanabilir teklif taahhütsüz paket — farklı koşul,
+    // "fiyat arttı" rozeti gösterilmez.
+    replaces: true,
+    set: {
+      priceMonthly: 1350,
+      priceNoCommitment: 1350,
+      commitmentMonths: 0,
+      modemIncluded: true,
+      features: ["Taahhütsüz", "500 Mbps'ye kadar", "Modem dahil"],
+      officialUrl: "https://www.superonline.net/ev-interneti/taahhutsuz",
+    },
+    source:
+      "superonline.net/ev-interneti/taahhutsuz — 'Taahhütsüz Fiberde Süper Teklif' 500 Mbps'ye kadar 1350 TL/ay, modem dahil — doğrulama 10.10.2026",
+  },
+  {
+    id: "2026-10-10-tt-fiber-100-modem",
+    table: "packages",
+    match: { operatorSlug: "turk-telekom", name: "Fiber 100 Mbps" },
+    expectPrice: 1145,
+    set: {
+      features: [
+        "Online'da 12 Ay Avantaj Kampanyası",
+        "Ücretsiz kurulum",
+        "Kampanya 31.12.2026'ya kadar",
+        "Modem ücrete dahil değil (fiberde 85 ₺/ay)",
+      ],
+    },
+    source:
+      "bireysel.turktelekom.com.tr Online'da 12 Ay Avantaj 100 Mbps — 1.145 TL/ay, fiber hatta modem 85 TL/ay — doğrulama 10.10.2026",
+  },
+  // ── 13.10.2026 ─────────────────────────────────────────────────────────
+  {
+    id: "2026-10-13-tt-fiber-500-off",
+    table: "packages",
+    match: { operatorSlug: "turk-telekom", name: "Fiber 500 Mbps" },
+    expectPrice: 1000,
+    set: { isActive: false },
+    source:
+      "13.10.2026: Türk Telekom'un kendi sayfaları çelişiyor — 'Online'da 12 Ay Avantaj 500 Mbps' sayfası 1.000 TL, " +
+      "daha yeni (19.06.2026) 100 Mbps kampanya sayfasının paket tablosu 500 Mbps için 1.380 TL. Doğrulanana kadar yayından kaldırıldı.",
+  },
 ];
