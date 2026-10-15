@@ -1,19 +1,17 @@
-import { useCallback, useRef, useState } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import {
   Zap, Download, Upload, Activity, RotateCcw, Loader2, Waves, Gauge, Share2, Check,
 } from "lucide-react";
-import { fetchSpeedStats, saveSpeedResult } from "@/lib/api";
+import { fetchSpeedStats } from "@/lib/api";
+import { useSpeedTest } from "@/lib/useSpeedTest";
 import { useRouteSeo } from "@/lib/hooks";
 import SpeedGauge from "@/components/SpeedGauge";
 import PartnerCard from "@/components/PartnerCard";
 import Sss from "@/components/Sss";
 import { FAQ } from "@shared/faq";
-import {
-  measurePing, measureDownload, measureUpload, rate, pingRate,
-  type Phase, type Result,
-} from "@/lib/speedtest";
+import { rate, pingRate, type Phase } from "@/lib/speedtest";
 
 const TONE: Record<string, string> = {
   bad: "text-red-600 bg-red-50 border-red-200",
@@ -50,74 +48,12 @@ function Metrik({
 }
 
 export default function HizTesti() {
-  const [phase, setPhase] = useState<Phase>("idle");
-  const [progress, setProgress] = useState(0);
-  const [live, setLive] = useState(0);
-  const [result, setResult] = useState<Result | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const { phase, progress, result, error, running, gaugeValue, run, stop } = useSpeedTest("sayfa");
   const [copied, setCopied] = useState(false);
-  const abortRef = useRef<AbortController | null>(null);
 
   const { data: stats } = useQuery({ queryKey: ["speedstats"], queryFn: fetchSpeedStats });
 
   useRouteSeo("/hiz-testi");
-
-  const run = useCallback(async () => {
-    const controller = new AbortController();
-    abortRef.current = controller;
-    setError(null);
-    setResult(null);
-    setLive(0);
-
-    try {
-      setPhase("ping");
-      setProgress(0);
-      const { ping, jitter } = await measurePing(controller.signal, setProgress);
-
-      setPhase("download");
-      setProgress(0);
-      setLive(0);
-      const dl = await measureDownload(controller.signal, (mbps, p) => {
-        setLive(mbps);
-        setProgress(p);
-      });
-
-      setPhase("upload");
-      setProgress(0);
-      setLive(0);
-      const ul = await measureUpload(controller.signal, (mbps, p) => {
-        setLive(mbps);
-        setProgress(p);
-      });
-
-      const r: Result = {
-        download: dl.mbps,
-        upload: ul.mbps,
-        ping,
-        jitter,
-        stability: dl.stability,
-        samples: { download: dl.samples, upload: ul.samples },
-      };
-      setResult(r);
-      setPhase("done");
-
-      saveSpeedResult({
-        downloadSpeed: Math.round(dl.mbps),
-        uploadSpeed: Math.round(ul.mbps),
-        ping: Math.round(ping),
-      });
-    } catch (e) {
-      if ((e as Error).name === "AbortError") {
-        setPhase("idle");
-        return;
-      }
-      setError("Test tamamlanamadı. Bağlantınızı kontrol edip tekrar deneyin.");
-      setPhase("idle");
-    }
-  }, []);
-
-  const running = phase === "ping" || phase === "download" || phase === "upload";
-  const gaugeValue = running && phase !== "ping" ? live : result?.download ?? 0;
 
   const paylas = () => {
     if (!result) return;
@@ -204,7 +140,7 @@ export default function HizTesti() {
         {error && <p className="text-sm text-red-600 text-center mb-4" role="alert">{error}</p>}
 
         <button
-          onClick={running ? () => abortRef.current?.abort() : run}
+          onClick={running ? stop : run}
           className="w-full flex items-center justify-center gap-2 bg-[#0097a7] hover:bg-[#00838f] text-white font-semibold py-3.5 rounded-xl transition-colors mt-2"
         >
           {running ? (

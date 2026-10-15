@@ -72,6 +72,8 @@ export async function saveSpeedResult(r: {
   downloadSpeed: number;
   uploadSpeed: number;
   ping: number;
+  /** Testin başlatıldığı yer — ana sayfa kartının etkisini ölçmek için */
+  source?: "sayfa" | "anasayfa";
 }) {
   try {
     await fetch(`${BASE}/speedtest/result`, {
