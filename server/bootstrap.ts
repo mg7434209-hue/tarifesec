@@ -227,6 +227,8 @@ export async function ensureCoreTables(): Promise<void> {
     "day" varchar(10) PRIMARY KEY NOT NULL,
     "count" integer DEFAULT 0 NOT NULL
   )`);
+  // Hız testi kaynağı (ana sayfa / test sayfası) — sonradan eklenen kolon
+  await db.execute(sql`ALTER TABLE IF EXISTS "speed_tests" ADD COLUMN IF NOT EXISTS "source" varchar(20)`);
   await db.execute(sql`CREATE TABLE IF NOT EXISTS "settings" (
     "key" varchar(60) PRIMARY KEY NOT NULL,
     "value" text NOT NULL,

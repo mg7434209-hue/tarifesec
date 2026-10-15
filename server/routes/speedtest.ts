@@ -27,6 +27,60 @@ const bw = bandwidthLimit({
   maxBytes: config.speedTest.budgetBytes,
 });
 
+/**
+ * SUNUCU GENELİ günlük veri bütçesi (indirme + yükleme).
+ *
+ * IP başına bütçe tek kişinin kötüye kullanımını keser ama trafik patlamasını
+ * (ör. ana sayfadaki test kartı viral olursa) kesmez; Railway trafiği
+ * faturalandırır. Bütçe dolunca test o gün için "kapasite doldu" der, site
+ * çalışmaya devam eder. Gün Türkiye saatine göre döner.
+ */
+const daily = { day: "", bytes: 0 };
+const trDay = () => new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString().slice(0, 10);
+const dailyLimit = () => config.speedTest.dailyBudgetGB * 1024 ** 3;
+
+/** Son 7 günde testlerin başlatıldığı yer — ana sayfa kartı işe yarıyor mu? */
+export async function speedTestSources(): Promise<Record<string, number>> {
+  const r: any = await db.execute(
+    sql`select coalesce(source, 'sayfa') as s, count(*)::int as n from speed_tests
+        where created_at > now() - interval '7 days' group by 1`
+  );
+  const rows = r.rows ?? r;
+  return Object.fromEntries(rows.map((x: any) => [x.s, Number(x.n)]));
+}
+
+export function speedTestUsage() {
+  if (daily.day !== trDay()) return { gun: trDay(), kullanilanGB: 0, limitGB: config.speedTest.dailyBudgetGB };
+  return {
+    gun: daily.day,
+    kullanilanGB: Math.round((daily.bytes / 1024 ** 3) * 100) / 100,
+    limitGB: config.speedTest.dailyBudgetGB,
+  };
+}
+
+function dailyGuard(_req: any, res: any, next: any) {
+  if (daily.day !== trDay()) {
+    daily.day = trDay();
+    daily.bytes = 0;
+  }
+  if (daily.bytes >= dailyLimit()) {
+    res.setHeader("Retry-After", "3600");
+    return res.status(503).json({
+      error: "Hız testi bugünlük kapasitesine ulaştı. Lütfen yarın tekrar deneyin.",
+    });
+  }
+  next();
+}
+
+function chargeAll(req: any, bytes: number) {
+  bw.charge(req, bytes);
+  if (daily.day !== trDay()) {
+    daily.day = trDay();
+    daily.bytes = 0;
+  }
+  daily.bytes += bytes;
+}
+
 const noStore = (res: any) => {
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
   res.setHeader("Pragma", "no-cache");
@@ -37,7 +91,7 @@ router.get("/ping", (_req, res) => {
   res.status(204).end();
 });
 
-router.get("/download", bw.guard, (req, res) => {
+router.get("/download", dailyGuard, bw.guard, (req, res) => {
     const requested = Number(req.query.bytes) || config.speedTest.defaultBytes;
     const total = Math.min(Math.max(requested, 1024), config.speedTest.maxDownloadBytes);
 
@@ -63,12 +117,24 @@ router.get("/download", bw.guard, (req, res) => {
       res.end();
     };
 
-    req.on("close", () => res.destroy());
-    res.on("finish", () => bw.charge(req, sent));
+    // Akış kesilse de (istemci süre dolunca iptal eder — normaldir) gönderilen
+    // bayt bütçeye yazılır. Eskiden yalnız "finish"te yazılıyordu; kesilen
+    // indirmeler kotaya hiç girmiyordu.
+    let charged = false;
+    const charge = () => {
+      if (charged) return;
+      charged = true;
+      chargeAll(req, sent);
+    };
+    req.on("close", () => {
+      charge();
+      res.destroy();
+    });
+    res.on("finish", charge);
     write();
 });
 
-router.post("/upload", bw.guard, (req, res) => {
+router.post("/upload", dailyGuard, bw.guard, (req, res) => {
     let received = 0;
     let aborted = false;
 
@@ -81,9 +147,14 @@ router.post("/upload", bw.guard, (req, res) => {
       }
     });
 
+    // Yükleme yarıda kesilse de alınan bayt bütçeye yazılır
+    req.on("close", () => {
+      if (!aborted && !req.complete) chargeAll(req, received);
+    });
+
     req.on("end", () => {
       if (aborted) return;
-      bw.charge(req, received);
+      chargeAll(req, received);
       noStore(res);
       res.json({ bytes: received });
     });
@@ -106,6 +177,7 @@ router.post("/result", rateLimit(config.rateLimit.speedTestMeta), async (req, re
       ping,
       isp: typeof req.body?.isp === "string" ? req.body.isp.slice(0, 100) : null,
       city: typeof req.body?.city === "string" ? req.body.city.slice(0, 50) : null,
+      source: req.body?.source === "anasayfa" ? "anasayfa" : "sayfa",
     });
 
     res.status(201).json({ success: true });

@@ -1,4 +1,7 @@
 import { Link } from "wouter";
+import { lazy, Suspense } from "react";
+
+const HizTestiKart = lazy(() => import("@/components/HizTestiKart"));
 import { Zap, Smartphone, BarChart3, ArrowRight, CheckCircle, Shield } from "lucide-react";
 import PartnerCard from "@/components/PartnerCard";
 import { useRouteSeo } from "@/lib/hooks";
@@ -44,21 +47,23 @@ export default function Home() {
   return (
     <div>
       {/* Hero */}
-      <section className="bg-gradient-to-br from-[#1a237e] to-[#0097a7] text-white py-20 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <span className="inline-flex items-center gap-1.5 bg-white/10 border border-white/20 rounded-full px-3 py-1 text-xs font-medium mb-6">
+      <section className="bg-gradient-to-br from-[#1a237e] to-[#0097a7] text-white py-8 sm:py-14 md:py-20 px-4">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-[1fr_420px] gap-10 items-center">
+        <div className="text-center lg:text-left">
+          <span className="hidden sm:inline-flex items-center gap-1.5 bg-white/10 border border-white/20 rounded-full px-3 py-1 text-xs font-medium mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
             Bağımsız Karşılaştırma Platformu
           </span>
-          <h1 className="text-4xl md:text-5xl font-bold mb-5 leading-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-5 leading-tight">
             Türkiye'nin Tüm Tarifelerini<br />
             <span className="text-[#4dd0e1]">Tek Yerde Karşılaştır</span>
           </h1>
-          <p className="text-lg text-blue-100 mb-8 max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg text-blue-100 mb-6 sm:mb-8 max-w-2xl mx-auto lg:mx-0">
             Superonline, Turkcell, Vodafone ve Türk Telekom internet ile mobil
-            paketlerini tarafsız olarak karşılaştırın. Hız testi yapın.
+            paketlerini tarafsız olarak karşılaştırın. Önce bağlantınızın gerçek
+            hızını ölçün, sonra size uygun paketi seçin.
           </p>
-          <div className="flex flex-wrap justify-center gap-3">
+          <div className="flex flex-wrap justify-center lg:justify-start gap-3">
             <Link
               href="/paket-karsilastir"
               className="bg-[#0097a7] hover:bg-[#00838f] text-white font-semibold px-6 py-3 rounded-xl transition-colors flex items-center gap-2"
@@ -72,11 +77,19 @@ export default function Home() {
               Mobil Tarife Bul
             </Link>
           </div>
-          <div className="flex flex-wrap justify-center gap-5 mt-8 text-sm text-blue-100">
+          <div className="hidden sm:flex flex-wrap justify-center lg:justify-start gap-5 mt-8 text-sm text-blue-100">
             <span className="flex items-center gap-1.5"><CheckCircle className="w-4 h-4 text-green-400" />5 Operatör</span>
             <span className="flex items-center gap-1.5"><CheckCircle className="w-4 h-4 text-green-400" />Tarafsız Karşılaştırma</span>
             <span className="flex items-center gap-1.5"><CheckCircle className="w-4 h-4 text-green-400" />Ücretsiz Araçlar</span>
           </div>
+        </div>
+
+        {/* Hız testi kartı — ayrı parça, geç yüklenir; yer önceden ayrılır (CLS yok) */}
+        <div className="min-h-[430px] flex items-center">
+          <Suspense fallback={<div className="w-full max-w-md mx-auto h-[430px] rounded-2xl bg-white/10" aria-hidden="true" />}>
+            <HizTestiKart />
+          </Suspense>
+        </div>
         </div>
       </section>
 

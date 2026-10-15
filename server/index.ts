@@ -180,6 +180,14 @@ app.get("/api/health", async (_req, res) => {
       out.ziyaretciSayaci = { kalici: false, sorun: (e as Error).message };
     }
     out.kurulum = bootstrapStatus;
+    const { speedTestUsage } = await import("./routes/speedtest");
+    out.hizTesti = speedTestUsage();
+    try {
+      const { speedTestSources } = await import("./routes/speedtest");
+      (out.hizTesti as any).son7GunTestSayisi = await speedTestSources();
+    } catch {
+      /* tablo/kolon henüz yoksa teşhis bozulmasın */
+    }
     res.json(out);
   } catch (err) {
     out.status = "degraded";

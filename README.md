@@ -214,6 +214,19 @@ sponsorlu bağlantıların varlığını açıkça belirtecek biçimde güncelle
 
 ## Hız Testi
 
+- **Ana sayfada kompakt kart** (`components/HizTestiKart.tsx`, geç yüklenir):
+  sonuca göre ilgili karşılaştırma sayfasına öneri verir. "Hız testi"
+  aramasının hedef sayfası yine `/hiz-testi`'dir — iki sayfa aynı anahtar
+  kelimede yarışmasın diye ana sayfa başlığı/şeması değiştirilmedi.
+- Ölçüm durumu tek kancada: `lib/useSpeedTest.ts` (sayfa ve kart ortak).
+  Test yalnız düğmeyle başlar.
+- **Sunucu geneli günlük veri bütçesi:** `SPEEDTEST_DAILY_GB` (varsayılan 200).
+  Dolunca test o gün "kapasite doldu" der. Kesilen indirmeler de bütçeye
+  yazılır (eskiden yalnız tamamlanan indirme yazılıyordu).
+- Analiz: `speed_tests.source` (anasayfa | sayfa). `/api/health` → `hizTesti`
+  günlük kullanılan GB ve son 7 günde kaynağa göre test sayısı.
+
+
 `client/src/lib/speedtest.ts` — ölçüm motoru, `SpeedGauge` — kadran.
 
 - **4 paralel akış.** Tek TCP bağlantısı yüksek hızlı hatlarda pencere boyutu

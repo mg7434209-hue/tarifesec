@@ -80,6 +80,8 @@ export const speedTests = pgTable("speed_tests", {
   ping: integer("ping").notNull(),
   isp: varchar("isp", { length: 100 }),
   city: varchar("city", { length: 50 }),
+  /** sayfa | anasayfa — kolon server/bootstrap.ts ensureCoreTables'ta eklenir */
+  source: varchar("source", { length: 20 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

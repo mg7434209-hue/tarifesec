@@ -63,5 +63,11 @@ export const config = {
     maxDownloadBytes: 50 * 1024 * 1024,
     maxUploadBytes: 8 * 1024 * 1024,
     defaultBytes: 8 * 1024 * 1024,
+    /**
+     * Sunucu geneli GÜNLÜK veri bütçesi (GB). Dolunca test o gün "kapasite
+     * doldu" der. 100 Mbps'lik bir hatta tek test ≈ 100–150 MB'tır; 200 GB
+     * kabaca günde 1.500+ test demektir. Railway Variables: SPEEDTEST_DAILY_GB
+     */
+    dailyBudgetGB: Number(process.env.SPEEDTEST_DAILY_GB ?? 200),
   },
 } as const;
