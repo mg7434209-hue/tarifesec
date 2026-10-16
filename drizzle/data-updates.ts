@@ -405,4 +405,52 @@ export const DATA_UPDATES: DataUpdate[] = [
       "13.10.2026: Türk Telekom'un kendi sayfaları çelişiyor — 'Online'da 12 Ay Avantaj 500 Mbps' sayfası 1.000 TL, " +
       "daha yeni (19.06.2026) 100 Mbps kampanya sayfasının paket tablosu 500 Mbps için 1.380 TL. Doğrulanana kadar yayından kaldırıldı.",
   },
+  // ── 16.10.2026 ─────────────────────────────────────────────────────────
+  {
+    id: "2026-10-16-tt-fiber-500-on",
+    table: "packages",
+    match: { operatorSlug: "turk-telekom", name: "Fiber 500 Mbps" },
+    expectPrice: 1000,
+    set: {
+      isActive: true,
+      features: [
+        "Online'da 12 Ay Avantaj Kampanyası",
+        "Kampanya 31.12.2026'ya kadar",
+        "Bağlantı ücreti fiyata dahil",
+        "Modem ücrete dahil değil",
+      ],
+    },
+    source:
+      "bireysel.turktelekom.com.tr/evde-internet/yeni-musteri-kampanyalari/onlineda-12-ay-avantaj-kampanyasi-500-mbps — " +
+      "Kampanya Fiyatı (1-12 Ay) 1.000 TL, 31.12.2026'ya kadar; 13.10'daki 1.380 TL tablo değeri kampanyasız liste fiyatı — doğrulama 16.10.2026",
+  },
+  {
+    id: "2026-10-16-superonline-500-ucret-notu",
+    table: "packages",
+    match: { operatorSlug: "superonline", name: "Fiber 500 Mbps" },
+    expectPrice: 1350,
+    set: {
+      features: [
+        "Taahhütsüz",
+        "500 Mbps'ye kadar",
+        "Modem dahil",
+        "Yeni abonelikte 12 ay boyunca aylık 150 ₺ kurulum/aktivasyon taksidi",
+        "Teklif 01.01.2027'ye kadar",
+      ],
+    },
+    source:
+      "superonline.net/ev-interneti/fiber-internet/taahhutsuz-fiberde-super-teklif/500-mbps-ye-kadar — 1350 TL/ay, 01.01.2027'ye kadar; " +
+      "yeni aktivasyonda kurulum+aktivasyon 12 ay taksitle aylık 150 TL — doğrulama 16.10.2026",
+  },
+  {
+    id: "2026-10-16-turkcell-40gb-ad",
+    table: "mobile",
+    match: { operatorSlug: "turkcell", name: "5G Ultra Dijital 40 GB" },
+    expectPrice: 720,
+    // Ad değişti: yeni kurulumda eski adlı satır yoktur, uyarı basılmasın
+    replaces: true,
+    set: { name: "5G Dijital 40 GB", minuteLimit: 2000 },
+    source:
+      "turkcell.com.tr/turkcellli-olmak/paket-secimi — '5G Dijital 40 GB' 720 TL/ay, 2.000 dk (önceki ad ve dakika hatalıydı) — doğrulama 16.10.2026",
+  },
 ];

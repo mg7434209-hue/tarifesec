@@ -28,7 +28,10 @@ export const SEED_PACKAGES: InsertPackage[] = [
       // 10.10.2026: 12 aylık kampanya sona erdi; taahhütsüz teklif (bkz. data-updates.ts)
       priceMonthly: 1350, priceNoCommitment: 1350, commitmentMonths: 0,
       dataLimit: "Limitsiz", modemIncluded: true, installationFee: 0,
-      features: JSON.stringify(["Taahhütsüz", "500 Mbps'ye kadar", "Modem dahil"]),
+      features: JSON.stringify([
+        "Taahhütsüz", "500 Mbps'ye kadar", "Modem dahil",
+        "Yeni abonelikte 12 ay boyunca aylık 150 ₺ kurulum/aktivasyon taksidi", "Teklif 01.01.2027'ye kadar",
+      ]),
       isFeatured: true,
       affiliateUrl: "https://superonline.net",
       officialUrl: "https://www.superonline.net/ev-interneti/taahhutsuz",
@@ -73,7 +76,17 @@ export const SEED_PACKAGES: InsertPackage[] = [
       ]),
       officialUrl: "https://bireysel.turktelekom.com.tr/evde-internet/yeni-musteri-kampanyalari/onlineda-12-ay-avantaj-kampanyasi-100-mbps",
     },
-    // Türk Telekom Fiber 500: 13.10.2026'da resmi sayfalar çelişti (1.000 / 1.380 TL) — eklenmedi.
+    {
+      operator: "Türk Telekom", operatorSlug: "turk-telekom", type: "fiber",
+      name: "Fiber 500 Mbps", downloadSpeed: 500, uploadSpeed: null,
+      priceMonthly: 1000, priceNoCommitment: null, commitmentMonths: 12,
+      dataLimit: "Limitsiz", modemIncluded: false,
+      features: JSON.stringify([
+        "Online'da 12 Ay Avantaj Kampanyası", "Kampanya 31.12.2026'ya kadar",
+        "Bağlantı ücreti fiyata dahil", "Modem ücrete dahil değil",
+      ]),
+      officialUrl: "https://bireysel.turktelekom.com.tr/evde-internet/yeni-musteri-kampanyalari/onlineda-12-ay-avantaj-kampanyasi-500-mbps",
+    },
     // ── TurkNet (taahhütsüz; liste fiyatı 949,90 ₺) ──
     {
       operator: "TurkNet", operatorSlug: "turknet", type: "fiber",
@@ -123,7 +136,7 @@ export const SEED_MOBILE: InsertMobileTariff[] = [
     TC("5G Ultra Dijital 5 GB", 5, 400),
     TC("5G Ultra Dijital 15 GB", 15, 500),
     TC("5G Ultra Dijital 25 GB", 25, 600),
-    TC("5G Ultra Dijital 40 GB", 40, 720),
+    { ...TC("5G Dijital 40 GB", 40, 720), minuteLimit: 2000 },
     VF("5G Online Plus 20 GB", 20, 465),
     VF("5G Online Plus 30 GB", 30, 565),
     VF("5G Online Plus 50 GB", 50, 685),
