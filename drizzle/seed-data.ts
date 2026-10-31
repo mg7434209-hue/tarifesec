@@ -96,7 +96,6 @@ export const SEED_PACKAGES: InsertPackage[] = [
       features: JSON.stringify([
         "Taahhütsüz",
         "Liste fiyatı 949,90 ₺/ay",
-        "Yeni aboneliğe ilk 3 ay 749,90 ₺ (kampanya 31.10.2026'ya kadar)",
       ]),
       officialUrl: "https://www.turk.net/",
     },

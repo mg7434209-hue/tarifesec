@@ -453,4 +453,15 @@ export const DATA_UPDATES: DataUpdate[] = [
     source:
       "turkcell.com.tr/turkcellli-olmak/paket-secimi — '5G Dijital 40 GB' 720 TL/ay, 2.000 dk (önceki ad ve dakika hatalıydı) — doğrulama 16.10.2026",
   },
+  // ── 31.10.2026 ─────────────────────────────────────────────────────────
+  {
+    id: "2026-10-31-turknet-kampanya-bitti",
+    table: "packages",
+    match: { operatorSlug: "turknet", name: "TurkNet 100 Mbps" },
+    expectPrice: 950,
+    set: { features: ["Taahhütsüz", "Liste fiyatı 949,90 ₺/ay"] },
+    source:
+      "turk.net/hiz-isteyene-turknet-kampanyasi — 'ilk 3 ay 749,90 TL' kampanyası 01.09–31.10.2026 arası yeni aboneliklerde geçerliydi; " +
+      "uzatma duyurusu yok, kampanya notu kaldırıldı. Liste fiyatı 949,90 TL değişmedi — doğrulama 31.10.2026",
+  },
 ];
