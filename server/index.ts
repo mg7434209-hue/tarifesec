@@ -10,6 +10,7 @@ import mobileRouter from "./routes/mobile";
 import leadsRouter from "./routes/leads";
 import blogRouter from "./routes/blog";
 import adminRouter from "./routes/admin";
+import osRouter from "./routes/os";
 import visitorsRouter from "./routes/visitors";
 import speedTestRouter from "./routes/speedtest";
 import seoRouter from "./routes/seo";
@@ -133,6 +134,7 @@ app.use("/api/leads", leadsRouter);
 app.use("/api/blog", blogRouter);
 app.use("/api/setup", setupRouter);
 app.use("/api/admin", adminRouter);
+app.use("/api/os", osRouter);
 app.use("/api/visitors", visitorsRouter);
 app.use("/api/speedtest", speedTestRouter);
 

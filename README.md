@@ -57,6 +57,7 @@ npm run dev
 |----------|---------|----------|
 | `DATABASE_URL` | ✅ | PostgreSQL bağlantısı (Railway otomatik inject eder) |
 | `ADMIN_SECRET` | ✅ | Admin API şifresi. **Tanımlı değilse `/api/admin` uçları 503 ile kapalı çalışır.** |
+| `OS_TOKEN` | — | Gespa OS (JARVIS) salt okunur özeti `GET /api/os/summary` için belirteç (≥32 karakter). Tanımsızsa uç 503 döner. Başvuranın adı/telefonu/notu bu uçtan ÇIKMAZ. |
 | `NODE_ENV` | — | `production` derlenmiş SPA'yı servis eder |
 | `VISITOR_BASE` | — | Ziyaretçi sayacı tabanı (varsayılan `1000`) |
 | `DATABASE_SSL` | — | `true`/`false` ile SSL'i elle zorla; boşsa host'a göre otomatik |
